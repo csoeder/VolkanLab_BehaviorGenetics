@@ -473,14 +473,10 @@ rule collapseIntersects_byGroup:
 		shell(""" rm fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bg fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bg """)
 
 
-
-
-
-
 rule collapse_all_intersects:
 	input:
-		clpsd_in = expand("fSeq/{spearmint}.vs_dm6.bwa.inputs.group_{group}.collapsed.bed", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
-		clpsd_out = expand("fSeq/{spearmint}.vs_dm6.bwa.outputs.group_{group}.collapsed.bed", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
+		clpsd_in = expand("fSeq/collapsed/{spearmint}.group_{group}.input.signalsCollapsed.bed", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
+		clpsd_out = expand("fSeq/collapsed/{spearmint}.group_{group}.output.signalsCollapsed.bed", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
 	output:
 		clpsd_flag = "utils/allCollapsed.flg",
 	params:
