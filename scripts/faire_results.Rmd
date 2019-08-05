@@ -90,27 +90,6 @@ names(refGenomes_summary_df) <- c("refGenome","measure","value")
 
 ```
 
-```{r include=FALSE}
-# 
-# t1 <- kable(head(mtcars)[1:3], format = "latex", booktabs = TRUE)
-# t2 <- kable(head(mtcars)[4:6], format = "latex", booktabs = TRUE)
-# 
-# cat(c("\\begin{table}[!htb]
-#     \\begin{minipage}{.5\\linewidth}
-#       \\caption{}
-#       \\centering",
-#         t1,
-#     "\\end{minipage}%
-#     \\begin{minipage}{.5\\linewidth}
-#       \\centering
-#         \\caption{}",
-#         t2,
-#     "\\end{minipage} 
-# \\end{table}"
-# ))  
-# https://stackoverflow.com/questions/38036680/align-multiple-tables-side-by-side
-```
-
 The dm6 reference genome was used for read alignment:
 ```{r echo=FALSE}
 
@@ -129,6 +108,91 @@ names(ref_ann.stats) <- c("annot", "measure", "type", "value")
 
 ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt()
 
+```
+
+
+
+
+
+In addition to the full annotations, subsets containing prespecified genes of interest will also be used.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+
+geneLists.stats <- read_delim("meta/geneLists.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(geneLists.stats) <- c("query", "annot", "measure", "type", "value")
+geneLists.stats$query <- as.factor(geneLists.stats$query)
+geneLists.stats$annot <- as.factor(geneLists.stats$annot)
+geneLists.stats$measure <- as.factor(geneLists.stats$measure)
+geneLists.stats$type <- as.factor(geneLists.stats$type)
+
+geneList.tbl <-  geneLists.stats %>% filter(measure == "count") %>% unite(measure, type, measure, sep=" ") %>% select(c(query,measure,value)) 
+
+geneList.tbl <- rbind(geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="count" & type=="annotated"), ref_ann.stats %>% filter(measure=="count" & type=="total"), by=c("annot" = "annot"), suffix=c("", ".ann")) %>% mutate(measure = "percent of annotations", value=value/value.ann) %>% select(query, measure, value))
+
+geneList.tbl <- rbind( geneList.tbl, geneLists.stats %>%  filter(measure == "size") %>% filter(type == "total" | type == "avg") %>% unite(measure, type, measure, sep=" ") %>% select(query, measure, value)) 
+
+geneList.tbl <- rbind(geneList.tbl, geneLists.stats %>% filter(measure=="size" & type == "total") %>%  mutate(value = value/(refGenomes_summary_df %>% filter(measure=="number_bases") %>% select(value) %>% as.numeric() ) ) %>%  unite(measure, type, measure, sep=" ") %>% select(-c(annot)) %>% mutate(measure = "percent genome size") )
+
+
+geneList.tbl <- rbind( geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="size" & type == "total"), ref_ann.stats %>% filter(measure=="size" & type == "total"), by = c("annot" = "annot")) %>% mutate(value=value.x/value.y, measure = "percent annotation size") %>% select(query, measure, value) )
+
+
+```
+
+Here are those subsets and their sizes:
+
+```{r echo=FALSE}
+
+geneList.tbl %>% spread(query, value) %>% gt() %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "size"), decimals=1, suffixing=T) %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "count"), decimals=0, suffixing=T)  %>% fmt_percent(columns=seq(2,6), rows=str_detect(measure, "percent"), decimals=1) %>% tab_header(title="Predefined Subsets of Gene Annotation", subtitle= md("&nbsp;"))
+```
+
+
+TODO: mention number of distinct locii
+
+### Ionotropic
+
+A list of ionotropic receptors supplied by Corbin via Flybase & George et al 2019  (email 28 May 2019). This contained 335 entries, some with mutiple genes, some not unique. Once merged & uniqued : 246
+Annotation symbols (CGxxxxx) gonverted to FlyBase gene games (FBgnxxxx) using flybase ID converter (http://flybase.org/convert/id) 
+
+239 converted cleanly; 5 had duplicate conversions and were corrected by hand:
+```
+CG11430 is FBgn0041585, not FBgn0050323
+CG43368 is FBgn0263111, not FBgn0041188
+CG8885 is FBgn0262467, not FBgn0081377
+CG9090 is FBgn0034497, not FBgn0082745
+CG9126 is FBgn0045073, not FBgn0053180
+```
+
+Two were corrected to be consistent with the dm6_genes annotation:
+```
+CG9907 (para), is listed as FBgn0264255 not FBgn0285944
+CG42345 (straw) is listed as FBgn0259247 (laccase2)
+```
+
+### Derived from GO terms
+
+Nervous System Development:
+```
+nrd, FBgn0002967, no annotated gene model
+l(2)23Ab, FBgn0014978, same
+aloof, FBgn0020609, same
+Imp, FBgn0285926, is FBgn0262735
+```
+
+Mating:
+```
+Only three, but all good
+```
+
+synapse signalling
+```
+1 gene
+```
+
+Histone modification, DNA trans factor act, synapse org
+```
+MT
 ```
 
 ## Sequenced Reads
