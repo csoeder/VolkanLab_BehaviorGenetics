@@ -217,6 +217,23 @@ data_sets.df.sparse  %>% group_by(experimental,rep) %>% summarise(`sample count`
 ```
 
 
+To accomodate varying data quality, analyses were done on three nested subsets of the data, each including an input and at least one replicate for each experimental treatment. Groups A, B, and C correspond to 1, 2, and 3:
+
+```
+ok, do the alignment and MACS2 analysis like you did before.  Do three version: 
+
+1) Only unmarked
+2) include the orange
+3) all date
+```
+(Corbin, 20 May 2019 email)
+
+```{r gt table}
+
+data_sets.df %>% select(c(experimental, rep, subgroups)) %>% mutate(dummy="1") %>% filter(subgroups!='all') %>% group_by_at(vars(-dummy)) %>%  mutate(rowid=1:n()) %>% ungroup() %>% spread(key=subgroups, value=dummy ) %>%  select(-rowid) %>% mutate(A=case_when(is.na(A) ~ "x", TRUE ~ "o" ), B=case_when(is.na(B) ~ "x", TRUE ~ "o" ) , C=case_when(is.na(C) ~ "x", TRUE ~ "o" )  ) %>% gt() %>% tab_style(style = cells_styles(text_style = "italic", text_color="red"), locations = list(cells_data(columns = vars(A), rows = A=="x"), cells_data(columns = vars(B), rows = B=="x")))
+
+```
+
 
 ### Pre-Processing
 
@@ -325,7 +342,7 @@ readcount_process.spread %>% gather(total_read_count:percent_mapping, key="measu
 
 ## Peak Calling
 
-MACS was used to QC pilot data, but it wasn't designed for use on FAIRE-Seq. MACS2 was extended for use with FAIRE (  https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-7-33 ) but has its own difficulties, such as python2/3 incompatibilities, and only running on all samples under inhomogeneous settings. Here, Fseq [@Boyle2008] is used to infer peaks from mapped reads. It does this using a kernel density estimation to find intervals with significantly (4 sigma by default) more mapped reads than expected from the average regional coverage. Additionally, a signal strength is calculated, as the highest per-basepair significance in the interval. 
+MACS was used to QC pilot data, but it wasn't designed for use on FAIRE-Seq. MACS2 was extended for use with FAIRE (  https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-7-33 ) but has its own difficulties, such as python2/3 incompatibilities, and only running on all samples under inhomogeneous settings. Here, Fseq [@Boyle2008] is used to infer peaks from mapped reads. It does this using a kernel density estimation to find intervals with significantly (4 sigma by default) more mapped reads than expected from the average regional coverage. Additionally, a signal strength is calculated, as the highest kernel density in the interval, scaled by interval size. 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -359,7 +376,7 @@ basicPeakStats_vs_dm6_bwa.count.sprud.aug  %>% select(-c("sample", "day")) %>% s
 
 ```
 
-
+### Raw Peaks
 
 ```{r echo=FALSE}
 
@@ -373,9 +390,6 @@ grand_mean_signal <- mean(basicPeakStats_vs_dm6_bwa.size.sprud$`avg signal`)
 ```
 
 peaks had an average width of $`r human_readable_croncher(grand_mean_peak_width) `$ base pairs. Peaks also had intensity values measuring signal enhancement over the genomic background; these averaged at $`r human_readable_croncher(grand_mean_signal) `$ Both of these values were highly variable within and between samples:
-
-
-
 
 ```{r gt, echo=FALSE}
 
@@ -393,17 +407,11 @@ names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- gsub(" ","\n", gsub("_", "\n"
 
 ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "std\nwidth", "avg\nsignal", "std\nsignal", "total\nread\ncount", "total\nmapped\ncount", "total\npeak\ncount" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions & Correlations for Read and Peak Stats")
 
-```
-
-
-```{r echo=FALSE}
 #ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "avg\nsignal", "total\nread\ncount", "total\nmapped\ncount", "percent\nmapping",  "total\npeak\ncount" ), color="experimental") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- basicPeakStats_vs_dm6_bwa.full.sprud.aug.names 
 
 ```
-
-
 
 
 
@@ -426,7 +434,9 @@ raw_called_peaks.df <- inner_join(raw_called_peaks.df, data_sets.df.sparse, by=c
 ```
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 of the $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ peaks, $`r raw_called_peaks.df %>% filter(peak_width==0) %>% nrow() %>% human_readable_croncher() `$ had a width of zero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ```{r echo=FALSE, warning=FALSE}
@@ -443,6 +453,102 @@ raw_called_peaks.df %>% filter(peak_width > 1000 )  %>% group_by(experimental, r
 ```
 
 47b1-7 replicate #3 is only included in the "C" analysis group (Section 2.6). 
+
+
+check intrasample, inter-peak distances: look for potentially non-distinct peaks. 
+```{r echo=FALSE, message=FALSE}
+
+calledPeaks.selfDistance.df <-as.data.frame(c()) 
+for (nom in data_sets.df.sparse$name) {
+	tmp.df <- read_delim(paste("fSeq/closest/all/",nom,".to.",nom,  ".vs_dm6.bwa.closestPeaks.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, guess_max = 1000000)
+	#names(tmp.df) <- c("chrom", "start", "stop", "signal", "center")
+	calledPeaks.selfDistance.df  <- rbind(calledPeaks.selfDistance.df , tmp.df)
+}
+
+calledPeaks.selfDistance.df <- calledPeaks.selfDistance.df  %>% as_tibble() %>% select(c(X1,X2,X3,X7,X10,X11,X12,X13,X17,X20,X21,X22))
+names(calledPeaks.selfDistance.df) <- c("chrom1", "start1", "stop1", "signal1", "center1", "chrom2", "start2", "stop2", "signal2", "center2", "distance", "sample" )
+calledPeaks.selfDistance.df$chrom1 <- as.factor(calledPeaks.selfDistance.df$chrom1)
+calledPeaks.selfDistance.df$chrom2 <- as.factor(calledPeaks.selfDistance.df$chrom2)
+calledPeaks.selfDistance.df$sample <- as.factor(calledPeaks.selfDistance.df$sample)
+
+calledPeaks.selfDistance.df <- inner_join(calledPeaks.selfDistance.df, data_sets.df.sparse, by=c("sample"="name"))
+
+
+```
+
+
+The distance between adjacent peaks within a sample was measured. 
+
+
+```{r echo=FALSE}
+
+ggplot(calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM")) + geom_freqpoly(aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks,\nby sample and replicate", x= "distance (bp)")
+
+```
+
+Some peaks were very close to other peaks; as many as 20% of peaks were within 10bp of another one, and as many as 65% were within 100 bp:
+
+```{r echo=FALSE}
+closePeaks <- calledPeaks.selfDistance.df %>% filter(abs(distance)<10) %>% group_by(sample) %>% summarise(lessThan10 = n() )
+closePeaks <- cbind( closePeaks, calledPeaks.selfDistance.df %>% filter(abs(distance)<100) %>% group_by(sample) %>% summarise(lessThan100 = n() ) %>% select(lessThan100))
+
+#closePeaks <- 
+inner_join(closePeaks, basicPeakStats_vs_dm6_bwa.full.sprud.aug, by=c("sample"="sample")) %>% mutate(lessThan10 = lessThan10/total_peak_count, lessThan100 = lessThan100/total_peak_count, potato = "")  %>% select(experimental, rep, lessThan10, lessThan100, potato) %>% group_by(experimental) %>% gt(rowname_col = "potato") %>% fmt_percent(columns=vars(lessThan10, lessThan100), decimals = 1) %>% tab_stubhead_label(label="experimental treatment") %>% cols_label(lessThan10 = "< 10 bp", lessThan100 = "< 100 bp") %>% tab_header(title="Percentage of Peaks Very Close to Other Peaks", subtitle= "within a sample")
+
+#ggplot(calledPeaks.selfDistance.df %>% mutate(one=stop1-start1, two = stop2-start2, distance=abs(distance)) %>% select(one, two, distance, experimental, rep) %>% gather(one, two, key="peak", value="width") ) + geom_point(aes(x=distance, y=width), alpha=0.1) + facet_grid(.~peak)
+
+```
+
+### Collapsed Peaks ( within input/output )
+
+Although the inputs consisted of a single replicate, each experimental output had three replicates. These were collapsed into a single set of peaks each for every input and output. The collapsed peak region was defined as the union of all peaks being considered. Calculating a combined signal value for multiple peaks is an open problem; several approaches are tested here:
+```
+	* Average: a flat average of the component peaks' signal values
+	* Rescale: in which the component peaks' maximum kernel densities are averaged, and then scaled by final peak width
+	* Weighted: like Rescale, but the average max kernel density is weighted by the component peak widths
+	* Pessimistic: like weighted, but replicates with no contributing peaks are considered as having a peak of width 0 and signal 0 
+	* Fine: (in development)
+```
+
+
+```{r echo=FALSE}
+
+collapsedPeaks.df <-as.data.frame(c()) 
+for (nom in data_sets.df.sparse$experimental) {
+	
+	for (treat in c("inputs","outputs")){
+		
+		for (grup in c("A", "B", "C")) {
+			
+			tmp.df <- read_delim(paste("fSeq/",gsub("-", "_", nom),".vs_dm6.bwa.",treat,".group_",grup,".collapsed.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+			names(tmp.df) <- c("chrom", "start", "stop", "count")
+			tmp.df$chrom <- as.factor(tmp.df$chrom)
+			tmp.df$treat <- as.factor(treat)
+			tmp.df$experimental <- as.factor(nom)
+			tmp.df$group <- as.factor(grup)
+			collapsedPeaks.df <- rbind(collapsedPeaks.df, tmp.df)
+		}
+	}
+}
+
+collapsedPeaks.df <- collapsedPeaks.df %>% as_tibble()
+
+collapsedPeaks.df$peak_width <- collapsedPeaks.df$stop - collapsedPeaks.df$start
+
+
+```
+
+
+
+
+```{r echo=FALSE}
+
+
+
+```
+
+
+
 
 
 

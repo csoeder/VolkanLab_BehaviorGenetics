@@ -493,24 +493,26 @@ rule collapseIntersects_byGroup:
 		ref_fai = ref_genome_by_name["dm6"]["fai"]
 		rep_count = len(input.uncollapsed_in)
 
+
+		#*peaksCollapsed.bed: chrom/start/stop/contributorList/signals/maxPkHt/peakWidth
 		shell(""" mkdir -p fSeq/collapsed/ """)
-		shell(""" cat {input.uncollapsed_in} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_in}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 4,7,10,11,12 -o collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed """ )
-		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed | cut -f 1-3 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed  -r {rep_count}) > {output.collapsed_in} """)
+		shell(""" cat {input.uncollapsed_in} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_in}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed """ )
+		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.peaksCollapsed.bed  -r {rep_count}) > {output.collapsed_in} """)
 		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bg """)
 		shell(""" rm -rf fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed """)
 		for num_included in range(1,rep_count+1):
 			shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed """)
-		shell("""cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 4,7,10,11,12 -o collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.collapsed.bed """)
+		shell("""cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.collapsed.bed """)
 		shell(""" touch {output.collapsed_in} """)
 
 		rep_count = len(input.uncollapsed_out)
-		shell(""" cat {input.uncollapsed_out} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_out}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 4,7,10,11,12 -o collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed """ )
-		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed | cut -f 1-3 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed  -r {rep_count}) > {output.collapsed_out} """)
+		shell(""" cat {input.uncollapsed_out} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_out}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed """ )
+		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.peaksCollapsed.bed  -r {rep_count}) > {output.collapsed_out} """)
 		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bg """)
 		shell(""" rm -rf fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed """)
 		for num_included in range(1,rep_count+1):
 			shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed """)
-		shell("""cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 4,7,10,11,12 -o collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.collapsed.bed """)
+		shell("""cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.collapsed.bed """)
 		shell(""" touch {output.collapsed_out} """)
 		shell(""" rm fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.input.subIntervals.bg fSeq/collapsed/{wildcards.spearmint}.group_{wildcards.group}.output.subIntervals.bg """)
 
@@ -540,7 +542,7 @@ rule write_report:
 		sequenced_reads_summary=["meta/sequenced_reads.dat"],
 		aligned_reads_summary = ["meta/alignments.vs_dm6.bwa.summary"],
 		called_peak_stats = ["meta/basicPeakStats.vs_dm6.bwa.summary"],
-
+		peaks_collapsed = ["utils/allCollapsed.flg"],
 	output:
 		pdf_out="VolkanLab_BehaviorGenetics.pdf"
 	params:
