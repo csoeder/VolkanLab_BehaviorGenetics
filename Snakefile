@@ -432,6 +432,48 @@ rule summonBasicPeakStats:
 		for samp in sampname_by_group['all']:
 			shell(""" cat meta/peakStats/{samp}.vs_dm6.bwa.calledPeaks.stats | awk '{{print"{samp}\t"$0}}' >> {output.fullPeakStatsOut} """ )
 
+rule singleDistance:
+	input:
+		peek1 = "fSeq/{samp1}.vs_dm6.bwa.calledPeaks.bed", 
+		peek2 = "fSeq/{samp2}.vs_dm6.bwa.calledPeaks.bed", 
+	output:
+		distOut = "fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	run:
+		shell(""" mkdir -p fSeq/closest/all/ """)
+		shell("""  bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {input.peek1} ) -b <( bedtools sort -i {input.peek2} ) | awk '{{print$0"\t{wildcards.samp2}"}}' > {output.distOut}""")
+
+rule roundRobinDist:
+	input:
+		distances_in = expand("fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed", samp1 = sampname_by_group['all'], samp2 = sampname_by_group['all']),
+	output:
+		allClose_flag = 'utils/closestCalcd.flg'
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+	run:
+		shell(""" touch {output.allClose_flag} """)
+
+rule consolidate_distance_by_group:
+	input:
+		allClose_flag = 'utils/closestCalcd.flg'
+	output:
+		grupFlg = 'utils/closest_{group}.flg'
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	run:
+		shell(""" mkdir -p fSeq/closest/{wildcards.group} """)
+		for samp in sampname_by_group[wildcards.group]:
+			for cramp in sampname_by_group[wildcards.group]:
+				shell(""" cat fSeq/closest/all/{samp}.to.{cramp}.vs_dm6.bwa.closestPeaks.bed >> fSeq/closest/{wildcards.group}/{samp}.vs_dm6.bwa.closestPeaks.{wildcards.group}.bed """ )
+		shell(""" touch {output.grupFlg} """)
+
 
 
 
@@ -487,10 +529,18 @@ rule collapse_all_intersects:
 		shell(""" touch {output.clpsd_flag} """)
 
 
+
+
+
 rule write_report:
 	input:
 		reference_genome_summary = ["meta/reference_genomes.summary"],
+		reference_annotation_summary = ["meta/reference_annotations.summary"],
+		gene_lists_summary = ["meta/geneLists.stats"],
 		sequenced_reads_summary=["meta/sequenced_reads.dat"],
+		aligned_reads_summary = ["meta/alignments.vs_dm6.bwa.summary"],
+		called_peak_stats = ["meta/basicPeakStats.vs_dm6.bwa.summary"],
+
 	output:
 		pdf_out="VolkanLab_BehaviorGenetics.pdf"
 	params:
