@@ -41,13 +41,13 @@ for bed_line in bed_lines:
 	Sweight = Kweight/int_len # weighted average of K by contributing peak width, then rescale by final peak width
 
 
-	missing =int(args.rep_count) - len(contributors)
-	s_list.extend([0]*missing)
-	k_list.extend([0]*missing)
-	component_len.extend([0]*missing)
+	# missing =int(args.rep_count) - len(contributors)
+	# s_list.extend([0]*missing)
+	# k_list.extend([0]*missing)
+	# component_len.extend([0]*missing)
 
-	Kpess = sum(array(k_list)*array(component_len))/sum(component_len)
-	Spess = Kpess/int_len # same as Sweight, but now considers replicates with no peak
+	# Kpess = sum(array(k_list)*array(component_len))/sum(component_len)
+	Spess = Sweight*(len(contributors)/float(args.rep_count)) # same as Sweight, but now considers replicates with no peak
 
 	data_out = [Savg, Srescale, Sweight, Spess]
 	print("%s\t"*len(data_out) % tuple(data_out))

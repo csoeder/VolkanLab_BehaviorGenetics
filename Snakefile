@@ -497,7 +497,7 @@ rule collapseIntersects_byGroup:
 		#*peaksCollapsed.bed: chrom/start/stop/contributorList/signals/maxPkHt/peakWidth
 		shell(""" mkdir -p fSeq/collapsed/ """)
 		shell(""" cat {input.uncollapsed_in} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_in}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed """ )
-		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_in} """)
+		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalCollapser.py -i fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_in} """)
 		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) > fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg """)
 		shell(""" rm -rf fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
 		for num_included in range(1,rep_count+1):
@@ -507,7 +507,7 @@ rule collapseIntersects_byGroup:
 
 		rep_count = len(input.uncollapsed_out)
 		shell(""" cat {input.uncollapsed_out} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_out}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed """ )
-		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalMerger.py -i fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_out} """)
+		shell(""" paste <(cat fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalCollapser.py -i fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_out} """)
 		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) > fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
 		shell(""" rm -rf fSeq/collapsed/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
 		for num_included in range(1,rep_count+1):
@@ -529,6 +529,26 @@ rule collapse_all_intersects:
 		cores=1,
 	run:
 		shell(""" touch {output.clpsd_flag} """)
+
+rule merge_nearby_collapsed:
+	input:
+		unmerged_in = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.bed",
+		unmerged_out = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.bed",
+	output:
+		merged_in = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.bed",
+		merged_out = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.bed",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+		merge_dist = 100,
+	run:
+		shell(""" cat {input.merged_in}  | awk '{print$0"\t"$3-$2}' | bedtools merge -d 100 -c 1,4,5,6,7,8,9 -o count,collapse,collapse,collapse,collapse,collapse,collapse -i - > fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.input.peaksMerged.bed """)
+		# output: chromStartStop, contribs to merged, contribs to collapsed, collapsed avg, collapsed rescale, collapsed weighted, collapsed pess, collapsed int lengths
+
+
+
+
 
 
 

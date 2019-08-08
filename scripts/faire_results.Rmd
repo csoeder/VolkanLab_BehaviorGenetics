@@ -439,6 +439,12 @@ of the $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
+```
+There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file, then the start and end positions should never be the same (which would indicate zero bases). It is a zero-based position, so a peak with coordinates chr1:1000-1001 is a 1bp peak at chr1:1001. [...] I’ve cc’d Alan Boyle, who wrote the software, to confirm that there should not be any zero-width peaks. I’m at a loss here – I don’t think we’ve encountered this before.
+(emails from Terry Furey, 6 Aug 2019)
+```
+
+
 ```{r echo=FALSE, warning=FALSE}
 
 ggplot(raw_called_peaks.df %>% gather(signal, peak_width, key="measure", value="value")) + geom_histogram(aes(x=value, fill=experimental), bins=50) +facet_grid(chrom~measure, scales="free") + scale_x_log10() + theme_bw() + labs(title="Histogram of Peak Width & Signal Strength,\nby Chromosome")
@@ -506,7 +512,7 @@ Although the inputs consisted of a single replicate, each experimental output ha
 	* Average: a flat average of the component peaks' signal values
 	* Rescale: in which the component peaks' maximum kernel densities are averaged, and then scaled by final peak width
 	* Weighted: like Rescale, but the average max kernel density is weighted by the component peak widths
-	* Pessimistic: like weighted, but replicates with no contributing peaks are considered as having a peak of width 0 and signal 0 
+	* Pessimistic: like weighted, but the result is further scaled by the fraction of replicates supporting a peak in this region.  
 	* Fine: (in development)
 ```
 
@@ -520,7 +526,7 @@ collapsedPeaks.df <-as.data.frame(c())
 for (nom in data_sets.df.sparse$experimental) {
 	
 #	for (treat in c("input","output")){
-	for (treat in c("input","output")){		
+	for (treat in c("output")){		
 		for (grup in c("A", "B", "C")) {
 			tmp.df <- read_delim(paste("fSeq/collapsed/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsCollapsed.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 			names(tmp.df) <- c("chrom", "start", "stop", "count", "avg", "rescale", "weight", "pess")
@@ -540,7 +546,7 @@ collapsedPeaks.df$peak_width <- collapsedPeaks.df$stop - collapsedPeaks.df$start
 
 ```
 
-Since the inputs consist of one replicate each, their collapsed peaks are identical to their raw peaks. In the case of the outputs, with 1-3 replicates depending on experimental treatment and 
+Since the inputs consist of one replicate each, their collapsed peaks are identical to their raw peaks (except for those with a width of zero, whose collapsed signal strengths are NA except for the flat average). In the case of the outputs, with 1-3 replicates depending on experimental treatment and 
 
 
 ```{r echo=FALSE}
@@ -557,17 +563,35 @@ raw_called_peaks.signlXtract$measure <- factor(raw_called_peaks.signlXtract$meas
 
 
 
+hiPass.raw <- raw_called_peaks.signlXtract %>% filter(rep != "input") %>% mutate(high = signal > 20) %>% group_by(high) %>% summarize( count = n()) %>% mutate( frac = count/sum(count))
+hiPass.clps <- collapsedPeaks.gath  %>% mutate(high = value > 20) %>% group_by(high) %>% summarize( count = n()) %>% mutate( frac = count/sum(count))
 
-
-ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10()
-
-hiPass.raw <- raw_called_peaks.signlXtract %>% filter(rep != "input") %>% mutate(high = signal > 20) %>% group_by(high) %>% summarize( count = n(), frac = count/sum(count))
-hiPass.clps <- collapsedPeaks.gath  %>% mutate(high = value > 20) %>% group_by(high) %>% summarize( count = n(), frac = count/sum(count))
 
 
 ```
 
+When the small number (`r  human_readable_croncher(hiPass.raw$frac[2]*100)` percent of raw peaks,  `r  human_readable_croncher(hiPass.clps$frac[2]*100) ` percent of collapsed peaks ) of high-signal outliers  (raw or collapsed signal > 20) were excluded, the distributions of the raw/collapsed signals were as follows
 
+```{r echo=FALSE}
+
+ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed)")
+
+```
+
+```{r echo=FALSE}
+ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(420000), columns = c( "avg", "rescale", "weight", "pess" ))# + theme(axis.text.x = element_text(angle = 90, hjust = 1))# + labs(title="Distributions & Correlations for Read and Peak Stats")
+
+```
+
+
+
+
+ggscattercorr + naniar::geom_miss_point ?
+
+
+### Merged Peaks (proximity within input/output)
+
+Once the peaks have been collapsed within a treatment, the issue of nearby peaks not being distinct remains. It is trivial to merge nearby peaks into a single feature, but the issue of how to combine signal strengths remains. 
 
 
 
