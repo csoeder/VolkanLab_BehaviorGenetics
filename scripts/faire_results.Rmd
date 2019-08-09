@@ -645,25 +645,25 @@ mergedPeakStats <- read_delim("meta_mergedPeakStats.vs_dm6.bwa.summary", "\t", e
 names(mergedPeakStats) <- c("experimental","group","treatment","measure","type","value")
 mergedPeakStats$stage <- as.factor("merged")
 
-rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "input" ) %>% filter( type =="avg" | type == "total") %>% unite("measure", type, measure, sep = " ")  %>% select(-c(group, treatment)) %>% distinct() %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = F) %>%  cols_label(measure = " ") %>% tab_header(title="Input Peak Count, Size & Signal Strength", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "input" ) %>% filter( type =="avg" | type == "total") %>% unite("measure", type, measure, sep = " ")  %>% select(-c(group, treatment)) %>% distinct() %>% spread(stage, value) %>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = F) %>%  cols_label(measure = " ") %>% tab_header(title="Input Peak Count, Size & Signal Strength", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
 ```
 
 ```{r echo=FALSE, message=FALSE}
 
 
-rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="count" & type == "total")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Count", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="count" & type == "total")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value)%>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Count", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
 
 ```
 
 ```{r echo=FALSE, message=FALSE}
 
-rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="width" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Size", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="width" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% mutate(experimental=as.factor(gsub("_","-",experimental)))%>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Size", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
 
 ```
 
 ```{r echo=FALSE, message=FALSE}
 
-rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="signal" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Signal", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="signal" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value)%>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Signal", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
 
 
 ```
