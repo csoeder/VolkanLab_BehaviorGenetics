@@ -512,15 +512,13 @@ Although the inputs consisted of a single replicate, each experimental output ha
 	* Average: a flat average of the component peaks' signal values
 	* Rescale: in which the component peaks' maximum kernel densities are averaged, and then scaled by final peak width
 	* Weighted: like Rescale, but the average max kernel density is weighted by the component peak widths
-	* Pessimistic: like weighted, but the result is further scaled by the fraction of replicates supporting a peak in this region.  
+	* Pessimistic: like Weighted, but the result is further scaled by the fraction of replicates supporting a peak in this region.  
 	* Fine: (in development)
 ```
 
 All strategies but Average will give NA for singleton zero-width peaks. 
 
-
-
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 
 collapsedPeaks.df <-as.data.frame(c()) 
 for (nom in data_sets.df.sparse$experimental) {
@@ -528,7 +526,7 @@ for (nom in data_sets.df.sparse$experimental) {
 #	for (treat in c("input","output")){
 	for (treat in c("output")){		
 		for (grup in c("A", "B", "C")) {
-			tmp.df <- read_delim(paste("fSeq/collapsed/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsCollapsed.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+			tmp.df <- read_delim(paste("fSeq/collapse/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsCollapsed.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 			names(tmp.df) <- c("chrom", "start", "stop", "count", "avg", "rescale", "weight", "pess")
 			tmp.df$chrom <- as.factor(tmp.df$chrom)
 			tmp.df$treat <- as.factor(treat)
@@ -574,27 +572,101 @@ When the small number (`r  human_readable_croncher(hiPass.raw$frac[2]*100)` perc
 
 ```{r echo=FALSE}
 
-ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed)")
+ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Collapsing Strategies\n( Outliers with Intensity > 20 Removed)")
 
 ```
+
+The impact of lower-quality replicates and their exclusion across groups is apparent in the collapsed signal strength distributions. The strategies are generally comparable in distribution, except for Pessimist which is skewed lower and apears to have a smoothing effect. 
 
 ```{r echo=FALSE}
-ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(420000), columns = c( "avg", "rescale", "weight", "pess" ))# + theme(axis.text.x = element_text(angle = 90, hjust = 1))# + labs(title="Distributions & Correlations for Read and Peak Stats")
+ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(420000), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity > 20 Removed, Downsampled 10%)")
 
+#ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks>20), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity < 20 ")
 ```
 
+One thing that stands out is that, because of the length-weighting step, the Pessimistic values are sometimes much higher than the flat averages (though on the whole they are smaller)
 
-
-
-ggscattercorr + naniar::geom_miss_point ?
+The results are similar for the high-signal outliers, except the correllations are even stronger. 
 
 
 ### Merged Peaks (proximity within input/output)
 
 Once the peaks have been collapsed within a treatment, the issue of nearby peaks not being distinct remains. It is trivial to merge nearby peaks into a single feature, but the issue of how to combine signal strengths remains. 
 
+The same basic strategies were used to merge signals of disconnected peaks. One important difference is that, whereas collapsing peaks across replicates assigns a signal to regions with some peak coverage, merging nearby peaks assigns a signal to basepairs which previously had none. This will tend to make the rescaling step a more severe reduction since the nonzero signal is being averaged with the zero signal regions. Also, since the point of collapsing peaks was to reduce the replicate count to one in each case, Pessimistic will necessarily equal Weighted and is excluded. 
 
 
+
+```{r echo=FALSE, message=FALSE}
+
+mergedPeaks.df <-as.data.frame(c()) 
+for (nom in data_sets.df.sparse$experimental) {
+	
+	for (treat in c("input","output")){
+		for (grup in c("A", "B", "C")) {
+			tmp.df <- read_delim(paste("fSeq/merge/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsMerged.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+			names(tmp.df) <- c("chrom", "start", "stop", "count", "avg", "rescale", "weight")
+			tmp.df$chrom <- as.factor(tmp.df$chrom)
+			tmp.df$treat <- as.factor(treat)
+			tmp.df$experimental <- as.factor(nom)
+			tmp.df$group <- as.factor(grup)
+			mergedPeaks.df <- rbind(mergedPeaks.df, tmp.df)
+		}
+	}
+}
+
+mergedPeaks.df <- mergedPeaks.df %>% as_tibble()
+
+mergedPeaks.df$peak_width <- mergedPeaks.df$stop - mergedPeaks.df$start
+
+mergedPeaks.gath <- mergedPeaks.df %>%  gather(key = "measure", value = "value", c(avg, rescale, weight))
+
+```
+
+
+
+
+```{r echo=FALSE}
+
+ggplot(mergedPeaks.gath %>%  filter(value<20) ) + geom_violin(data = collapsedPeaks.gath %>% filter(value<20) %>%  filter(measure == "pess"), aes(x=measure, y=value),fill="red") + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("pess", "avg", "rescale", "weight")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed; Merged Signal in Red)")+ theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+collapsedPeakStats <- read_delim("meta_collapsedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(collapsedPeakStats) <- c("experimental","group","treatment","measure","type","value")
+collapsedPeakStats$stage <- as.factor("collapsed")
+
+mergedPeakStats <- read_delim("meta_mergedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(mergedPeakStats) <- c("experimental","group","treatment","measure","type","value")
+mergedPeakStats$stage <- as.factor("merged")
+
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "input" ) %>% filter( type =="avg" | type == "total") %>% unite("measure", type, measure, sep = " ")  %>% select(-c(group, treatment)) %>% distinct() %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = F) %>%  cols_label(measure = " ") %>% tab_header(title="Input Peak Count, Size & Signal Strength", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+```
+
+```{r echo=FALSE, message=FALSE}
+
+
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="count" & type == "total")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Count", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+
+```
+
+```{r echo=FALSE, message=FALSE}
+
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="width" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Size", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+
+```
+
+```{r echo=FALSE, message=FALSE}
+
+rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="signal" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Signal", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+
+
+```
 
 
 	
