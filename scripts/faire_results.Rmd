@@ -440,7 +440,11 @@ of the $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype 
 
 
 ```
-There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file, then the start and end positions should never be the same (which would indicate zero bases). It is a zero-based position, so a peak with coordinates chr1:1000-1001 is a 1bp peak at chr1:1001. [...] I’ve cc’d Alan Boyle, who wrote the software, to confirm that there should not be any zero-width peaks. I’m at a loss here – I don’t think we’ve encountered this before.
+There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file,
+then the start and end positions should never be the same (which would indicate zero bases). It is a
+zero-based position, so a peak with coordinates chr1:1000-1001 is a 1bp peak at chr1:1001. [...] I’ve
+cc’d Alan Boyle, who wrote the software, to confirm that there should not be any zero-width peaks. I’m
+at a loss here – I don’t think we’ve encountered this before.
 (emails from Terry Furey, 6 Aug 2019)
 ```
 
@@ -488,7 +492,7 @@ The distance between adjacent peaks within a sample was measured.
 
 ```{r echo=FALSE}
 
-ggplot(calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM")) + geom_freqpoly(aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks,\nby sample and replicate", x= "distance (bp)")
+ggplot(calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM")) + geom_freqpoly(aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks,\nby sample and replicate", x= "distance (bp)") + theme_bw()
 
 ```
 
@@ -510,9 +514,12 @@ inner_join(closePeaks, basicPeakStats_vs_dm6_bwa.full.sprud.aug, by=c("sample"="
 Although the inputs consisted of a single replicate, each experimental output had three replicates. These were collapsed into a single set of peaks each for every input and output. The collapsed peak region was defined as the union of all peaks being considered. Calculating a combined signal value for multiple peaks is an open problem; several approaches are tested here:
 ```
 	* Average: a flat average of the component peaks' signal values
-	* Rescale: in which the component peaks' maximum kernel densities are averaged, and then scaled by final peak width
-	* Weighted: like Rescale, but the average max kernel density is weighted by the component peak widths
-	* Pessimistic: like Weighted, but the result is further scaled by the fraction of replicates supporting a peak in this region.  
+	* Rescale: in which the component peaks' maximum kernel densities are averaged,
+	and then scaled by final peak width
+	* Weighted: like Rescale, but the average max kernel density is weighted by
+	the component peak widths
+	* Pessimistic: like Weighted, but the result is further scaled by the fraction
+	of replicates supporting a peak in this region.  
 	* Fine: (in development)
 ```
 
@@ -547,7 +554,7 @@ collapsedPeaks.df$peak_width <- collapsedPeaks.df$stop - collapsedPeaks.df$start
 Since the inputs consist of one replicate each, their collapsed peaks are identical to their raw peaks (except for those with a width of zero, whose collapsed signal strengths are NA except for the flat average). In the case of the outputs, with 1-3 replicates depending on experimental treatment and 
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 
 collapsedPeaks.gath <- collapsedPeaks.df %>%  gather(key = "measure", value = "value", c(avg, rescale, weight, pess))
 
@@ -568,18 +575,20 @@ hiPass.clps <- collapsedPeaks.gath  %>% mutate(high = value > 20) %>% group_by(h
 
 ```
 
-When the small number (`r  human_readable_croncher(hiPass.raw$frac[2]*100)` percent of raw peaks,  `r  human_readable_croncher(hiPass.clps$frac[2]*100) ` percent of collapsed peaks ) of high-signal outliers  (raw or collapsed signal > 20) were excluded, the distributions of the raw/collapsed signals were as follows
+When the small number (`r hiPass.raw$frac[2]*100` percent of raw peaks,  `r  hiPass.clps$frac[2]*100` percent of collapsed peaks ) of high-signal outliers  (raw or collapsed signal > 20) were excluded, the distributions of the raw/collapsed signals were as follows
 
 ```{r echo=FALSE}
 
-ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Collapsing Strategies\n( Outliers with Intensity > 20 Removed)")
+ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Collapsing Strategies\n( Outliers with Intensity > 20 Removed)") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
 
 ```
 
 The impact of lower-quality replicates and their exclusion across groups is apparent in the collapsed signal strength distributions. The strategies are generally comparable in distribution, except for Pessimist which is skewed lower and apears to have a smoothing effect. 
 
 ```{r echo=FALSE}
-ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(420000), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity > 20 Removed, Downsampled 10%)")
+full_samp <- collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% nrow()
+
+ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(floor(full_samp/100)), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = -45, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity > 20 Removed, Downsampled To 1%)")
 
 #ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks>20), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity < 20 ")
 ```
@@ -587,6 +596,25 @@ ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess))
 One thing that stands out is that, because of the length-weighting step, the Pessimistic values are sometimes much higher than the flat averages (though on the whole they are smaller)
 
 The results are similar for the high-signal outliers, except the correllations are even stronger. 
+
+
+```{r echo=FALSE}
+
+collapsedPeakStats.autoDist.df <- read_delim("meta/collapsedPeakStats.vs_dm6.bwa.autoDist.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(collapsedPeakStats.autoDist.df) <- c("experimental", "group", "put", "chrom", "dist", "count")
+collapsedPeakStats.autoDist.df$process <- as.factor("raw")
+
+#ggplot(collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")))  + geom_line(aes(x=dist, y=count, color=process))  + geom_line(aes(x=dist, y=count, color=process))  + facet_grid(experimental ~ put)
+
+
+
+ggplot( calledPeaks.selfDistance.df %>% select(c(experimental, rep, distance)) %>% mutate(dist = abs(distance), put = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% group_by(experimental, rep, dist, put) %>% summarise(count = n()) %>%  ungroup() %>% mutate(process=as.factor("raw"), experimental = gsub("-", "_", experimental))) + geom_line(aes(x=dist, y=count, color=process, group=rep)) + geom_line(data=collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")), aes(x=dist, y=count, color=process, linetype = group))  + facet_grid(experimental ~ put) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks (Raw & Collapsed),\nby sample and replicate", x= "distance (bp)") 
+
+#ggplot( ) + geom_freqpoly(data = calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM") %>% mutate(process = "raw") , aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks,\nby sample and replicate", x= "distance (bp)") + theme_bw()
+
+
+```
+
 
 
 ### Merged Peaks (proximity within input/output)
@@ -637,11 +665,11 @@ ggplot(mergedPeaks.gath %>%  filter(value<20) ) + geom_violin(data = collapsedPe
 
 
 ```{r echo=FALSE, message=FALSE}
-collapsedPeakStats <- read_delim("meta_collapsedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+collapsedPeakStats <- read_delim("meta/collapsedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(collapsedPeakStats) <- c("experimental","group","treatment","measure","type","value")
 collapsedPeakStats$stage <- as.factor("collapsed")
 
-mergedPeakStats <- read_delim("meta_mergedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+mergedPeakStats <- read_delim("meta/mergedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(mergedPeakStats) <- c("experimental","group","treatment","measure","type","value")
 mergedPeakStats$stage <- as.factor("merged")
 
@@ -664,6 +692,39 @@ rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>
 ```{r echo=FALSE, message=FALSE}
 
 rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="signal" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value)%>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title="Output Peak Signal", subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+
+
+```
+
+	
+```{r echo=FALSE, message=FALSE}
+
+mergedPeakStats.autoDist.df <- read_delim("meta/mergedPeakStats.vs_dm6.bwa.autoDist.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(mergedPeakStats.autoDist.df) <- c("experimental", "group", "put", "chrom", "dist", "count")
+mergedPeakStats.autoDist.df$process <- as.factor("merged")
+
+
+ggplot( calledPeaks.selfDistance.df %>% select(c(experimental, rep, distance)) %>% mutate(dist = abs(distance), put = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% group_by(experimental, rep, dist, put) %>% summarise(count = n()) %>%  ungroup() %>% mutate(process=as.factor("raw"), experimental = gsub("-", "_", experimental)))  + geom_line(aes(x=dist, y=count, color=process, group=rep))  + geom_line(data=collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")), aes(x=dist, y=count, color=process, linetype = group)) + geom_line(data=mergedPeakStats.autoDist.df %>% filter(chrom != "chrM") %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("merged")), aes(x=dist, y=count, color=process, linetype = group)) + geom_vline(xintercept = 100, color = 'red', linetype = "dashed")+ facet_grid(experimental ~ put) + scale_x_log10() +theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks (Raw, Collapsed, and Merged),\nby sample and replicate", x= "distance (bp)") 
+
+
+
+```	
+
+
+Is 100 bp a large enough merging threshold? would we expect the merged distance distributution to be more normal?
+
+
+```{r echo=FALSE, message=FALSE}
+
+peakSquishProcessStats.tbl <- rbind(rbind(collapsedPeakStats, mergedPeakStats )   %>%  filter(type=="total"|type=="avg"), inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = rep, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage)) ) %>% mutate(experimental = gsub("-", "_", experimental)) %>%  filter(measure=="count" | measure =="width" | measure=="signal")
+
+#rbind(collapsedPeakStats, mergedPeakStats) %>% mutate(rep = as.factor(NA))
+
+#inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = NA, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage, rep))
+
+
+ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = "Distance Between Adjacent Peaks (Raw, Collapsed, and Merged),\nby sample and replicate", x= "distance (bp)") 
+
 
 
 ```

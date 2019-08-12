@@ -28,7 +28,7 @@ for bed_line in bed_lines:
 	#contributors = list(set([c for c in bed_line[4].split(',')]))
 	s_list = [float(s) for s in bed_line[col].split(',')]
 	contrib_num = int(bed_line[3])
-	metacontrib_nums = [int(m) for m in bed_line]
+	metacontrib_nums = [int(m) for m in bed_line[4].split(",")]
 #	spare_list = [x for x in bed_line[6].split(',')]
 #	k_list = [float(k) for k in bed_line[7].split(',')]
 	component_len = [int(l) for l in bed_line[9].split(',')]
@@ -51,7 +51,7 @@ for bed_line in bed_lines:
 	# component_len.extend([0]*missing)
 
 	# Kpess = sum(array(k_list)*array(component_len))/sum(component_len)
-	Spess = Sweight*(len(contributors)/float(args.rep_count)) # same as Sweight, but now considers replicates with no peak
+	#Spess = Sweight*(len(contributors)/float(args.rep_count)) # same as Sweight, but now considers replicates with no peak
 
 	data_out = [Savg, Srescale, Sweight]
 	print("%s\t"*len(data_out) % tuple(data_out))

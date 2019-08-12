@@ -485,8 +485,10 @@ rule collapseIntersects_byGroup:
 	output:
 		collapsed_in = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.bed",
 		collapsed_in_stats = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.stat",
+		collapsed_in_hist = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.autoDist.hist",
 		collapsed_out = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.bed",
 		collapsed_out_stats = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.stat",
+		collapsed_out_hist = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.autoDist.hist",
 	params:
 		runmem_gb=8,
 		runtime="1:00:00",
@@ -505,12 +507,14 @@ rule collapseIntersects_byGroup:
 		shell(""" cat {output.collapsed_in} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_in_stats} """)
 		shell(""" cat {output.collapsed_in} |cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_in_stats} """)
 
-		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg """)
-		shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
-		for num_included in range(1,rep_count+1):
-			shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
-		shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.collapsed.bed """)
-		shell(""" touch {output.collapsed_in} """)
+		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.collapsed_in} ) -b <( bedtools sort -i {output.collapsed_in} ) | awk '{{print$1"~"$17}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.collapsed_in_hist} """)
+
+		# shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg """)
+		# shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
+		# for num_included in range(1,rep_count+1):
+		# 	shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
+		# shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.collapsed.bed """)
+		# shell(""" touch {output.collapsed_in} """)
 
 		put = "output"
 		rep_count = len(input.uncollapsed_out)
@@ -521,30 +525,36 @@ rule collapseIntersects_byGroup:
 		shell(""" cat {output.collapsed_out} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_out_stats} """)
 		shell(""" cat {output.collapsed_out} |cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_out_stats} """)
 
-		shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
-		shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
-		for num_included in range(1,rep_count+1):
-			shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
-		shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.collapsed.bed """)
-		shell(""" touch {output.collapsed_out} """)
-		shell(""" rm fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
+		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.collapsed_out} ) -b <( bedtools sort -i {output.collapsed_out} ) | awk '{{print$1"~"$17}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.collapsed_out_hist} """)
+
+		# shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
+		# shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
+		# for num_included in range(1,rep_count+1):
+		# 	shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
+		# shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.collapsed.bed """)
+		# shell(""" touch {output.collapsed_out} """)
+		# shell(""" rm fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
+
+		
 
 
 rule collapse_all_intersects:
 	input:
-		clpsd_in = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
-		clpsd_out = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
+		clpsd_in = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
+		clpsd_out = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
 	output:
 		clpsd_stat = "meta/collapsedPeakStats.vs_dm6.bwa.summary",
+		clpsd_distHist = "meta/collapsedPeakStats.vs_dm6.bwa.autoDist.hist",
 	params:
 		runmem_gb=1,
 		runtime="1:00",
 		cores=1,
 	run:
-		shell(""" rm -rf {output.clpsd_stat} """)
+		shell(""" rm -rf {output.clpsd_stat} {output.clpsd_distHist} """)
 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
 			for grup in ["A","B","C"]:
 				shell(""" cat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsCollapsed.stat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsCollapsed.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.clpsd_stat} """)
+				shell(""" cat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsCollapsed.autoDist.hist meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsCollapsed.autoDist.hist | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.clpsd_distHist} """)
 
 rule merge_nearby_collapsed:
 	input:
@@ -553,8 +563,10 @@ rule merge_nearby_collapsed:
 	output:
 		merged_in = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.bed",
 		merged_in_stats = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.stat",
+		merged_in_hist = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.autoDist.hist",
 		merged_out = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.bed",
 		merged_out_stats = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.stat",
+		merged_out_hist = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.autoDist.hist",
 	params:
 		runmem_gb=8,
 		runtime="1:00:00",
@@ -574,6 +586,8 @@ rule merge_nearby_collapsed:
 		shell(""" cat {output.merged_in} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
 		shell(""" cat {output.merged_in} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
 		shell(""" cat {output.merged_in} |cut -f {params.col2report} | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
+		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.merged_in} ) -b <( bedtools sort -i {output.merged_in} ) | awk '{{print$1"~"$15}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.merged_in_hist} """)
+
 
 		put = "output"
 		shell(""" cat {input.unmerged_out}  | awk '{{print$0"\t"$3-$2}}' | bedtools merge -d {params.merge_dist} -c 1,4,5,6,7,8,9 -o count,collapse,collapse,collapse,collapse,collapse,collapse -i - > fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksMerged.bed """)
@@ -583,14 +597,16 @@ rule merge_nearby_collapsed:
 		shell(""" cat {output.merged_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
 		shell(""" cat {output.merged_out} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
 		shell(""" cat {output.merged_out} |cut -f {params.col2report}  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
+		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.merged_out} ) -b <( bedtools sort -i {output.merged_out} ) | awk '{{print$1"~"$15}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.merged_out_hist} """)
 
 
 rule merge_all_collapsed:
 	input:
-		mrgd_in = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
-		mrgd_out = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"]),
+		mrgd_in = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
+		mrgd_out = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
 	output:
 		mrgd_stats = "meta/mergedPeakStats.vs_dm6.bwa.summary",
+		mrgd_distHist = "meta/mergedPeakStats.vs_dm6.bwa.autoDist.hist",
 	params:
 		runmem_gb=1,
 		runtime="1:00",
@@ -600,6 +616,7 @@ rule merge_all_collapsed:
 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
 			for grup in ["A","B","C"]:
 				shell(""" cat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsMerged.stat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsMerged.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.mrgd_stats} """)
+				shell(""" cat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsMerged.autoDist.hist meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsMerged.autoDist.hist | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.mrgd_distHist} """)
 
 
 
