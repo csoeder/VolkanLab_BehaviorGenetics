@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Faire-Seq"
 author: "Charlie Soeder"
-date: "8/1/2019"
+date: "8/12/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -101,7 +101,7 @@ refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refG
 
 Reference annotations were used to locate features within the genome for comparison:
 
-```{r include=FALSE}
+```{r echo=FALSE}
 
 ref_ann.stats <- read_delim("meta/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(ref_ann.stats) <- c("annot", "measure", "type", "value")
@@ -109,9 +109,6 @@ names(ref_ann.stats) <- c("annot", "measure", "type", "value")
 ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt()
 
 ```
-
-
-
 
 
 In addition to the full annotations, subsets containing prespecified genes of interest will also be used.
@@ -228,7 +225,7 @@ ok, do the alignment and MACS2 analysis like you did before.  Do three version:
 ```
 (Corbin, 20 May 2019 email)
 
-```{r gt table}
+```{r echo = FALSE}
 
 data_sets.df %>% select(c(experimental, rep, subgroups)) %>% mutate(dummy="1") %>% filter(subgroups!='all') %>% group_by_at(vars(-dummy)) %>%  mutate(rowid=1:n()) %>% ungroup() %>% spread(key=subgroups, value=dummy ) %>%  select(-rowid) %>% mutate(A=case_when(is.na(A) ~ "x", TRUE ~ "o" ), B=case_when(is.na(B) ~ "x", TRUE ~ "o" ) , C=case_when(is.na(C) ~ "x", TRUE ~ "o" )  ) %>% gt() %>% tab_style(style = cells_styles(text_style = "italic", text_color="red"), locations = list(cells_data(columns = vars(A), rows = A=="x"), cells_data(columns = vars(B), rows = B=="x")))
 
@@ -577,7 +574,7 @@ hiPass.clps <- collapsedPeaks.gath  %>% mutate(high = value > 20) %>% group_by(h
 
 When the small number (`r hiPass.raw$frac[2]*100` percent of raw peaks,  `r  hiPass.clps$frac[2]*100` percent of collapsed peaks ) of high-signal outliers  (raw or collapsed signal > 20) were excluded, the distributions of the raw/collapsed signals were as follows
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 
 ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Collapsing Strategies\n( Outliers with Intensity > 20 Removed)") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
 
@@ -598,7 +595,7 @@ One thing that stands out is that, because of the length-weighting step, the Pes
 The results are similar for the high-signal outliers, except the correllations are even stronger. 
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 collapsedPeakStats.autoDist.df <- read_delim("meta/collapsedPeakStats.vs_dm6.bwa.autoDist.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(collapsedPeakStats.autoDist.df) <- c("experimental", "group", "put", "chrom", "dist", "count")
@@ -606,11 +603,11 @@ collapsedPeakStats.autoDist.df$process <- as.factor("raw")
 
 #ggplot(collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")))  + geom_line(aes(x=dist, y=count, color=process))  + geom_line(aes(x=dist, y=count, color=process))  + facet_grid(experimental ~ put)
 
+```
 
-
+```{r echo=FALSE}
 ggplot( calledPeaks.selfDistance.df %>% select(c(experimental, rep, distance)) %>% mutate(dist = abs(distance), put = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% group_by(experimental, rep, dist, put) %>% summarise(count = n()) %>%  ungroup() %>% mutate(process=as.factor("raw"), experimental = gsub("-", "_", experimental))) + geom_line(aes(x=dist, y=count, color=process, group=rep)) + geom_line(data=collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")), aes(x=dist, y=count, color=process, linetype = group))  + facet_grid(experimental ~ put) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks (Raw & Collapsed),\nby sample and replicate", x= "distance (bp)") 
 
-#ggplot( ) + geom_freqpoly(data = calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM") %>% mutate(process = "raw") , aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = "Distance Between Adjacent Peaks,\nby sample and replicate", x= "distance (bp)") + theme_bw()
 
 
 ```
@@ -656,7 +653,7 @@ mergedPeaks.gath <- mergedPeaks.df %>%  gather(key = "measure", value = "value",
 
 ```{r echo=FALSE}
 
-ggplot(mergedPeaks.gath %>%  filter(value<20) ) + geom_violin(data = collapsedPeaks.gath %>% filter(value<20) %>%  filter(measure == "pess"), aes(x=measure, y=value),fill="red") + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("pess", "avg", "rescale", "weight")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed; Merged Signal in Red)")+ theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+ggplot(mergedPeaks.gath %>%  filter(value<20) ) + geom_violin(data = collapsedPeaks.gath %>% filter(value<20) %>%  filter(measure == "pess"), aes(x=measure, y=value),fill="red") + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("pess", "avg", "rescale", "weight")) + labs(x = "signal type", y= "signal intensity", title="Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed; Signal to be Merged in Red)")+ theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
 
 
 ```
@@ -723,14 +720,41 @@ peakSquishProcessStats.tbl <- rbind(rbind(collapsedPeakStats, mergedPeakStats ) 
 #inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = NA, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage, rep))
 
 
-ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = "Distance Between Adjacent Peaks (Raw, Collapsed, and Merged),\nby sample and replicate", x= "distance (bp)") 
+ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = "Changes in Peak Properties during Merging Process,\nby sample and replicate", x= "distance (bp)") 
 
 
 
 ```
 
 
-	
+## Peak Contrasts (input vs output)
+
+Once peak data have been consolidated to a single track per input & ouput, they are contrasted across input & output. This is done by partitioning the peaks into three piles based on the same proximity threshold used to merge them:
+
+```
+shared: peaks in input which are within 100bp of a peak in output, and vice versa
+input exclusive: peaks in input which are more than 100bp from the nearest peak in output
+output exclusive: peaks in output which are more than 100bp from the nearest peak in intput
+```
+
+??? further consolidate the shared peaks ?????
+
+
+# Results
+
+## Input vs Output Contrast (by group & treatment)
+
+```{r echo=FALSE, message=FALSE}
+
+contrastedPeakStats_shared.df <- read_delim("meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+names(contrastedPeakStats_shared.df) <-c("experimental", "group", "measure", "type", "value")
+
+contrastedPeakStats_shared.df %>% filter(type == "avg" | type== "locii" | type=="locii_intersect" | type=="input" | type=="output" | type=="input_intersect" | type=="output_intersect") %>% unite(measure, type, "measure") %>% spread(key=measure, value=value) %>% group_by(experimental) %>% gt() %>% cols_label(locii_count = "locii", input_count = "input", output_count = "output", avg_input_width = "input", avg_output_width = "output", avg_input_signal = "input", avg_output_signal = "output", input_intersect_count="input", output_intersect_count="output", locii_intersect_count="locii", avg_distance = "w/ intersects", avg_non0dist = "w/o intersects", group = "" ) %>% tab_spanner(label = "number shared", columns =c("locii_count", "input_count", "output_count")) %>% tab_spanner(label = "avg width (bp)", columns =c("avg_input_width", "avg_output_width")) %>% tab_spanner(label = "avg signal", columns =c("avg_input_signal", "avg_output_signal"))  %>% tab_spanner(label = "number intersects", columns =c("input_intersect_count", "output_intersect_count", "locii_intersect_count")) %>% tab_spanner(label = "average distance (bp)", columns =c("avg_distance", "avg_non0dist"))
+
+
+```
+
+
 # Bibliography
 ```{r echo=FALSE}
 
@@ -738,7 +762,6 @@ citation("topGO")
 citation("ggplot2")
 citation("GGally")
 citation("ggnewscale")
-
 
 ```
 
