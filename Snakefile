@@ -626,7 +626,11 @@ rule contrast_merged_peaks:
 		inputPeaks= "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.bed",
 		outputPeaks= "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.bed",
 	output:
-		sharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.shared.contrast.dubBed",
+		inputClosest = "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.inputClosest.dubBed",
+		outputClosest = "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.outputClosest.dubBed",
+		inputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_shared.contrast.bed",
+		outputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.output_shared.contrast.bed",
+		sharedLocii = "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.sharedLocii.bed",
 		sharedPeaks_stats = "meta/contrast/{spearmint}.vs_dm6.bwa.group_{group}.shared.contrast.stat",
 		inputExclusivePeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast.bed",
 		inputExclusivePeaks_stats= "meta/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast.stat",
@@ -638,46 +642,59 @@ rule contrast_merged_peaks:
 		cores=8,
 		contrast_thresh = 100,
 	run:
+		###		get ready to rumble
 		shell(""" mkdir -p fSeq/contrast/ meta/contrast/ """)
 
+		###		Measure distances to nearest neighbor	###
 		#a few assumptions: we're only interested in a single merged signal track (column 7, weighted)
-		shell(""" bedtools closest -d -D ref -t all -filenames -a <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -b <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) | awk '{{if($11<{params.contrast_thresh} && -1*$11<{params.contrast_thresh})print;}}' > {output.sharedPeaks} """)
+		shell(""" bedtools closest -d -D ref -t all -filenames -a <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -b <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) > {output.inputClosest} """)
 
-		shell(""" cat {output.sharedPeaks} | wc -l | awk '{{print "count\ttotal\t"$1;}}' > {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | cut -f 1-4 | sort | uniq | wc -l | awk '{{print "count\tinput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | cut -f 6-9 | sort | uniq | wc -l | awk '{{print "count\toutput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" bedtools merge -d {params.contrast_thresh} -i <( cat <( cat {output.sharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq) <( cat {output.sharedPeaks} | cut -f 6-8 | sort -k1,1 -k2,2n | uniq ) | sort  -k1,1 -k2,2n) | wc -l | awk '{{print "count\tlocii\t"$1;}}' >> {output.sharedPeaks_stats} """)
-		shell(""" cat {output.sharedPeaks} | awk '{{if($11==0)print;}}' | wc -l | awk '{{print "count\ttotal_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" bedtools merge -d {params.contrast_thresh} -i <( cat <( cat {output.sharedPeaks} | awk '{{if($11==0)print;}}' | cut -f 1-3 | sort -k1,1 -k2,2n | uniq) <( cat {output.sharedPeaks}| awk '{{if($11==0)print;}}' | cut -f 6-8 | sort -k1,1 -k2,2n | uniq ) | sort  -k1,1 -k2,2n) | wc -l  | awk '{{print "count\tlocii_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | awk '{{if($11==0)print;}}' | cut -f 1-3 | sort -k1,1 -k2,2n | uniq| wc -l | awk '{{print "count\tinput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | awk '{{if($11==0)print;}}' | cut -f 6-8 | sort -k1,1 -k2,2n | uniq| wc -l | awk '{{print "count\toutput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)		
-		shell(""" cat {output.sharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq| awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_width\tavg\t",sum/NR; print "input_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} |  cut -f 6-8 | sort -k1,1 -k2,2n | uniq | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_width\tavg\t",sum/NR; print "output_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | cut -f 1-5 | sort -k1,1 -k2,2n | uniq | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_signal\tavg\t",sum/NR; print "input_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | cut -f 6-10 | sort -k1,1 -k2,2n | uniq | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_signal\tavg\t",sum/NR; print "output_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($11);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "distance\tavg\t",sum/NR; print "distance\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-		shell(""" cat {output.sharedPeaks} | awk '{{if($11!=0)print;}}' |  awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($11);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "non0dist\tavg\t",sum/NR; print "non0dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		###		if as close as the threshold: dump to shared double-bed
+		shell(""" cat {output.inputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<={params.contrast_thresh})print;}}' | cut -f 1-5,11 | sort | uniq > {output.inputSharedPeaks} """)
+		###		report stats on shared input peaks
+			###	how many input peaks are shared?
+		shell(""" cat {output.inputSharedPeaks} | wc -l | awk '{{print "count\tinput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
+			### how many intersect an output?
+		shell(""" cat {output.inputSharedPeaks} | awk '{{if($6==0)print;}}' |cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\tinput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.inputSharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq| awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_width\ttotal\t",sum; print "input_width\tavg\t",sum/NR; print "input_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.inputSharedPeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_signal\tavg\t",sum/NR; print "input_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.inputSharedPeaks} | cut -f 6 | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_dist\tavg\t",sum/NR; print "input_dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.inputSharedPeaks} | cut -f 6 | awk '{{if($1!=0)print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_non0dist\tavg\t",sum/NR; print "input_non0dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}""")
+
+		shell(""" bedtools closest -d -D ref -t all -filenames -b <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -a <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) > {output.outputClosest} """)
+		shell(""" cat {output.outputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<={params.contrast_thresh})print;}}' | cut -f 1-5,11 | sort | uniq > {output.outputSharedPeaks} """)
+		shell(""" cat {output.outputSharedPeaks} | cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\toutput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.outputSharedPeaks} | awk '{{if($6==0)print;}}' | cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\toutput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.outputSharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_width\ttotal\t",sum; print "output_width\tavg\t",sum/NR; print "output_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.outputSharedPeaks} | cut -f 1-5 | sort -k1,1 -k2,2n | uniq| cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_signal\tavg\t",sum/NR; print "output_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.outputSharedPeaks} | cut -f 6 | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_dist\tavg\t",sum/NR; print "output_dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
+		shell(""" cat {output.outputSharedPeaks} | cut -f 6 | awk '{{if($1!=0)print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'   | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_non0dist\tavg\t",sum/NR; print "output_non0dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
 
 
-		shell(""" bedtools closest -d -D ref -t all -filenames -a <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -b <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) | awk '{{if($11>={params.contrast_thresh} || -1*$11>={params.contrast_thresh})print;}}' > fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed """)
-
-		shell(""" cat fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed | cut -f 1-5 | sort | uniq > {output.inputExclusivePeaks} """)
-
+		###		if more distant than thresh, collect the input-exclusive
+		shell(""" cat {output.inputClosest} | awk 'function abs(x) {{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>{params.contrast_thresh})print;}}' | cut -f 1-5 | sort | uniq > {output.inputExclusivePeaks} """)
+		###		report on stats
 		shell( """ cat {output.inputExclusivePeaks} | wc -l | awk '{{print "total\tcount\t"$1}}' > {output.inputExclusivePeaks_stats} """ )
-		shell( """ cat {output.inputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats} """ )
+		shell( """ cat {output.inputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\ttotal\t",sum; print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats} """ )
 		shell( """ cat {output.inputExclusivePeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats} """ )
-		shell(""" cat fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed | cut -f 11 |awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats}  """)
+		shell(""" cat {output.inputClosest}| cut -f 1-5,11 | sort -k1,1 -k2,2n | uniq  | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($6)>{params.contrast_thresh})print abs($6);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats}  """)
 
-
-		shell(""" cat fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed | cut -f 6-10 | sort | uniq > {output.outputExclusivePeaks} """)
-
+		###		if more distant than thresh, collect the output-exclusive
+		###		gotta recalculate for the output
+		shell(""" cat {output.outputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>{params.contrast_thresh})print;}}' | cut -f 1-5 | sort | uniq > {output.outputExclusivePeaks} """)
+		###		report on stats
 		shell( """ cat {output.outputExclusivePeaks} | wc -l | awk '{{print "total\tcount\t"$1}}' > {output.outputExclusivePeaks_stats} """ )
-		shell( """ cat {output.outputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats} """ )
+		shell( """ cat {output.outputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\ttotal\t",sum; print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats} """ )
 		shell( """ cat {output.outputExclusivePeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats} """ )
-		shell(""" cat fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed | cut -f 11 |awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats}  """)
+		shell(""" cat {output.outputClosest}| cut -f 1-5,11 | sort -k1,1 -k2,2n | uniq  | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($6)>{params.contrast_thresh})print abs($6);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats}  """)
+
+		shell(""" bedtools merge -d {params.contrast_thresh} -i <(cat <( cut -f 1-3 {output.inputSharedPeaks} ) <( cut -f 1-3 {output.outputSharedPeaks} )  | sort -k1,1 -k2,2n  ) > {output.sharedLocii} """)
+		shell(""" cat {output.sharedLocii}| wc -l | awk '{{print "count\tlocii\t"$1;}}' >> {output.sharedPeaks_stats} """)
+		shell(""" cat {output.sharedLocii} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "locii_width\ttotal\t",sum; print "locii_width\tavg\t",sum/NR; print "locii_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.sharedPeaks_stats} """ )
 
 
-		shell(""" rm fSeq/contrast/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.dubBed """)
+
+
 
 
 
@@ -701,6 +718,86 @@ rule contrast_all_merged:
 					shell(""" cat meta/contrast/{spearmint}.vs_dm6.bwa.group_{grup}.{contrast}_exclusive.contrast.stat | awk '{{print"{spearmint}\t{grup}\t{contrast}\t"$0}}' >> {output.cntrst_stats_xclusiv} """)
 	
 
+rule contrastIntersectWithAnnot:
+	input:
+		inputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_shared.contrast.bed",
+		outputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.output_shared.contrast.bed",
+		sharedLocii = "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.sharedLocii.bed",
+		inputExclusivePeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast.bed",
+		outputExclusivePeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.contrast.bed",
+		annot_file = lambda wildcards: annotation_by_name[wildcards.annot_name]["bed_path"],
+	output:
+		input_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.intersect.{annot_name}.bed",
+		input_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.intersect.{annot_name}.stat",
+		output_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.bed",
+		output_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.stat",
+		shared_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.bed",
+		shared_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.stat",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	run:
+		shell(""" mkdir -p features/intersect/ meta/intersect/ """)
+		shell(""" bedtools intersect -wao -a {input.annot_file} -b {input.inputExclusivePeaks} > {output.input_intersect} """)
+		#	note: this intersects the *annotation* with the *peaks*. There may be peaks which do not intersect with anything!
+
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.input_intersect_stats}""")
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.input_intersect_stats}""")
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "peak_cov\tavg\t",sum/NR; print "peak_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
+		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_peaks\t"$1}}' >> {output.input_intersect_stats} """ ) 
+		shell(""" cat {input.inputExclusivePeaks} | cut -f 1-3 | sort | uniq | wc -l| awk '{{print"count\ttotal_peaks\t"$1}}' >> {output.input_intersect_stats} """ ) 
+
+
+		shell(""" bedtools intersect -wao -a {input.annot_file} -b {input.outputExclusivePeaks} > {output.output_intersect} """)
+		#	note: this intersects the *annotation* with the *peaks*. There may be peaks which do not intersect with anything!
+
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.output_intersect_stats}""")
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.output_intersect_stats}""")
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "peak_cov\tavg\t",sum/NR; print "peak_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
+		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_peaks\t"$1}}' >> {output.output_intersect_stats} """ ) 
+		shell(""" cat {input.outputExclusivePeaks} | cut -f 1-3 | sort | uniq | wc -l| awk '{{print"count\ttotal_peaks\t"$1}}' >> {output.output_intersect_stats} """ ) 
+
+
+		shell(""" bedtools intersect -wao -a {input.annot_file}  -b <(bedtools map -a <( bedtools sort -i {input.sharedLocii} ) -b <( bedtools sort -i {input.inputSharedPeaks} ) -c 5 -o collapse | paste - <(bedtools map -a <( bedtools sort -i {input.sharedLocii} ) -b <( bedtools sort -i {input.outputSharedPeaks} ) -c 5 -o collapse | cut -f 4) ) > {output.shared_intersect}""")
+		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.shared_intersect_stats}""")
+		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.shared_intersect_stats}""")
+		#shell(""" cat {output.shared_intersect} | rev | awk '{if($1!=0)print;}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
+		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.shared_intersect_stats}""")
+		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "locus_cov\tavg\t",sum/NR; print "locus_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.shared_intersect_stats}""")
+		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_locii\t"$1}}' >> {output.shared_intersect_stats} """ ) 
+		shell(""" cat {input.sharedLocii}  | wc -l | awk '{{print"count\ttotal_locii\t"$1}}' >> {output.shared_intersect_stats} """ ) 
+
+
+
+rule summonAllContrastIntersects:
+	input:
+		intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.{partition}.intersect.{annot_name}.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], partition = ["shared","input_exclusive","output_exclusive"], annot_name = ["dm6_genes"]),
+#		output_intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.stat"),
+#		shared_intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.stat"),
+	output:
+		exclusive_intersect_summary = "meta/contrastPeakIntersects.exclusive.{annot_name}.stat",
+		shared_intersect_summary = "meta/contrastPeakIntersects.shared.{annot_name}.stat",
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+	run:
+		shell(""" rm -rf {output.exclusive_intersect_summary} {output.shared_intersect_summary} """)
+		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
+			for grup in ["A","B","C"]:
+				shell(""" cat meta/intersect/{spearmint}.vs_dm6.bwa.group_{grup}.shared.intersect.{wildcards.annot_name}.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.shared_intersect_summary} """)
+				for contrast in ["input", "output"]:
+					shell(""" cat meta/intersect/{spearmint}.vs_dm6.bwa.group_{grup}.{contrast}_exclusive.intersect.{wildcards.annot_name}.stat | awk '{{print"{spearmint}\t{grup}\t{contrast}\t"$0}}' >> {output.exclusive_intersect_summary} """)
+
+
+
+
+
 
 
 
@@ -715,6 +812,8 @@ rule write_report:
 		called_peak_stats = ["meta/basicPeakStats.vs_dm6.bwa.summary"],
 		collapsed_peak_stats = ["meta/collapsedPeakStats.vs_dm6.bwa.summary"],
 		merged_peak_stats = ["meta/mergedPeakStats.vs_dm6.bwa.summary"],
+		contrast_stats = ["meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary"],
+		intersect_stats = ["meta/contrastPeakIntersects.exclusive.dm6_genes.stat", "meta/contrastPeakIntersects.shared.dm6_genes.stat"],
 	output:
 		pdf_out="VolkanLab_BehaviorGenetics.pdf"
 	params:

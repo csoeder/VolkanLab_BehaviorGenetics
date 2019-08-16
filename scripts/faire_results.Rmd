@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Faire-Seq"
 author: "Charlie Soeder"
-date: "8/12/2019"
+date: "8/16/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -168,6 +168,20 @@ CG42345 (straw) is listed as FBgn0259247 (laccase2)
 ```
 
 ### Derived from GO terms
+
+```
+Sub Pull out by particular GO terms?
+o Nervous system development - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007399 
+o Mating - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007618
+o Histone modification - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0016570 
+o Dna-binding transcription factor - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0003700 
+o Synaptic signaling - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0099536 
+o Synapse organization - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0050808
+```
+(Bryson, email 24 July 2019)
+
+melanogaster-specific genes with these GO terms were retrieved using th FlyBase QueryBuilder. 
+
 
 Nervous System Development:
 ```
@@ -720,7 +734,7 @@ peakSquishProcessStats.tbl <- rbind(rbind(collapsedPeakStats, mergedPeakStats ) 
 #inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = NA, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage, rep))
 
 
-ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = "Changes in Peak Properties during Merging Process,\nby sample and replicate", x= "distance (bp)") 
+ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = "Changes in Peak Properties during Merging Process,\nby sample and replicate", x= "stage") 
 
 
 
@@ -739,6 +753,8 @@ output exclusive: peaks in output which are more than 100bp from the nearest pea
 
 ??? further consolidate the shared peaks ?????
 
+## Compare 
+
 
 # Results
 
@@ -749,10 +765,87 @@ output exclusive: peaks in output which are more than 100bp from the nearest pea
 contrastedPeakStats_shared.df <- read_delim("meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
 names(contrastedPeakStats_shared.df) <-c("experimental", "group", "measure", "type", "value")
 
-contrastedPeakStats_shared.df %>% filter(type == "avg" | type== "locii" | type=="locii_intersect" | type=="input" | type=="output" | type=="input_intersect" | type=="output_intersect") %>% unite(measure, type, "measure") %>% spread(key=measure, value=value) %>% group_by(experimental) %>% gt() %>% cols_label(locii_count = "locii", input_count = "input", output_count = "output", avg_input_width = "input", avg_output_width = "output", avg_input_signal = "input", avg_output_signal = "output", input_intersect_count="input", output_intersect_count="output", locii_intersect_count="locii", avg_distance = "w/ intersects", avg_non0dist = "w/o intersects", group = "" ) %>% tab_spanner(label = "number shared", columns =c("locii_count", "input_count", "output_count")) %>% tab_spanner(label = "avg width (bp)", columns =c("avg_input_width", "avg_output_width")) %>% tab_spanner(label = "avg signal", columns =c("avg_input_signal", "avg_output_signal"))  %>% tab_spanner(label = "number intersects", columns =c("input_intersect_count", "output_intersect_count", "locii_intersect_count")) %>% tab_spanner(label = "average distance (bp)", columns =c("avg_distance", "avg_non0dist"))
+contrastedPeakStats_shared.df %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(type =="avg" | measure == "count" | type == "total") %>% unite(measure, type, "measure") %>% spread(key=measure, value=value) %>% mutate(input_intersect_frac = input_intersect_count/input_count, output_intersect_frac = output_intersect_count/output_count) %>% select(-c(input_intersect_count,output_intersect_count)) %>% group_by(experimental) %>% gt() %>% cols_label(avg_input_width = "input", avg_output_width = "output", avg_input_signal = "input", avg_output_signal = "output",input_count = "input", output_count = "output", locii_count = "count", avg_locii_width="avg width", total_locii_width = "total width",avg_input_dist = "input", avg_output_dist = "output", avg_input_non0dist = "input", avg_output_non0dist = "output", input_intersect_frac = "input", output_intersect_frac ="output", group = " ") %>% tab_spanner(label = "avg peak width (bp)", columns =c("avg_input_width", "avg_output_width"))%>% tab_spanner(label = "avg signal", columns =c("avg_input_signal", "avg_output_signal"))  %>% tab_spanner(label = "number peaks shared", columns =c("input_count", "output_count"))   %>% tab_spanner(label = "distinct shared locii", columns =c("locii_count","avg_locii_width", "total_locii_width"))  %>% tab_spanner(label = "average interpeak distance", columns =c("avg_input_dist","avg_output_dist"))   %>% tab_spanner(label = "average interpeak distance\n(overlaps excluded)", columns =c("avg_input_non0dist","avg_output_non0dist"))  %>% tab_spanner(label = "percent overlapping", columns =c("input_intersect_frac", "output_intersect_frac")) %>% fmt_number(columns = c("avg_input_width", "avg_output_width", "avg_input_dist", "avg_output_dist", "avg_input_non0dist", "avg_output_non0dist", "avg_locii_width", "total_locii_width" ), decimals = 1, suffixing = T) %>% fmt_number(columns = c("avg_input_signal", "avg_output_signal"), decimals = 2) %>% fmt_number(columns = c("input_count", "output_count", "locii_count"), decimals = 1, suffixing = T) %>% fmt_percent(columns = vars(output_intersect_frac, input_intersect_frac), decimals = 1, drop_trailing_zeros = TRUE) %>% tab_header(title="Properties of Locii Shared Between Input and Output", subtitle= "and their contributing peaks")%>% cols_hide( columns = vars(total_input_width,total_output_width))
+
+
+
+
+
+
+
+
+
 
 
 ```
+
+```{r echo=FALSE, message=FALSE}
+
+contrastedPeakStats_xclsv.df <- read_delim("meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+names(contrastedPeakStats_xclsv.df) <-c("experimental", "group", "exclusive", "measure", "type", "value")
+
+contrastedPeakStats_xclsv.df %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(type == "avg" | type == "count" | type == "total") %>% unite("measure", exclusive, measure, type ) %>% spread(key = measure, value = value) %>% group_by(experimental)  %>% gt() %>% tab_spanner(label = "avg signal", columns =c("input_signal_avg", "output_signal_avg")) %>% tab_spanner(label = "number of peaks", columns =c("input_total_count", "output_total_count")) %>% tab_spanner(label = "avg peak width (bp)", columns =c("input_width_avg", "output_width_avg"))  %>% tab_spanner(label = "avg distance to other", columns =c("input_nearest_avg", "output_nearest_avg")) %>% tab_spanner(label = "total peak width", columns =c("output_width_total", "input_width_total")) %>% cols_label(input_signal_avg = "input", output_signal_avg = "output", input_total_count="input", output_total_count = "output", input_width_avg = "input", output_width_avg = "output",input_nearest_avg = "input", output_nearest_avg = "output", input_width_total = "input", output_width_total = "output", group = " ") %>% fmt_number(columns = c("input_signal_avg", "output_signal_avg"), decimals = 2)   %>% fmt_number(columns = c("input_width_avg", "output_width_avg", "input_total_count", "output_total_count", "input_nearest_avg", "output_nearest_avg", "output_width_total", "input_width_total"), decimals = 1, suffixing = T) %>% tab_header(title="Properties of Peaks Disjoint Between Input and Output", subtitle= md("&nbsp;") ) 
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+
+#contrastedPeakStats.counts <- rbind(contrastedPeakStats_shared.df %>% filter(measure == "count") %>% filter(type == "input" | type == "output")  %>% mutate(pile = as.factor("shared"), put = as.factor(type)) %>% select(c(experimental, group, put, pile, value)), contrastedPeakStats_xclsv.df %>%  filter(type == "count" & measure == "total" ) %>% mutate(put = as.factor(exclusive), pile = as.factor("exclusive"))  %>% select(c(experimental, group, put, pile, value)) )
+
+
+#contrastedPeakStats_shared.df %>% filter(type == "input_intersect" | type == "output_intersect" ) %>%  separate(type, into = c("put","pile")) %>% mutate(pile = as.factor("shared"), put = as.factor(put)) %>% select(c(experimental, group, put, pile, value)) , 
+contrastedPeakStats.counts <- rbind(contrastedPeakStats_shared.df %>% filter(type == "input" | type == "output" ) %>% mutate(pile = as.factor("shared"), put = as.factor(type)) %>% select(c(experimental, group, put, pile, value)), contrastedPeakStats_xclsv.df %>%  filter(type == "count" ) %>% mutate(put = as.factor(exclusive), pile = as.factor("exclusive"))  %>% select(c(experimental, group, put, pile, value)))
+
+
+
+####		whats up with the off by ones here???
+#inner_join(contrastedPeakStats.counts %>% group_by(experimental, group, put) %>% summarise(some=sum(value)), mergedPeakStats %>% filter(measure=="count" & type =="total"), by=c("put"="treatment", "experimental"="experimental", "group"="group")) %>% mutate(diff = some - value)
+
+
+ggplot(contrastedPeakStats.counts) + geom_col(aes(x=put, y=value, fill = pile)) + geom_col(data = mergedPeakStats %>% filter(measure=="count" & type =="total") %>% mutate(put = as.factor(treatment)) %>% select(c(experimental, group, put, value)), aes(x=put, y=value),color = "black", alpha =0) + facet_grid(experimental~group) + theme_bw() + scale_fill_discrete(name="contrast") + labs(title="Shared and Exclusive Peaks Amongst Groups and Experimental Treatments", x = "Partition", y="count") 
+
+```
+
+
+
+
+## Contrasted Peaks and Annotated Genes
+
+Once peaks have been called, collapsed & merged, and contrasted, they are compared to the dm6 gene annotation track. 
+
+Here are the shared peaks
+
+```{r echo=FALSE, message=FALSE}
+
+sharedPeaks_dm6geneIntersect <- read_delim("meta/contrastPeakIntersects.shared.dm6_genes.stat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(sharedPeaks_dm6geneIntersect ) <- c("experimental", "group", "measure", "type", "value")
+
+
+
+
+sharedPeaks_dm6geneIntersect %>% mutate( experimental =  gsub("_", "-", experimental))%>% filter(measure == "count" | type == "avg")%>% unite("measure", measure, type) %>% spread(key = measure, value = value) %>% mutate(intersect_frac_annot = count_intersect/(count_intersect+count_nointersect), intersect_frac_loc = count_intersecting_locii/count_total_locii) %>% group_by(experimental) %>% gt() %>% cols_label(intersect_frac_annot = "genes", intersect_frac_loc  = "locii", locus_cov_avg = "locus", annot_cov_avg = "gene", count_intersect = "genes overlapped", group = " ") %>% tab_spanner(label = "percent intersecting", columns =c("intersect_frac_annot", "intersect_frac_loc") ) %>% tab_spanner(label = "percent overlap", columns =c("locus_cov_avg", "annot_cov_avg"))  %>% fmt_percent(columns = c("intersect_frac_annot", "intersect_frac_loc","locus_cov_avg", "annot_cov_avg"), decimals = 1) %>% tab_header(title="Locii Shared Between Input and Output", subtitle= md("and their intersections with dm6_genes") )  %>% cols_hide(c("count_intersecting_locii", "count_nointersect", "count_total_locii"))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+exclusivePeaks_dm6geneIntersect <- read_delim("meta/contrastPeakIntersects.exclusive.dm6_genes.stat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(exclusivePeaks_dm6geneIntersect ) <- c("experimental", "group", "exclusive", "measure", "type", "value")
+
+
+
+
+exclusivePeaks_dm6geneIntersect %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(measure == "count" | type == "avg")%>% unite("measure", exclusive, measure, type) %>% spread(key = measure, value = value)  %>% mutate(input_intersect_frac_annot = input_count_intersect/(input_count_intersect+input_count_nointersect), input_intersect_frac_peak = input_count_intersecting_peaks/input_count_total_peaks, output_intersect_frac_annot = output_count_intersect/(output_count_intersect+output_count_nointersect), output_intersect_frac_peak = output_count_intersecting_peaks/output_count_total_peaks) %>% group_by(experimental) %>% gt() %>% tab_spanner(label = "percent genes intersecting", columns =c("input_intersect_frac_annot", "output_intersect_frac_annot") ) %>% tab_spanner(label = "percent peaks intersecting", columns =c("input_intersect_frac_peak", "output_intersect_frac_peak") ) %>% tab_spanner(label = "average signal", columns =c("input_signal_avg", "output_signal_avg") ) %>% tab_spanner(label = "number genes intersected", columns =c("input_count_intersect", "output_count_intersect") ) %>% tab_spanner(label = "average percent gene overlapped (per peak)", columns =c("input_annot_cov_avg", "output_annot_cov_avg") )%>% tab_spanner(label = "average percent peak overlapped", columns =c("input_peak_cov_avg", "output_peak_cov_avg") ) %>% cols_label(input_intersect_frac_annot="input", output_intersect_frac_annot="output", input_intersect_frac_peak = "input", output_intersect_frac_peak = "output", input_signal_avg = "input", output_signal_avg = "output", input_count_intersect = "input", output_count_intersect = "output", input_annot_cov_avg="input", output_annot_cov_avg = "output" , input_peak_cov_avg = "input", output_peak_cov_avg = "output", group = " ") %>% fmt_percent(columns = c("input_intersect_frac_annot", "output_intersect_frac_annot","input_intersect_frac_peak", "output_intersect_frac_peak", "input_annot_cov_avg", "output_annot_cov_avg", "input_peak_cov_avg", "output_peak_cov_avg"), decimals = 1) %>% fmt_number(columns = c("input_signal_avg", "output_signal_avg"), decimals = 2) %>% fmt_number(columns = c("input_count_intersect", "output_count_intersect"), decimals = 1, suffixing = T) %>% cols_hide(columns = vars(input_count_intersecting_peaks,input_count_nointersect,input_count_total_peaks,output_count_intersecting_peaks, output_count_nointersect,output_count_total_peaks))  %>% tab_header(title="Peaks Exclusive Between Input and Output", subtitle= md("and their intersections with dm6_genes") ) 
+```
+
+
+## Peaks and Annotated Repetitive Elements
+
+Repetitive DNA, such as low-complexity regions or retroelements, can also be important. Peaks were compared to the dm6 RepeatMasker annotation in the same manner as the gene annotation.
+
 
 
 # Bibliography
