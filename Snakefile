@@ -23,29 +23,34 @@ for s in sample_by_name.keys():
 		else:
 			sampname_by_group[g] = [s]
 
-
-rule all:
-	input: 
-		peaks_in = lambda wildcards: expand("fSeq/{sample}.vs_{ref_genome}.{aligner}.calledPeaks.bed", ref_genome = "dm6", sample = sample_by_name.keys(), aligner = "bwa" )
-#	output:
-#		dummy = "test.txt"
-#	params:
-#		runmem_gb=1,
-#		runtime="0:01:00",
-#		cores=1,
-#	shell:
-#		"touch {output.dummy}"
-
-
-
-
-
 def return_file_relpath_by_sampname(wildcards):
 	sampname = wildcards.samplename
 	pathprefix = sample_by_name[sampname]["path"]
 	filesin = sample_by_name[sampname]['readsfile']
 	pathsout = ["".join([pathprefix, filesin])]
 	return pathsout
+
+
+
+
+
+rule all:
+	input: 
+		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
+	params:
+		runmem_gb=1,
+		runtime="0:01:00",
+		cores=1,
+	run:
+		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').pdf """)
+		shell(""" tar cf results.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
+
+
+
+
+
+
+
 
 
 rule window_maker:
@@ -815,7 +820,7 @@ rule write_report:
 		contrast_stats = ["meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary"],
 		intersect_stats = ["meta/contrastPeakIntersects.exclusive.dm6_genes.stat", "meta/contrastPeakIntersects.shared.dm6_genes.stat"],
 	output:
-		pdf_out="VolkanLab_BehaviorGenetics.pdf"
+		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:
 		runmem_gb=8,
 		runtime="1:00:00",
@@ -825,8 +830,9 @@ rule write_report:
 	run:
 		pandoc_path="/nas/longleaf/apps/rstudio/1.0.136/bin/pandoc"
 		pwd = subprocess.check_output("pwd",shell=True).decode().rstrip()+"/"
+		shell("""mkdir -p results/figures/supp/ results/tables/supp/""")
 		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/faire_results.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
-
+#		shell(""" tar cf results.tar results/ """)
 
 
 
