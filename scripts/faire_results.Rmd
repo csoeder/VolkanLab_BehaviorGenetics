@@ -235,8 +235,25 @@ data_sets.df$experimental <- gsub("_", "-", data_sets.df$experimental)
 data_sets.df$experimental<- as.factor(data_sets.df$experimental)
 data_sets.df$subgroups<- as.factor(data_sets.df$subgroups)
 data_sets.df$rep<- as.factor(data_sets.df$rep)
+data_sets.df$housing<- as.factor(data_sets.df$housing)
+data_sets.df$genotype<- as.factor(data_sets.df$genotype)
 
 data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile)) %>% distinct() 
+
+```
+
+
+```{r include=FALSE}
+
+
+tbl_cnt <- tbl_cnt + 1
+
+GxEcombo.gt<- data_sets.df.sparse %>% select(c(experimental, genotype, housing)) %>% group_by(genotype, housing) %>% summarise(count=n())%>%  ungroup() %>% spread(key=housing, value=count )  %>% mutate(group=case_when(is.na(group) ~ "x", TRUE ~ "o" ), single=case_when(is.na(single) ~ "x", TRUE ~ "o" )  ) %>% gt() %>% tab_style(style = cells_styles(text_style = "italic", text_color="red"), locations = list(cells_data(columns = vars(group), rows = group=="x"), cells_data(columns = vars(single), rows = single=="x"))) %>% tab_spanner(label = "housing environment", columns = vars(single, group)) %>% tab_header(title=paste("Table ",tbl_cnt, ". Experimental Design", sep = ""), subtitle= md("genotype-environmental interactions tested"))
+
+GxEcombo.gt
+
+
+write(GxEcombo.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_experimentGxEcombos.html", sep=""))
 
 ```
 
@@ -247,7 +264,7 @@ FAIRE-Seq reads were sequenced for four experimental treatments. Each had one "i
 
 tbl_cnt <- tbl_cnt + 1
 
-sampleBreakdown.gt<- data_sets.df.sparse  %>% group_by(experimental,rep) %>% summarise(`sample count`=n())  %>% gt() %>%  tab_options(row_group.background.color = "#FFEFDB")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Breakdown of Samples within Experiment", sep = ""), subtitle= md("&nbsp;"))
+sampleBreakdown.gt <- data_sets.df.sparse  %>%  mutate(rep = case_when(rep == "input" ~ "input", rep != "input" ~ "output",)) %>% group_by(experimental,rep) %>% summarise(`sample count`=n())  %>% gt() %>%  tab_options(row_group.background.color = "#FFEFDB")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Breakdown of Samples within Experiment", sep = ""), subtitle= md("&nbsp;"))
 
 sampleBreakdown.gt
 
@@ -346,7 +363,7 @@ http://seqanswers.com/forums/showthread.php?t=40440
 dupe_stats <- inner_join(fastp_summary %>% filter(type=='duplication' & measure =='rate') %>%  mutate(percent=value*100) %>% select(c(name,percent)), data_sets.df.sparse, by=c("name"="name"))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, include=FALSE}
 
 tbl_cnt <- tbl_cnt + 1
 
