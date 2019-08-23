@@ -7,6 +7,7 @@ data_sets:
       housing: group
       day: 7
       rep: input
+      put: in
       subgroups: [all,A,B,C]
     - name: 47b1_7_r1
       path: FASTQ/47b1_7/rep_1/
@@ -16,6 +17,7 @@ data_sets:
       housing: group
       day: 7
       rep: 1
+      put: out
       subgroups: [all,A,B,C]
     - name: 47b1_7_r2
       path: FASTQ/47b1_7/rep_2/
@@ -25,6 +27,7 @@ data_sets:
       housing: group
       day: 7
       rep: 2
+      put: out
       subgroups: [all,A,B,C]
     - name: 47b1_7_r3
       path: FASTQ/47b1_7/rep_3/
@@ -34,6 +37,7 @@ data_sets:
       housing: group
       day: 7
       rep: 3
+      put: out
       subgroups: [all,C]
     - name: Fru7_in
       path: FASTQ/Fru7/input/
@@ -43,6 +47,7 @@ data_sets:
       housing: group
       day: 7
       rep: input
+      put: in
       subgroups: [all,A,B,C]
     - name: Fru7_r1
       path: FASTQ/Fru7/rep_1/
@@ -52,6 +57,7 @@ data_sets:
       housing: group
       day: 7
       rep: 1
+      put: out
       subgroups: [all,A,B,C]
     - name: Fru7_r2
       path: FASTQ/Fru7/rep_2/
@@ -61,6 +67,7 @@ data_sets:
       housing: group
       day: 7
       rep: 2
+      put: out
       subgroups: [all,B,C]
     - name: Fru7_r3
       path: FASTQ/Fru7/rep_3/
@@ -70,6 +77,7 @@ data_sets:
       housing: group
       day: 7
       rep: 3
+      put: out
       subgroups: [all,A,B,C]
     - name: GH7_in
       path: FASTQ/GH7/input/
@@ -79,6 +87,7 @@ data_sets:
       housing: group
       day: 7
       rep: input
+      put: in
       subgroups: [all,A,B,C]
     - name: GH7_r1
       path: FASTQ/GH7/rep_1/
@@ -88,6 +97,7 @@ data_sets:
       housing: group
       day: 7
       rep: 1
+      put: out
       subgroups: [all,C]
     - name: GH7_r2
       path: FASTQ/GH7/rep_2/
@@ -97,6 +107,7 @@ data_sets:
       housing: group
       day: 7
       rep: 2
+      put: out
       subgroups: [all,A,B,C]
     - name: GH7_r3
       path: FASTQ/GH7/rep_3/
@@ -106,6 +117,7 @@ data_sets:
       housing: group
       day: 7
       rep: 3
+      put: out
       subgroups: [all,A,B,C]
     - name: SH7_in
       path: FASTQ/SH7/input/
@@ -115,6 +127,7 @@ data_sets:
       housing: single
       day: 7
       rep: input
+      put: in
       subgroups: [all,A,B,C]
     - name: SH7_r1
       path: FASTQ/SH7/rep_1/
@@ -124,6 +137,7 @@ data_sets:
       housing: single
       day: 7
       rep: 1
+      put: out
       subgroups: [all,B,C]
     - name: SH7_r2
       path: FASTQ/SH7/rep_2/
@@ -133,6 +147,7 @@ data_sets:
       housing: single
       day: 7
       rep: 2
+      put: out
       subgroups: [all,A,B,C]
     - name: SH7_r3
       path: FASTQ/SH7/rep_3/
@@ -142,6 +157,7 @@ data_sets:
       housing: single
       day: 7
       rep: 3
+      put: out
       subgroups: [all,A,B,C]
 
 
