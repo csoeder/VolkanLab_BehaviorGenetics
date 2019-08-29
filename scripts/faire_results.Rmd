@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Faire-Seq"
 author: "Charlie Soeder"
-date: "8/16/2019"
+date: "8/29/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -64,6 +64,31 @@ tbl_cnt <- 0
 
 
 
+```{r echo=FALSE, message=FALSE}
+
+
+#tbl_cnt <- tbl_cnt + 1
+#thing.gt <- asdfasdfasdf
+#thing.gt
+#write(thing.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_thing.html", sep=""))
+
+
+```
+
+```{r echo=FALSE, message=FALSE}
+
+
+# fig_cnt <- fig_cnt + 1
+# thing.gg <- asdfasdfasd
+# thing.gg
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
 # Introduction
 
 words words
@@ -84,7 +109,7 @@ generic overview words
 
 
 ```{r include=FALSE, echo = FALSE, message=FALSE}
-refGenomes_summary_df <- read_delim("meta/reference_genomes.summary", 
+refGenomes_summary_df <- read_delim("summaries/reference_genomes.summary", 
     "\t", escape_double = FALSE, col_names = FALSE, 
     trim_ws = TRUE)
 
@@ -97,7 +122,7 @@ The dm6 reference genome was used for read alignment:
 
 tbl_cnt <- tbl_cnt + 1
 
-refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Drosophila Melanogaster") %>%   fmt_number(columns = vars(dm6),suffixing = TRUE, decimals=0)
+refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Drosophila Melanogaster") %>%   fmt_number(columns = vars(dm6),suffixing = TRUE, decimals=0) %>% cols_label(measure = " ", dm6 = " ")
 
 refGenomes_summary.gt
 
@@ -110,13 +135,13 @@ write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_c
 
 Reference annotations were used to locate features within the genome for comparison:
 
-```{r echo=FALSE}
+```{r include=FALSE, echo = FALSE, message=FALSE }
 
-ref_ann.stats <- read_delim("meta/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+ref_ann.stats <- read_delim("summaries/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(ref_ann.stats) <- c("annot", "measure", "type", "value")
 
 tbl_cnt <- tbl_cnt + 1
-ref_ann.stats.gt <- ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Reference Annotations and their Sizes", sep = ""), subtitle= md("&nbsp;") )
+ref_ann.stats.gt <- ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Reference Annotations and their Sizes", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
 
 ref_ann.stats.gt
 
@@ -129,7 +154,7 @@ In addition to the full annotations, subsets containing prespecified genes of in
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE }
 
-geneLists.stats <- read_delim("meta/geneLists.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+geneLists.stats <- read_delim("summaries/geneLists.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 
 names(geneLists.stats) <- c("query", "annot", "measure", "type", "value")
 geneLists.stats$query <- as.factor(geneLists.stats$query)
@@ -146,7 +171,7 @@ geneList.tbl <- rbind( geneList.tbl, geneLists.stats %>%  filter(measure == "siz
 geneList.tbl <- rbind(geneList.tbl, geneLists.stats %>% filter(measure=="size" & type == "total") %>%  mutate(value = value/(refGenomes_summary_df %>% filter(measure=="number_bases") %>% select(value) %>% as.numeric() ) ) %>%  unite(measure, type, measure, sep=" ") %>% select(-c(annot)) %>% mutate(measure = "percent genome size") )
 
 
-geneList.tbl <- rbind( geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="size" & type == "total"), ref_ann.stats %>% filter(measure=="size" & type == "total"), by = c("annot" = "annot")) %>% mutate(value=value.x/value.y, measure = "percent annotation size") %>% select(query, measure, value) )
+geneList.tbl <- rbind( geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="size" & type == "total"), ref_ann.stats %>% filter(measure=="size" & type == "total"), by = c("annot" = "annot")) %>% mutate(value=value.x/value.y, measure = "percent annotation size") %>% select(query, measure, value) ) %>% mutate(measure=factor(measure, levels = c("total count","annotated count","percent of annotations","total size","avg size","percent genome size","percent annotation size")))
 
 
 ```
@@ -165,12 +190,10 @@ write(geneList.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_geneL
 ```
 
 
-TODO: mention number of distinct locii
-
 ### Ionotropic
 
 A list of ionotropic receptors supplied by Corbin via Flybase & George et al 2019  (email 28 May 2019). This contained 335 entries, some with mutiple genes, some not unique. Once merged & uniqued : 246
-Annotation symbols (CGxxxxx) gonverted to FlyBase gene games (FBgnxxxx) using flybase ID converter (http://flybase.org/convert/id) 
+Annotation symbols (CGxxxxx) converted to FlyBase gene games (FBgnxxxx) using flybase ID converter (http://flybase.org/convert/id) 
 
 239 converted cleanly; 5 had duplicate conversions and were corrected by hand:
 ```
@@ -200,7 +223,7 @@ o Synapse organization - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0050808
 ```
 (Bryson, email 24 July 2019)
 
-melanogaster-specific genes with these GO terms were retrieved using th FlyBase QueryBuilder. 
+melanogaster-specific genes with these GO terms were retrieved using the FlyBase QueryBuilder. 
 
 
 Nervous System Development:
@@ -264,7 +287,7 @@ FAIRE-Seq reads were sequenced for four experimental treatments. Each had one "i
 
 tbl_cnt <- tbl_cnt + 1
 
-sampleBreakdown.gt <- data_sets.df.sparse  %>%  mutate(rep = case_when(rep == "input" ~ "input", rep != "input" ~ "output",)) %>% group_by(experimental,rep) %>% summarise(`sample count`=n())  %>% gt() %>%  tab_options(row_group.background.color = "#FFEFDB")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Breakdown of Samples within Experiment", sep = ""), subtitle= md("&nbsp;"))
+sampleBreakdown.gt <- data_sets.df.sparse  %>%  mutate(rep = case_when(rep == "input" ~ "input", rep != "input" ~ "output",)) %>% group_by(experimental,rep) %>% summarise(`sample count`=n())  %>% gt() %>%  tab_options(row_group.background.color = "#FFEFDB")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Breakdown of Samples within Experiment", sep = ""), subtitle= md("&nbsp;")) %>% cols_label(rep = " ")
 
 sampleBreakdown.gt
 
@@ -302,7 +325,7 @@ These reads were preprocessed with FASTP [@Chen2018] for quality control and ana
 
 
 ```{r echo=FALSE, include=FALSE, warning=FALSE}
-fastp_summary <- read_delim("meta/sequenced_reads.dat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+fastp_summary <- read_delim("summaries/sequenced_reads.dat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(fastp_summary ) <- c("name","type","measure","value")
 fastp_summary$name <- as.factor(fastp_summary$name)
 fastp_summary$type <- as.factor(fastp_summary$type)
@@ -339,7 +362,7 @@ write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_
 
 
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 fig_cnt <- fig_cnt + 1
 
 readQual.gg <- ggplot(filtration_stats %>% filter(measure == "q30_rate")) + geom_line(aes(group=name, x=type,y=100*value)) +  geom_point(aes(x=type, y = 100*value, color=experimental, shape=rep)) + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() + geom_text(data= . %>% filter(type=="postfiltered") %>% filter(value<0.97), aes(type,100*value,label=name))
@@ -356,8 +379,12 @@ dev.off()
 Duplicate reads were also detected; however, duplicate reads are less concerning in FAIRE-seq given the relatively smaller genome they are sampled from. 
 
 https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/8%20Duplicate%20Sequences.html
+
 http://seqanswers.com/forums/showthread.php?t=40440
 
+https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html
+
+Furthermore, some peak-calling software (eg, MACS[@Zhang2008]) does internal deduplication. 
 
 ```{r echo=FALSE, include=FALSE}
 dupe_stats <- inner_join(fastp_summary %>% filter(type=='duplication' & measure =='rate') %>%  mutate(percent=value*100) %>% select(c(name,percent)), data_sets.df.sparse, by=c("name"="name"))
@@ -375,7 +402,7 @@ write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 fig_cnt <- fig_cnt + 1
 
 dupeStats.gg <- ggplot(dupe_stats) + geom_histogram(aes(x=percent, fill=experimental), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram", sep = ""), x="Read Duplication Rate (FASTP estimate)", y="Number Samples") + theme_bw()
@@ -397,8 +424,8 @@ Reads were first mapped to the reference genome using the BWA SAMPE/SE algorithm
 
 ```{r echo=FALSE, include=FALSE}
 
-vs_dm6.bwa <- bam_summary_loader(filename = "meta/alignments.vs_dm6.bwa.summary",aligner="bwa", reference="dm6")
-#vs_dm6.bwaUniq <- bam_summary_loader(filename = "meta/alignments.vs_dm6.bwaUniq.summary",aligner="bwaUniq", reference="dm6")
+vs_dm6.bwa <- bam_summary_loader(filename = "summaries/alignments.vs_dm6.bwa.summary",aligner="bwa", reference="dm6")
+#vs_dm6.bwaUniq <- bam_summary_loader(filename = "summaries/alignments.vs_dm6.bwaUniq.summary",aligner="bwaUniq", reference="dm6")
 
 all_alignments <- rbind(vs_dm6.bwa)#, vs_dm6.bwaUniq)
 ```
@@ -409,7 +436,7 @@ all_alignments <- rbind(vs_dm6.bwa)#, vs_dm6.bwaUniq)
 ### Read & Alignment Quality
 
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 readcount_process <- all_alignments %>%  filter( measure=='total_read_count'| measure == 'total_mapped_count' ) %>% select(-c(reference, aligner))
 
 readcount_process$measure <- factor(readcount_process$measure, levels = c('total_read_count','total_mapped_count'))
@@ -417,7 +444,7 @@ readcount_process$measure <- factor(readcount_process$measure, levels = c('total
 
 The mapping rate per sample can be calculated from the number of mapped reads compared to the total number of sequenced reads:
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 fig_cnt <- fig_cnt + 1
 
 readCountProcess.gg <- ggplot(inner_join(readcount_process%>% mutate(measure=gsub("_"," ",measure)), data_sets.df.sparse, by=c("sample"="name"))) + geom_line(aes(group=sample, x=measure,y=value)) + geom_point(aes(x=measure, y=value, group=sample,color=experimental, shape=rep))  + labs(title=paste("Figure ",fig_cnt, ". Read Counts by Processing Step: Unmapped, Mapped, Filtered", sep = ""), x="", y="Number Reads" ) + theme_bw() + theme(axis.text.x = element_text(angle = -45, hjust = 0), legend.position='none' ) + scale_y_log10()
@@ -430,7 +457,7 @@ dev.off()
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 readcount_process.spread <- readcount_process %>%  spread(measure, value) %>%  mutate(percent_mapping=100*total_mapped_count/total_read_count)#, filter_retention = filtered_mapped_count/total_mapped_count)
 
@@ -448,137 +475,26 @@ write(readCountProcess.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt
 
 ## Peak Calling
 
-MACS was used to QC pilot data, but it wasn't designed for use on FAIRE-Seq. MACS2 was extended for use with FAIRE (  https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-7-33 ) but has its own difficulties, such as python2/3 incompatibilities, and only running on all samples under inhomogeneous settings. Here, Fseq [@Boyle2008] is used to infer peaks from mapped reads. It does this using a kernel density estimation to find intervals with significantly (4 sigma by default) more mapped reads than expected from the average regional coverage. Additionally, a signal strength is calculated, as the highest kernel density in the interval, scaled by interval size. 
+http://genome.ucsc.edu/ENCODE/protocols/dataStandards/ChIP_DNase_FAIRE_DNAme_v2_2011.pdf
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+### MACS vs MACS2 vs F-Seq
 
-basicPeakStats_vs_dm6_bwa <- read_delim("meta/basicPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
-names(basicPeakStats_vs_dm6_bwa ) <- c("sample","dataType","dataSubtype","value")
-basicPeakStats_vs_dm6_bwa$sample <- as.factor(basicPeakStats_vs_dm6_bwa$sample)
-basicPeakStats_vs_dm6_bwa$dataType<- as.factor(basicPeakStats_vs_dm6_bwa$dataType)
-basicPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(basicPeakStats_vs_dm6_bwa$dataSubtype)
-
+MACS [@Zhang2008] was used to QC pilot data, but it wasn't designed for use on FAIRE-Seq. MACS2 was extended for use with FAIRE [@Tsompana2014] but is still not necessesarily recommended for use with non-ChIP-Seq data. Here's Tao Liu:
 ```
-
-from the $`r basicPeakStats_vs_dm6_bwa %>% select(sample) %>% unique() %>% count() `$ samples,  $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ total peaks were called:
-
-```{r echo=FALSE}
-basicPeakStats_vs_dm6_bwa.count.sprud <- basicPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value)
-
-contigs <- basicPeakStats_vs_dm6_bwa.count.sprud %>% select(3:ncol(.)-1) %>% names()
-
-tbl_cnt <- tbl_cnt + 1
-
-calledPeakCounts.gt <- basicPeakStats_vs_dm6_bwa.count.sprud %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = seq(2,10),  decimals = 1, suffixing = T)   %>% tab_header(title=paste("Table ",tbl_cnt, ". Called Peak Count", sep = ""), subtitle= "by contig and sample")
-
-calledPeakCounts.gt
-
-write(calledPeakCounts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_calledPeakCounts.html", sep=""))
-
-
-
+Over the years, I have got many emails from users asking if they can analyze their X-Seq 
+(not ChIP-Seq) data using MACS2, or if they can turn on or off some features in callpeak for their
+special need. In most of cases, I would simply reply that they may have to find more dedicated tool 
+for the type of your data, because the callpeak module is specifically designed and tuned for 
+ChIP-Seq data.
+https://github.com/taoliu/MACS/wiki/Advanced%3A-Call-peaks-using-MACS2-subcommands
 ```
+(goes on to say that a more complicated pipeline might be made bypassing callpeak; also: https://www.biostars.org/p/141214/ )
 
-We can also check the peak-calling efficiency:
+Furthermore, the current official release of MACS2 is written in python2, which must be wrangled to coorperate with the python3 snakemake environment. Worse, it will become obselete when python2 deprecates at the start of 2020. An unmerged branch of MACS2 has been updated to run in python3: https://github.com/taoliu/MACS/tree/feat_py3
 
+On the other hand, MACS2 reports straightforward statistical measures and incorporates the input data as a baseline control, meaning that distinguishing between input/output exclusive and shared peaks is done for us. 
 
-```{r echo=FALSE}
-
-basicPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(inner_join(basicPeakStats_vs_dm6_bwa.count.sprud %>% select(c("sample","total")), data_sets.df.sparse , by = c("sample"="name")), readcount_process.spread, by=c("sample"="sample")) %>% rename("total_peak_count"=total) %>% mutate(peaks_per_thousand_sequenced_reads = 1000*total_peak_count/total_read_count, peaks_per_thousand_mapped_reads = 1000*total_peak_count/total_mapped_count)
-
-tbl_cnt <- tbl_cnt + 1
-
-peakCallingEfficiency.gt <- basicPeakStats_vs_dm6_bwa.count.sprud.aug  %>% select(-c("sample", "day")) %>% select_all(~gsub("_"," ",.)) %>%  gt() %>% cols_move_to_start(columns = vars(experimental, rep)) %>% fmt_number(columns = vars(`total peak count`), suffixing = T, decimals = 1) %>% fmt_number(columns = vars(`peaks per thousand sequenced reads`, `peaks per thousand mapped reads`),  decimals = 1) %>% cols_hide(columns=vars(`total read count`, `total mapped count`, `percent mapping`)) %>% cols_label(`peaks per thousand sequenced reads` = "peaks per\nthousand sequenced reads", `peaks per thousand mapped reads`= "peaks per\nthousand mapped reads")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Peak Calling Efficiency", sep = ""), subtitle= "peaks called per read sequenced/mapped")
-
-peakCallingEfficiency.gt
-
-write(peakCallingEfficiency.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_peakCallingEfficiency.html", sep=""))
-
-```
-
-### Raw Peaks
-
-```{r echo=FALSE}
-
-basicPeakStats_vs_dm6_bwa.size.sprud <- basicPeakStats_vs_dm6_bwa %>% filter(dataType == "width" | dataType == "signal") %>% unite(dataSubtype, dataType, col="measure", sep=" ")  %>% spread(measure, value) %>% select(sample, `avg width`, `std width`, `avg signal`, `std signal`)
-
-basicPeakStats_vs_dm6_bwa.size.sprud.aug <- inner_join(inner_join(basicPeakStats_vs_dm6_bwa.size.sprud, data_sets.df.sparse , by = c("sample"="name")),readcount_process.spread, by=c("sample"="sample") )
-
-	
-grand_mean_peak_width <- mean(basicPeakStats_vs_dm6_bwa.size.sprud$`avg width`)
-grand_mean_signal <- mean(basicPeakStats_vs_dm6_bwa.size.sprud$`avg signal`)
-```
-
-peaks had an average width of $`r human_readable_croncher(grand_mean_peak_width) `$ base pairs. Peaks also had intensity values measuring signal enhancement over the genomic background; these averaged at $`r human_readable_croncher(grand_mean_signal) `$ Both of these values were highly variable within and between samples:
-
-```{r gt, echo=FALSE}
-
-tbl_cnt <- tbl_cnt + 1
-
-PeakSizeStrength.gt <- basicPeakStats_vs_dm6_bwa.size.sprud.aug %>% select(experimental, rep, `avg width`, `std width`, `avg signal`, `std signal`) %>% gt() %>%  tab_spanner(label="width", columns=vars( `avg width`, `std width`)) %>%  tab_spanner(label="signal", columns=vars( `avg signal`, `std signal` )) %>% fmt_number(columns = vars(`avg width`, `std width`, `avg signal`, `std signal` ), decimals = 1, suffixing = F) %>% tab_header(title=paste("Table ",tbl_cnt, ". Peak Size & Signal Strength", sep = ""), subtitle= md("&nbsp;")) %>% cols_label(`avg width` = "avg", `std width` = "std", `avg signal` = "avg", `std signal` = "std" )
-
-PeakSizeStrength.gt
-
-write(PeakSizeStrength.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_peakSizeAndStrength.html", sep=""))
-
-
-```
-
-```{r echo=FALSE}
-
-basicPeakStats_vs_dm6_bwa.full.sprud.aug <- inner_join(basicPeakStats_vs_dm6_bwa.size.sprud.aug, basicPeakStats_vs_dm6_bwa.count.sprud.aug %>% select(-c(experimental,day,rep, total_read_count, total_mapped_count, percent_mapping)), by=c("sample"="sample")  )
-
-
-basicPeakStats_vs_dm6_bwa.full.sprud.aug.names <- basicPeakStats_vs_dm6_bwa.full.sprud.aug %>% names()
-names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- gsub(" ","\n", gsub("_", "\n", basicPeakStats_vs_dm6_bwa.full.sprud.aug %>% names()))
-
-fig_cnt <- fig_cnt + 1
-
-readPeakStatCorr.gg <- ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "std\nwidth", "avg\nsignal", "std\nsignal", "total\nread\ncount", "total\nmapped\ncount", "total\npeak\ncount" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=paste("Figure ",fig_cnt, ". Distributions & Correlations for Read and Peak Stats", sep = ""))
-
-
-
-readPeakStatCorr.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ReadPeakStatCorr.png", sep=""))
-readPeakStatCorr.gg
-dev.off()
-
-
-
-png(height =  500, width = 800, filename = "results/figures/supp/Suppfig_ReadPeakStatCorr_byExp.png")
-ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "avg\nsignal", "total\nread\ncount", "total\nmapped\ncount", "percent\nmapping",  "total\npeak\ncount" ), color="experimental") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-dev.off()
-
-
-names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- basicPeakStats_vs_dm6_bwa.full.sprud.aug.names 
-
-```
-
-
-
-```{r echo=FALSE, message=FALSE}
-raw_called_peaks.df <-as.data.frame(c()) 
-for (nom in data_sets.df.sparse$name) {
-	
-	tmp.df <- read_delim(paste("fSeq/",nom,".vs_dm6.bwa.calledPeaks.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% select(X1,X2,X3,X7,X10)
-	names(tmp.df) <- c("chrom", "start", "stop", "signal", "center")
-	tmp.df$sample <- as.factor(nom)
-	raw_called_peaks.df <- rbind(raw_called_peaks.df, tmp.df)
-}
-
-raw_called_peaks.df <- raw_called_peaks.df %>% as_tibble()
-raw_called_peaks.df$chrom <- as.factor(raw_called_peaks.df$chrom)
-
-raw_called_peaks.df$peak_width <- raw_called_peaks.df$stop - raw_called_peaks.df$start
-raw_called_peaks.df <- inner_join(raw_called_peaks.df, data_sets.df.sparse, by=c("sample"="name"))
-
-```
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-of the $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ peaks, $`r raw_called_peaks.df %>% filter(peak_width==0) %>% nrow() %>% human_readable_croncher() `$ had a width of zero
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+In earlier versions, F-seq [@Boyle2008] is used to infer peaks from mapped reads. However, this software also has drawbacks. One is the interpretation of the reported signal statistic (which is the maximum kernel desnisty scaled by peak width; in particular, it is not obvious how to combine signal strength values when merging peaks. Worse, this statistic is not well-behaved; some peaks were called with a width of zero yet have a finite reported signal strength. 
 
 ```
 There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file,
@@ -589,543 +505,213 @@ at a loss here – I don’t think we’ve encountered this before.
 (emails from Terry Furey, 6 Aug 2019)
 ```
 
-
-```{r echo=FALSE, warning=FALSE}
-
-fig_cnt <- fig_cnt + 1
-
-rawPeakSizeStrengthHist.gg <- ggplot(raw_called_peaks.df %>% gather(signal, peak_width, key="measure", value="value")) + geom_histogram(aes(x=value, fill=experimental), bins=50) +facet_grid(chrom~measure, scales="free") + scale_x_log10() + theme_bw() + labs(title=paste("Figure ",fig_cnt, ". Histogram of Peak Width & Signal Strength,\nby Chromosome", sep = ""))
-
-
-rawPeakSizeStrengthHist.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawPeakSizeStrengthHist.png", sep=""))
-rawPeakSizeStrengthHist.gg
-dev.off()
-
+```
+I'm also at a loss - I didn't think that this would happen. I have a summer student re-writing 
+F-seq in python so I'll make sure that she checks for this edge case.
+(email from Alan Boyle, 15 Aug 2019)
 ```
 
-The consistent spike in peak width in the 47b1-7 experiment, slightly above 1kb, comes from replicate 3. This sample has an order of magnitude more peaks large than 1kb, than the other 15.
+### MACS2
 
-```{r echo=FALSE}
-
-tbl_cnt <- tbl_cnt + 1
-
-bigPeaks.gt <- raw_called_peaks.df %>% filter(peak_width > 1000 )  %>% group_by(experimental, rep) %>% summarize(n=n()) %>%  spread(rep, n) %>% ungroup() %>% gt() %>% tab_options(footnote.glyph = c("*")) %>% tab_style(style=cells_styles(text_color='red'), locations=list(cells_data(columns=vars(3), rows=experimental == "47b1-7"))) %>%  tab_footnote(footnote = "  ", locations=list(cells_data(columns=vars(3), rows=experimental == "47b1-7"))) %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of Peaks Larger than 1 kb", sep = ""), subtitle= "by experiment and replicate")
-
-bigPeaks.gt
-
-write(bigPeaks.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_bigPeaks.html", sep=""))
-
+In this version, MACS2 was used to call peaks. The mapped reads were used to call individual peaks for each sample; reads were also pooled within each group and experimental treatment to produce per-group pooled peak calls. The input in each experimental category was used as a control in both pooled and individually called peaks; broad peaks were called and modeling was turned off:
 
 ```
+macs2 callpeak --broad --nomodel -c {input.bam_cntrl} -t { pooled/individual reads } .....
+```
 
-47b1-7 replicate #3 is only included in the "C" analysis group (Section 2.6). 
+These pooled peaks were then compared to the individually called peaks, and a pooled peak was retained as "confirmed" if it overlapped at least one individually called peak. A file of confirmed peaks was thus generated for each experimental treatment and group.
 
-
-check intrasample, inter-peak distances: look for potentially non-distinct peaks. 
-```{r echo=FALSE, message=FALSE}
-
-calledPeaks.selfDistance.df <-as.data.frame(c()) 
-for (nom in data_sets.df.sparse$name) {
-	tmp.df <- read_delim(paste("fSeq/closest/all/",nom,".to.",nom,  ".vs_dm6.bwa.closestPeaks.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, guess_max = 1000000)
-	#names(tmp.df) <- c("chrom", "start", "stop", "signal", "center")
-	calledPeaks.selfDistance.df  <- rbind(calledPeaks.selfDistance.df , tmp.df)
-}
-
-calledPeaks.selfDistance.df <- calledPeaks.selfDistance.df  %>% as_tibble() %>% select(c(X1,X2,X3,X7,X10,X11,X12,X13,X17,X20,X21,X22))
-names(calledPeaks.selfDistance.df) <- c("chrom1", "start1", "stop1", "signal1", "center1", "chrom2", "start2", "stop2", "signal2", "center2", "distance", "sample" )
-calledPeaks.selfDistance.df$chrom1 <- as.factor(calledPeaks.selfDistance.df$chrom1)
-calledPeaks.selfDistance.df$chrom2 <- as.factor(calledPeaks.selfDistance.df$chrom2)
-calledPeaks.selfDistance.df$sample <- as.factor(calledPeaks.selfDistance.df$sample)
-
-calledPeaks.selfDistance.df <- inner_join(calledPeaks.selfDistance.df, data_sets.df.sparse, by=c("sample"="name"))
-
-
+```
+For each sample:
+Reads from step #4 above from each replicate are pooled together
+Peaks are called on the pooled data with MACS2 (using identical settings in step #5 above) 
+against sonicated genomic DNA
+[emails fwd'd by Dan McCay, following meeting 21 August]
 ```
 
 
-The distance between adjacent peaks within a sample was measured. 
+????? WHY THE EMPTY OUTPUT FILES ?????????
 
+https://www.biostars.org/p/173967/
 
-```{r echo=FALSE}
+https://github.com/taoliu/MACS/issues/235
 
-fig_cnt <- fig_cnt + 1
+https://biostar.usegalaxy.org/p/15781/index.html
 
-distanceBtwnAdjacentPeaks.gg <-  ggplot(calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM")) + geom_freqpoly(aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = paste("Figure ",fig_cnt, ". Distance Between Adjacent Peaks,\nby sample and replicate", sep = ""), x= "distance (bp)") + theme_bw()
+https://biostar.usegalaxy.org/p/22487.1.html
 
+?????????????????????????????????????????????
 
-distanceBtwnAdjacentPeaks.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_intraSamplePeakDistance.png", sep=""))
-distanceBtwnAdjacentPeaks.gg
-dev.off()
+#### Individually called peaks
+
+Mapped reads from each output replicate were used to call peaks, with the single input replicate used as a control. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+indvPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/individuals.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+
+names(indvPeakStats_vs_dm6_bwa ) <- c("sample","dataType","dataSubtype","value")
+indvPeakStats_vs_dm6_bwa$sample <- as.factor(indvPeakStats_vs_dm6_bwa$sample)
+indvPeakStats_vs_dm6_bwa$dataType<- as.factor(indvPeakStats_vs_dm6_bwa$dataType)
+indvPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(indvPeakStats_vs_dm6_bwa$dataSubtype)
 
 ```
 
-Some peaks were very close to other peaks; as many as 20% of peaks were within 10bp of another one, and as many as 65% were within 100 bp:
+from the $`r indvPeakStats_vs_dm6_bwa %>% select(sample) %>% unique() %>% count() `$ samples,  $`r indvPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ total peaks were called:
 
-```{r echo=FALSE}
-closePeaks <- calledPeaks.selfDistance.df %>% filter(abs(distance)<10) %>% group_by(sample) %>% summarise(lessThan10 = n() )
-closePeaks <- cbind( closePeaks, calledPeaks.selfDistance.df %>% filter(abs(distance)<100) %>% group_by(sample) %>% summarise(lessThan100 = n() ) %>% select(lessThan100))
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+indvPeakStats_vs_dm6_bwa.count.sprud <- indvPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- indvPeakStats_vs_dm6_bwa.count.sprud %>% select(3:ncol(.)-1) %>% names()
 
 
 tbl_cnt <- tbl_cnt + 1
 
-#closePeaks <- 
-inner_join(closePeaks, basicPeakStats_vs_dm6_bwa.full.sprud.aug, by=c("sample"="sample")) %>% mutate(lessThan10 = lessThan10/total_peak_count, lessThan100 = lessThan100/total_peak_count, potato = "")  %>% select(experimental, rep, lessThan10, lessThan100, potato) %>% group_by(experimental) %>% gt(rowname_col = "potato") %>% fmt_percent(columns=vars(lessThan10, lessThan100), decimals = 1) %>% tab_stubhead_label(label="experimental treatment") %>% cols_label(lessThan10 = "< 10 bp", lessThan100 = "< 100 bp") %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage of Peaks Very Close to Other Peaks", sep = ""), subtitle= "within a sample")
+calledPeakCounts.indv.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, experimental)), indvPeakStats_vs_dm6_bwa.count.sprud, by=c("name"="sample")) %>% select(-c(name)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = T) %>% tab_header(title=paste("Table ",tbl_cnt, ". Individually Called Peak Count", sep = ""), subtitle= "by contig and sample") %>% cols_label(rep=" ")
 
-#ggplot(calledPeaks.selfDistance.df %>% mutate(one=stop1-start1, two = stop2-start2, distance=abs(distance)) %>% select(one, two, distance, experimental, rep) %>% gather(one, two, key="peak", value="width") ) + geom_point(aes(x=distance, y=width), alpha=0.1) + facet_grid(.~peak)
+calledPeakCounts.indv.gt
 
-```
-
-### Collapsed Peaks ( within input/output )
-
-Although the inputs consisted of a single replicate, each experimental output had three replicates. These were collapsed into a single set of peaks each for every input and output. The collapsed peak region was defined as the union of all peaks being considered. Calculating a combined signal value for multiple peaks is an open problem; several approaches are tested here:
-
-```
-	* Average: a flat average of the component peaks' signal values
-	* Rescale: in which the component peaks' maximum kernel densities are averaged,
-	and then scaled by final peak width
-	* Weighted: like Rescale, but the average max kernel density is weighted by
-	the component peak widths
-	* Pessimistic: like Weighted, but the result is further scaled by the fraction
-	of replicates supporting a peak in this region.  
-	* Fine: (in development)
-```
-
-All strategies but Average will give NA for singleton zero-width peaks. 
-
-```{r echo=FALSE, message=FALSE}
-
-collapsedPeaks.df <-as.data.frame(c()) 
-for (nom in data_sets.df.sparse$experimental) {
-	
-#	for (treat in c("input","output")){
-	for (treat in c("output")){		
-		for (grup in c("A", "B", "C")) {
-			tmp.df <- read_delim(paste("fSeq/collapse/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsCollapsed.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-			names(tmp.df) <- c("chrom", "start", "stop", "count", "avg", "rescale", "weight", "pess")
-			tmp.df$chrom <- as.factor(tmp.df$chrom)
-			tmp.df$treat <- as.factor(treat)
-			tmp.df$experimental <- as.factor(nom)
-			tmp.df$group <- as.factor(grup)
-			collapsedPeaks.df <- rbind(collapsedPeaks.df, tmp.df)
-		}
-	}
-}
-
-collapsedPeaks.df <- collapsedPeaks.df %>% as_tibble()
-
-collapsedPeaks.df$peak_width <- collapsedPeaks.df$stop - collapsedPeaks.df$start
-```
-
-
-Since the inputs consist of one replicate each, their collapsed peaks are identical to their raw peaks (except for those with a width of zero, whose collapsed signal strengths are NA except for the flat average). In the case of the outputs, with 1-3 replicates depending on experimental treatment and 
-
-
-```{r echo=FALSE, message=FALSE}
-
-collapsedPeaks.gath <- collapsedPeaks.df %>%  gather(key = "measure", value = "value", c(avg, rescale, weight, pess))
-
-measureList <- levels(collapsedPeaks.gath$measure)
-collapsedPeaks.gath$measure<- as.factor(collapsedPeaks.gath$measure)
-measureList <- levels(collapsedPeaks.gath$measure)
-collapsedPeaks.gath$measure <- factor(collapsedPeaks.gath$measure, levels = c("raw", measureList ))
-
-raw_called_peaks.signlXtract <- raw_called_peaks.df %>%  mutate(measure = as.factor("raw"))
-raw_called_peaks.signlXtract$measure <- factor(raw_called_peaks.signlXtract$measure, levels = c("raw", measureList ))
-
-
-
-hiPass.raw <- raw_called_peaks.signlXtract %>% filter(rep != "input") %>% mutate(high = signal > 20) %>% group_by(high) %>% summarize( count = n()) %>% mutate( frac = count/sum(count))
-hiPass.clps <- collapsedPeaks.gath  %>% mutate(high = value > 20) %>% group_by(high) %>% summarize( count = n()) %>% mutate( frac = count/sum(count))
-
-
+write(calledPeakCounts.indv.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvCalledPeakCounts.html", sep=""))
 
 ```
 
-When the small number (`r hiPass.raw$frac[2]*100` percent of raw peaks,  `r  hiPass.clps$frac[2]*100` percent of collapsed peaks ) of high-signal outliers  (raw or collapsed signal > 20) were excluded, the distributions of the raw/collapsed signals were as follows
-
-```{r echo=FALSE, warning=FALSE}
-
-fig_cnt <- fig_cnt + 1
-
-rawSignalCollapsingStrategy.gg <- ggplot(collapsedPeaks.gath %>%  filter(value<20)) + geom_violin(data = inner_join(raw_called_peaks.signlXtract %>% filter(rep != "input") %>% select(sample, signal, rep, measure),data_sets.df %>% filter(subgroups != "all" & rep != "input") %>% select(name, subgroups, experimental) %>% rename(group=subgroups),by=c("sample"="name")) %>%  filter(signal<20), aes(x=measure, y=signal, fill=rep)) + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("raw", "avg", "rescale", "weight", "pess")) + labs(x = "signal type", y= "signal intensity", title=paste("Figure ",fig_cnt, ". Comparison of Signal-Collapsing Strategies\n( Outliers with Intensity > 20 Removed)", sep = "")) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+We can also check the peak-calling efficiency:
 
 
-rawSignalCollapsingStrategy.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawSignalCollapsingStrategy.png", sep=""))
-rawSignalCollapsingStrategy.gg
-dev.off()
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-```
-
-The impact of lower-quality replicates and their exclusion across groups is apparent in the collapsed signal strength distributions. The strategies are generally comparable in distribution, except for Pessimist which is skewed lower and apears to have a smoothing effect. 
-
-```{r echo=FALSE}
-full_samp <- collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% nrow()
-
-fig_cnt <- fig_cnt + 1
-
-rawSignalCollapseStrategyCorr.gg <- ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks<20) %>% sample_n(floor(full_samp/100)), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = -45, hjust = 1)) + labs(title=paste("Figure ",fig_cnt, ". Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity > 20 Removed, Downsampled To 1%)", sep = ""))
-
-
-rawSignalCollapseStrategyCorr.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawSignalCollapsingStrategyCorrelations.png", sep=""))
-rawSignalCollapseStrategyCorr.gg
-dev.off()
-
-
-#ggscatmat(collapsedPeaks.df %>% mutate(macks = pmax(avg, rescale, weight, pess)) %>%  filter(macks>20), columns = c( "avg", "rescale", "weight", "pess" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title="Distributions and Correllations of Various Signal Collapsing Strategies\n(Outliers with Intensity < 20 ")
-```
-
-One thing that stands out is that, because of the length-weighting step, the Pessimistic values are sometimes much higher than the flat averages (though on the whole they are smaller)
-
-The results are similar for the high-signal outliers, except the correllations are even stronger. 
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-collapsedPeakStats.autoDist.df <- read_delim("meta/collapsedPeakStats.vs_dm6.bwa.autoDist.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(collapsedPeakStats.autoDist.df) <- c("experimental", "group", "put", "chrom", "dist", "count")
-collapsedPeakStats.autoDist.df$process <- as.factor("raw")
-
-#ggplot(collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")))  + geom_line(aes(x=dist, y=count, color=process))  + geom_line(aes(x=dist, y=count, color=process))  + facet_grid(experimental ~ put)
-
-```
-
-```{r echo=FALSE}
-
-fig_cnt <- fig_cnt + 1
-
-intraSamplePeakDistanceRawCollapsed.gg <- ggplot( calledPeaks.selfDistance.df %>% select(c(experimental, rep, distance)) %>% mutate(dist = abs(distance), put = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% group_by(experimental, rep, dist, put) %>% summarise(count = n()) %>%  ungroup() %>% mutate(process=as.factor("raw"), experimental = gsub("-", "_", experimental))) + geom_line(aes(x=dist, y=count, color=process, group=rep)) + geom_line(data=collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")), aes(x=dist, y=count, color=process, linetype = group))  + facet_grid(experimental ~ put) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = paste("Figure ",fig_cnt, ". Distance Between Adjacent Peaks (Raw & Collapsed),\nby sample and replicate", sep = ""), x= "distance (bp)") 
-
-
-
-intraSamplePeakDistanceRawCollapsed.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawCollapsedInterPeakDistances.png", sep=""))
-intraSamplePeakDistanceRawCollapsed.gg
-dev.off()
-
-```
-
-
-
-### Merged Peaks (proximity within input/output)
-
-Once the peaks have been collapsed within a treatment, the issue of nearby peaks not being distinct remains. It is trivial to merge nearby peaks into a single feature, but the issue of how to combine signal strengths remains. 
-
-The same basic strategies were used to merge signals of disconnected peaks. One important difference is that, whereas collapsing peaks across replicates assigns a signal to regions with some peak coverage, merging nearby peaks assigns a signal to basepairs which previously had none. This will tend to make the rescaling step a more severe reduction since the nonzero signal is being averaged with the zero signal regions. Also, since the point of collapsing peaks was to reduce the replicate count to one in each case, Pessimistic will necessarily equal Weighted and is excluded. 
-
-
-
-```{r echo=FALSE, message=FALSE}
-
-mergedPeaks.df <-as.data.frame(c()) 
-for (nom in data_sets.df.sparse$experimental) {
-	
-	for (treat in c("input","output")){
-		for (grup in c("A", "B", "C")) {
-			tmp.df <- read_delim(paste("fSeq/merge/",gsub("-", "_", nom),".vs_dm6.bwa.","group_",grup,".",treat,".signalsMerged.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-			names(tmp.df) <- c("chrom", "start", "stop", "count", "avg", "rescale", "weight")
-			tmp.df$chrom <- as.factor(tmp.df$chrom)
-			tmp.df$treat <- as.factor(treat)
-			tmp.df$experimental <- as.factor(nom)
-			tmp.df$group <- as.factor(grup)
-			mergedPeaks.df <- rbind(mergedPeaks.df, tmp.df)
-		}
-	}
-}
-
-mergedPeaks.df <- mergedPeaks.df %>% as_tibble()
-
-mergedPeaks.df$peak_width <- mergedPeaks.df$stop - mergedPeaks.df$start
-
-mergedPeaks.gath <- mergedPeaks.df %>%  gather(key = "measure", value = "value", c(avg, rescale, weight))
-
-```
-
-
-
-
-```{r echo=FALSE}
-
-fig_cnt <- fig_cnt + 1
-
-SignalMergingStrategiesViolin.gg <- ggplot(mergedPeaks.gath %>%  filter(value<20) ) + geom_violin(data = collapsedPeaks.gath %>% filter(value<20) %>%  filter(measure == "pess"), aes(x=measure, y=value),fill="red") + geom_violin(aes(x=measure, y=value)) + facet_grid(group~experimental) + scale_y_log10() + scale_x_discrete(limits=c("pess", "avg", "rescale", "weight")) + labs(x = "signal type", y= "signal intensity", title=paste("Figure ",fig_cnt, ". Comparison of Signal-Merging Strategies\n( Outliers with Intensity > 20 Removed; Signal to be Merged in Red)", sep = ""))+ theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
-
-SignalMergingStrategiesViolin.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_signalMergingStrategyViolin.png", sep=""))
-SignalMergingStrategiesViolin.gg
-dev.off()
-
-
-
-```
-
-
-
-
-```{r echo=FALSE, message=FALSE}
-collapsedPeakStats <- read_delim("meta/collapsedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(collapsedPeakStats) <- c("experimental","group","treatment","measure","type","value")
-collapsedPeakStats$stage <- as.factor("collapsed")
-
-mergedPeakStats <- read_delim("meta/mergedPeakStats.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(mergedPeakStats) <- c("experimental","group","treatment","measure","type","value")
-mergedPeakStats$stage <- as.factor("merged")
+indvPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(inner_join(indvPeakStats_vs_dm6_bwa.count.sprud %>% select(c("sample","total")), data_sets.df.sparse , by = c("sample"="name")), readcount_process.spread, by=c("sample"="sample")) %>% rename("total_peak_count"=total) %>% mutate(peaks_per_thousand_sequenced_reads = 1000*total_peak_count/total_read_count, peaks_per_thousand_mapped_reads = 1000*total_peak_count/total_mapped_count)
 
 tbl_cnt <- tbl_cnt + 1
 
-inputsCollapsedMerged.gt<- rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "input" ) %>% filter( type =="avg" | type == "total") %>% unite("measure", type, measure, sep = " ")  %>% select(-c(group, treatment)) %>% distinct() %>% spread(stage, value) %>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = F) %>%  cols_label(measure = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Input Peak Count, Size & Signal Strength", sep = ""), subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+peakCallingEfficiency.indv.gt <- indvPeakStats_vs_dm6_bwa.count.sprud.aug  %>% select(-c("sample", "day")) %>% select_all(~gsub("_"," ",.)) %>% group_by(genotype, housing) %>%  gt()  %>% cols_move_to_start(columns = vars(experimental, rep)) %>% fmt_number(columns = vars(`total peak count`), suffixing = T, decimals = 0) %>% fmt_number(columns = vars(`peaks per thousand sequenced reads`, `peaks per thousand mapped reads`),  decimals = 1) %>% cols_hide(columns=vars(`total read count`, `total mapped count`, `percent mapping`, `experimental`, `put`)) %>% cols_label(`peaks per thousand sequenced reads` = "peaks per\nthousand sequenced reads", `peaks per thousand mapped reads`= "peaks per\nthousand mapped reads") %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Peak Calling Efficiency", sep = ""), subtitle= "peaks called per read sequenced/mapped")# %>% cols_move_to_start(columns = c("genotype", "housing", "rep"))
 
-inputsCollapsedMerged.gt
+peakCallingEfficiency.indv.gt
 
-write(inputsCollapsedMerged.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_inputsCollapsedMerged.html", sep=""))
+write(peakCallingEfficiency.indv.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvPeakCallingEfficiency.html", sep=""))
 
 ```
 
-```{r echo=FALSE, message=FALSE}
+
+
+#### Pooled peaks
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+poolPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/pooled.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+
+names(poolPeakStats_vs_dm6_bwa ) <- c("experimental","group","dataType","dataSubtype","value")
+poolPeakStats_vs_dm6_bwa$experimental <- as.factor(poolPeakStats_vs_dm6_bwa$experimental)
+poolPeakStats_vs_dm6_bwa$group <- as.factor(poolPeakStats_vs_dm6_bwa$group)
+poolPeakStats_vs_dm6_bwa$dataType<- as.factor(poolPeakStats_vs_dm6_bwa$dataType)
+poolPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(poolPeakStats_vs_dm6_bwa$dataSubtype)
+
+```
+
+As well as being used to call peaks individually, the replicate reads for each experimental treatment were pooled by group, and these pooled reads were used to call peaks with the input reads used as a control. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+poolPeakStats_vs_dm6_bwa.count.sprud <- poolPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- poolPeakStats_vs_dm6_bwa.count.sprud %>% select(4:ncol(.)-1) %>% names()
+
 
 tbl_cnt <- tbl_cnt + 1
 
-outputMergedPeakCount.gt <- rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="count" & type == "total")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value)%>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Output Peak Count", sep = ""), subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+calledPeakCounts.pool.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(), poolPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) , by=c("experimental"="experimental")) %>% select(-c(experimental)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = F)  %>% tab_header(title=paste("Table ",tbl_cnt, ". Pooled Called Peak Count", sep = ""), subtitle= "by contig, experimental treatment, and group") %>% cols_label(group = " ")
 
-outputMergedPeakCount.gt
+calledPeakCounts.pool.gt
 
-write(outputMergedPeakCount.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_outputsCollapsedMergedCounts.html", sep=""))
+write(calledPeakCounts.pool.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_poolCalledPeakCounts.html", sep=""))
+
 
 
 ```
 
-```{r echo=FALSE, message=FALSE}
+The treatment-wide peakcalling efficiency can also be calculated, 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+poolPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(poolPeakStats_vs_dm6_bwa.count.sprud %>% select(c("experimental","group","total")) %>% mutate(experimental=gsub("_","-",experimental)), inner_join(data_sets.df %>% filter(subgroups != "all" & put == "out" ) %>% select(subgroups, name, experimental), readcount_process.spread, by=c("name"="sample")) %>% group_by(experimental, subgroups) %>% summarise(grand_seq_total = sum(total_read_count), grand_mapt_total = sum(total_mapped_count)), by = c("group" = "subgroups", "experimental" = "experimental") ) %>% rename("grand_total_peak_count"=total) %>% mutate(peaks_per_thousand_sequenced_reads = 1000*grand_total_peak_count/grand_seq_total, peaks_per_thousand_mapped_reads = 1000*grand_total_peak_count/grand_mapt_total) %>% select(-c(grand_seq_total, grand_mapt_total))
+
+
+poolPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(poolPeakStats_vs_dm6_bwa.count.sprud.aug, data_sets.df.sparse %>%  select(c(experimental, genotype, housing)) %>% unique() , by=c("experimental"="experimental")   ) %>% select(-c(experimental))
+
 
 tbl_cnt <- tbl_cnt + 1
 
-outputMergedPeakSize.gt <- rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="width" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value) %>% mutate(experimental=as.factor(gsub("_","-",experimental)))%>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Output Peak Size", sep = ""), subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+peakCallingEfficiency.pool.gt <- poolPeakStats_vs_dm6_bwa.count.sprud.aug   %>% group_by(genotype, housing) %>%  gt()  %>% fmt_number(columns = c("grand_total_peak_count"), suffixing = T, decimals = 1, drop_trailing_zeros=TRUE)  %>% fmt_number(columns = c("peaks_per_thousand_sequenced_reads", "peaks_per_thousand_mapped_reads"),  decimals = 2) %>% cols_label(`peaks_per_thousand_sequenced_reads` = "peaks per\nthousand sequenced reads", `peaks_per_thousand_mapped_reads`= "peaks per\nthousand mapped reads", `grand_total_peak_count`="Pooled Peak Count") %>% tab_header(title=paste("Table ",tbl_cnt, ". Pooled Peak Calling Efficiency", sep = ""), subtitle= "peaks called per read sequenced/mapped")# %>% cols_move_to_start(columns = c("genotype", "housing", "rep"))
 
-outputMergedPeakSize.gt
+peakCallingEfficiency.pool.gt
 
-write(outputMergedPeakSize.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_outputMergedPeakSize.html", sep=""))
-
+write(peakCallingEfficiency.pool.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvPeakCallingEfficiency.html", sep=""))
 
 ```
 
-```{r echo=FALSE, message=FALSE}
+
+#### Confirmed Peaks
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+confPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/confirmed.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+names( confPeakStats_vs_dm6_bwa ) <- c("experimental","group","dataType","dataSubtype","value")
+confPeakStats_vs_dm6_bwa$experimental <- as.factor(confPeakStats_vs_dm6_bwa$experimental)
+confPeakStats_vs_dm6_bwa$group <- as.factor(confPeakStats_vs_dm6_bwa$group)
+confPeakStats_vs_dm6_bwa$dataType<- as.factor(confPeakStats_vs_dm6_bwa$dataType)
+confPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(confPeakStats_vs_dm6_bwa$dataSubtype)
+
+```
+
+Once the pooled peaks were called, they were compared to the indivdually called peaks within their group. A pooled peak was considered to be "confirmed" if it overlapped at least one individually called peak.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+confPeakStats_vs_dm6_bwa.count.sprud <- confPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- confPeakStats_vs_dm6_bwa.count.sprud %>% select(4:ncol(.)-1) %>% names()
+
 
 tbl_cnt <- tbl_cnt + 1
 
-outputMergedPeakSignal.gt <- rbind(collapsedPeakStats, mergedPeakStats) %>% filter(treatment == "output" ) %>% filter( measure =="signal" & type == "avg")  %>% select(-c(treatment, measure, type)) %>% spread(stage, value)%>% mutate(experimental=as.factor(gsub("_","-",experimental))) %>% group_by(experimental) %>% gt()  %>% fmt_number(columns = vars(collapsed, merged ), decimals = 1, suffixing = T) %>%  cols_label(group = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Output Peak Signal", sep = ""), subtitle= md("Collapsed across Replicates and Merged by Proximity"))
+calledPeakCounts.conf.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(), confPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) , by=c("experimental"="experimental")) %>% select(-c(experimental)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = F)  %>% tab_header(title=paste("Table ",tbl_cnt, ". Confirmed Peak Count", sep = ""), subtitle= "by contig, experimental treatment, and group") %>% cols_label(group = " ")
 
-outputMergedPeakSignal.gt
+calledPeakCounts.conf.gt
 
-write(outputMergedPeakSignal.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_outputMergedPeakSignal.html", sep=""))
+write(calledPeakCounts.conf.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_confirmedPeakCounts.html", sep=""))
 
 ```
 
-	
-```{r echo=FALSE, message=FALSE}
 
-mergedPeakStats.autoDist.df <- read_delim("meta/mergedPeakStats.vs_dm6.bwa.autoDist.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(mergedPeakStats.autoDist.df) <- c("experimental", "group", "put", "chrom", "dist", "count")
-mergedPeakStats.autoDist.df$process <- as.factor("merged")
+We can also look at the peak confirmation rate, that is, the fraction of pooled peaks which are confirmed by an individual peak. 
 
-fig_cnt <- fig_cnt + 1
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-intraSamplePeakDistanceRawCollapsedMerged.gg <- ggplot( calledPeaks.selfDistance.df %>% select(c(experimental, rep, distance)) %>% mutate(dist = abs(distance), put = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% group_by(experimental, rep, dist, put) %>% summarise(count = n()) %>%  ungroup() %>% mutate(process=as.factor("raw"), experimental = gsub("-", "_", experimental)))  + geom_line(aes(x=dist, y=count, color=process, group=rep))  + geom_line(data=collapsedPeakStats.autoDist.df %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("collapsed")), aes(x=dist, y=count, color=process, linetype = group)) + geom_line(data=mergedPeakStats.autoDist.df %>% filter(chrom != "chrM") %>% group_by(experimental, group, put, dist) %>%  summarise(count = sum(count)) %>% mutate(process=as.factor("merged")), aes(x=dist, y=count, color=process, linetype = group)) + geom_vline(xintercept = 100, color = 'red', linetype = "dashed")+ facet_grid(experimental ~ put) + scale_x_log10() +theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = paste("Figure ",fig_cnt, ". Distance Between Adjacent Peaks (Raw, Collapsed, and Merged),\nby sample and replicate", sep = ""), x= "distance (bp)") 
+confirmation_rate.tbl <- inner_join(inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(),confPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) %>% select(c(experimental, group, total)), by=c("experimental"="experimental")) %>% mutate(confirmed= total) %>% select(-c(total,experimental)), poolPeakStats_vs_dm6_bwa.count.sprud.aug %>%  select(genotype, housing, group, grand_total_peak_count, ) %>% mutate(pooled = grand_total_peak_count) %>% select(-c(grand_total_peak_count)), by=c("genotype"="genotype", "housing" ="housing", "group"="group")) %>% mutate(confirmation_pct = confirmed/pooled) %>% select(c(group, genotype, housing, pooled, confirmed, confirmation_pct))
 
 
-intraSamplePeakDistanceRawCollapsedMerged.gg 
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawCollapsedMergedInterPeakDistances.png", sep=""))
-intraSamplePeakDistanceRawCollapsedMerged.gg 
-dev.off()
+tbl_cnt <- tbl_cnt + 1
 
+confirmationRate.gt <- confirmation_rate.tbl %>% group_by(genotype, housing) %>% gt() %>%  tab_spanner(label="peak counts", columns=vars(pooled, confirmed )) %>% fmt_number(columns = c("pooled", "confirmed"),  decimals = 1, suffixing = T, drop_trailing_zeros = T )  %>% fmt_percent(columns =c("confirmation_pct"), decimals=2,drop_trailing_zeros =T) %>% cols_label(confirmation_pct = "percent confimed",group = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Peak Confirmation Rate", sep = ""), subtitle= "by genotype, housing, and group")
 
+confirmationRate.gt
 
-```	
-
-
-Is 100 bp a large enough merging threshold? would we expect the merged distance distributution to be more normal?
-
-
-```{r echo=FALSE, message=FALSE}
-
-peakSquishProcessStats.tbl <- rbind(rbind(collapsedPeakStats, mergedPeakStats )   %>%  filter(type=="total"|type=="avg"), inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = rep, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage)) ) %>% mutate(experimental = gsub("-", "_", experimental)) %>%  filter(measure=="count" | measure =="width" | measure=="signal")
-
-#rbind(collapsedPeakStats, mergedPeakStats) %>% mutate(rep = as.factor(NA))
-
-#inner_join(basicPeakStats_vs_dm6_bwa %>%  filter(dataSubtype=="total"|dataSubtype=="avg"), data_sets.df.sparse , by = c("sample"="name")) %>%  mutate(stage = as.factor("raw"), group = NA, measure=dataType, type = dataSubtype, treatment = as.factor(case_when(rep!="input"~"output", rep=="input"~"input")) ) %>% select(c(experimental, group, treatment, measure, type, value, stage, rep))
-
-fig_cnt <- fig_cnt + 1
-
-peakPropertiesDuringMerge.gg <- ggplot(peakSquishProcessStats.tbl) + geom_point(aes(x=stage, y = value, color=experimental)) + facet_grid(measure~treatment, scales = "free_y") + scale_x_discrete(limits=c("raw", "collapsed", "merged"))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_line(data = peakSquishProcessStats.tbl %>% group_by(experimental, treatment, measure, stage) %>% summarise(avg = mean(value)) , aes(x=stage, y=avg, color = experimental, group = experimental)) + labs(title = paste("Figure ",fig_cnt, ". Changes in Peak Properties during Merging Process,\nby sample and replicate", sep = ""), x= "stage")
-
-peakPropertiesDuringMerge.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_peakProperiesDuringMerge.png", sep=""))
-peakPropertiesDuringMerge.gg
-dev.off()
+write(confirmationRate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_peakConfirmationRates.html", sep=""))
 
 
 ```
 
 
-## Peak Contrasts (input vs output)
 
-Once peak data have been consolidated to a single track per input & ouput, they are contrasted across input & output. This is done by partitioning the peaks into three piles based on the same proximity threshold used to merge them:
+### Scrambled Peaks
 
-```
-shared: peaks in input which are within 100bp of a peak in output, and vice versa
-input exclusive: peaks in input which are more than 100bp from the nearest peak in output
-output exclusive: peaks in output which are more than 100bp from the nearest peak in intput
-```
-
-??? further consolidate the shared peaks ?????
-
-## Compare 
-
+asdfasfasdfa
 
 # Results
 
-## Input vs Output Contrast (by group & treatment)
 
-```{r echo=FALSE, message=FALSE}
-
-contrastedPeakStats_shared.df <- read_delim("meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
-names(contrastedPeakStats_shared.df) <-c("experimental", "group", "measure", "type", "value")
-
-tbl_cnt <- tbl_cnt + 1
-
-sharedMergedLociiStats.gt <- contrastedPeakStats_shared.df %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(type =="avg" | measure == "count" | type == "total") %>% unite(measure, type, "measure") %>% spread(key=measure, value=value) %>% mutate(input_intersect_frac = input_intersect_count/input_count, output_intersect_frac = output_intersect_count/output_count) %>% select(-c(input_intersect_count,output_intersect_count)) %>% group_by(experimental) %>% gt() %>% cols_label(avg_input_width = "input", avg_output_width = "output", avg_input_signal = "input", avg_output_signal = "output",input_count = "input", output_count = "output", locii_count = "count", avg_locii_width="avg width", total_locii_width = "total width",avg_input_dist = "input", avg_output_dist = "output", avg_input_non0dist = "input", avg_output_non0dist = "output", input_intersect_frac = "input", output_intersect_frac ="output", group = " ") %>% tab_spanner(label = "avg peak width (bp)", columns =c("avg_input_width", "avg_output_width"))%>% tab_spanner(label = "avg signal", columns =c("avg_input_signal", "avg_output_signal"))  %>% tab_spanner(label = "number peaks shared", columns =c("input_count", "output_count"))   %>% tab_spanner(label = "distinct shared locii", columns =c("locii_count","avg_locii_width", "total_locii_width"))  %>% tab_spanner(label = "average interpeak distance", columns =c("avg_input_dist","avg_output_dist"))   %>% tab_spanner(label = "average interpeak distance\n(overlaps excluded)", columns =c("avg_input_non0dist","avg_output_non0dist"))  %>% tab_spanner(label = "percent overlapping", columns =c("input_intersect_frac", "output_intersect_frac")) %>% fmt_number(columns = c("avg_input_width", "avg_output_width", "avg_input_dist", "avg_output_dist", "avg_input_non0dist", "avg_output_non0dist", "avg_locii_width", "total_locii_width" ), decimals = 1, suffixing = T) %>% fmt_number(columns = c("avg_input_signal", "avg_output_signal"), decimals = 2) %>% fmt_number(columns = c("input_count", "output_count", "locii_count"), decimals = 1, suffixing = T) %>% fmt_percent(columns = vars(output_intersect_frac, input_intersect_frac), decimals = 1, drop_trailing_zeros = TRUE) %>% tab_header(title=paste("Table ",tbl_cnt, ". Properties of Locii Shared Between Input and Output", sep = ""), subtitle= "and their contributing peaks")%>% cols_hide( columns = vars(total_input_width,total_output_width))
-
-sharedMergedLociiStats.gt
-
-
-write(sharedMergedLociiStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_sharedMergedLociiStats.html", sep=""))
-
-
-
-```
-
-```{r echo=FALSE, message=FALSE}
-
-contrastedPeakStats_xclsv.df <- read_delim("meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
-names(contrastedPeakStats_xclsv.df) <-c("experimental", "group", "exclusive", "measure", "type", "value")
-
-tbl_cnt <- tbl_cnt + 1
-
-disjointPeakProperties.gt <- contrastedPeakStats_xclsv.df %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(type == "avg" | type == "count" | type == "total") %>% unite("measure", exclusive, measure, type ) %>% spread(key = measure, value = value) %>% group_by(experimental)  %>% gt() %>% tab_spanner(label = "avg signal", columns =c("input_signal_avg", "output_signal_avg")) %>% tab_spanner(label = "number of peaks", columns =c("input_total_count", "output_total_count")) %>% tab_spanner(label = "avg peak width (bp)", columns =c("input_width_avg", "output_width_avg"))  %>% tab_spanner(label = "avg distance to other", columns =c("input_nearest_avg", "output_nearest_avg")) %>% tab_spanner(label = "total peak width", columns =c("output_width_total", "input_width_total")) %>% cols_label(input_signal_avg = "input", output_signal_avg = "output", input_total_count="input", output_total_count = "output", input_width_avg = "input", output_width_avg = "output",input_nearest_avg = "input", output_nearest_avg = "output", input_width_total = "input", output_width_total = "output", group = " ") %>% fmt_number(columns = c("input_signal_avg", "output_signal_avg"), decimals = 2)   %>% fmt_number(columns = c("input_width_avg", "output_width_avg", "input_total_count", "output_total_count", "input_nearest_avg", "output_nearest_avg", "output_width_total", "input_width_total"), decimals = 1, suffixing = T) %>% tab_header(title=paste("Table ",tbl_cnt, ". Properties of Peaks Disjoint Between Input and Output", sep = ""), subtitle= md("&nbsp;") ) 
-
-disjointPeakProperties.gt
-
-write(disjointPeakProperties.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_disjointMergedPeakProperties.html", sep=""))
-
-
-```
-
-
-```{r echo=FALSE, message=FALSE}
-
-#contrastedPeakStats.counts <- rbind(contrastedPeakStats_shared.df %>% filter(measure == "count") %>% filter(type == "input" | type == "output")  %>% mutate(pile = as.factor("shared"), put = as.factor(type)) %>% select(c(experimental, group, put, pile, value)), contrastedPeakStats_xclsv.df %>%  filter(type == "count" & measure == "total" ) %>% mutate(put = as.factor(exclusive), pile = as.factor("exclusive"))  %>% select(c(experimental, group, put, pile, value)) )
-
-
-#contrastedPeakStats_shared.df %>% filter(type == "input_intersect" | type == "output_intersect" ) %>%  separate(type, into = c("put","pile")) %>% mutate(pile = as.factor("shared"), put = as.factor(put)) %>% select(c(experimental, group, put, pile, value)) , 
-contrastedPeakStats.counts <- rbind(contrastedPeakStats_shared.df %>% filter(type == "input" | type == "output" ) %>% mutate(pile = as.factor("shared"), put = as.factor(type)) %>% select(c(experimental, group, put, pile, value)), contrastedPeakStats_xclsv.df %>%  filter(type == "count" ) %>% mutate(put = as.factor(exclusive), pile = as.factor("exclusive"))  %>% select(c(experimental, group, put, pile, value)))
-
-
-
-####		whats up with the off by ones here???
-#inner_join(contrastedPeakStats.counts %>% group_by(experimental, group, put) %>% summarise(some=sum(value)), mergedPeakStats %>% filter(measure=="count" & type =="total"), by=c("put"="treatment", "experimental"="experimental", "group"="group")) %>% mutate(diff = some - value)
-
-
-fig_cnt <- fig_cnt + 1
-
-sharedExclusivePeaks.gg <- ggplot(contrastedPeakStats.counts) + geom_col(aes(x=put, y=value, fill = pile)) + geom_col(data = mergedPeakStats %>% filter(measure=="count" & type =="total") %>% mutate(put = as.factor(treatment)) %>% select(c(experimental, group, put, value)), aes(x=put, y=value),color = "black", alpha =0) + facet_grid(experimental~group) + theme_bw() + scale_fill_discrete(name="contrast") + labs(title=paste("Figure ",fig_cnt, ". Shared and Exclusive Peaks Amongst Groups and Experimental Treatments", sep = ""), x = "Partition", y="count") 
-
-sharedExclusivePeaks.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_sharedExclusivePeakCounts.png", sep=""))
-sharedExclusivePeaks.gg
-dev.off()
-
-
-```
-
-
-
-
-## Contrasted Peaks and Annotated Genes
-
-Once peaks have been called, collapsed & merged, and contrasted, they are compared to the dm6 gene annotation track. 
-
-Here are the shared peaks
-
-```{r echo=FALSE, message=FALSE}
-
-sharedPeaks_dm6geneIntersect <- read_delim("meta/contrastPeakIntersects.shared.dm6_genes.stat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(sharedPeaks_dm6geneIntersect ) <- c("experimental", "group", "measure", "type", "value")
-
-
-
-tbl_cnt <- tbl_cnt + 1
-
-
-genesIntersectingSharedMerged.gt <- sharedPeaks_dm6geneIntersect %>% mutate( experimental =  gsub("_", "-", experimental))%>% filter(measure == "count" | type == "avg")%>% unite("measure", measure, type) %>% spread(key = measure, value = value) %>% mutate(intersect_frac_annot = count_intersect/(count_intersect+count_nointersect), intersect_frac_loc = count_intersecting_locii/count_total_locii) %>% group_by(experimental) %>% gt() %>% cols_label(intersect_frac_annot = "genes", intersect_frac_loc  = "locii", locus_cov_avg = "locus", annot_cov_avg = "gene", count_intersect = "genes overlapped", group = " ") %>% tab_spanner(label = "percent intersecting", columns =c("intersect_frac_annot", "intersect_frac_loc") ) %>% tab_spanner(label = "percent overlap", columns =c("locus_cov_avg", "annot_cov_avg"))  %>% fmt_percent(columns = c("intersect_frac_annot", "intersect_frac_loc","locus_cov_avg", "annot_cov_avg"), decimals = 1) %>% tab_header(title=paste("Table ",tbl_cnt, ". Locii Shared Between Input and Output", sep = ""), subtitle= md("and their intersections with dm6_genes") )  %>% cols_hide(c("count_intersecting_locii", "count_nointersect", "count_total_locii"))
-
-genesIntersectingSharedMerged.gt
-
-write(genesIntersectingSharedMerged.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_genesIntersectingSharedMerged.html", sep=""))
-
-
-```
-
-
-
-```{r echo=FALSE, message=FALSE}
-
-exclusivePeaks_dm6geneIntersect <- read_delim("meta/contrastPeakIntersects.exclusive.dm6_genes.stat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
-names(exclusivePeaks_dm6geneIntersect ) <- c("experimental", "group", "exclusive", "measure", "type", "value")
-
-
-tbl_cnt <- tbl_cnt + 1
-
-genesIntersectingExclusiveMerged.gt <- exclusivePeaks_dm6geneIntersect %>% mutate( experimental =  gsub("_", "-", experimental)) %>% filter(measure == "count" | type == "avg")%>% unite("measure", exclusive, measure, type) %>% spread(key = measure, value = value)  %>% mutate(input_intersect_frac_annot = input_count_intersect/(input_count_intersect+input_count_nointersect), input_intersect_frac_peak = input_count_intersecting_peaks/input_count_total_peaks, output_intersect_frac_annot = output_count_intersect/(output_count_intersect+output_count_nointersect), output_intersect_frac_peak = output_count_intersecting_peaks/output_count_total_peaks) %>% group_by(experimental) %>% gt() %>% tab_spanner(label = "percent genes intersecting", columns =c("input_intersect_frac_annot", "output_intersect_frac_annot") ) %>% tab_spanner(label = "percent peaks intersecting", columns =c("input_intersect_frac_peak", "output_intersect_frac_peak") ) %>% tab_spanner(label = "average signal", columns =c("input_signal_avg", "output_signal_avg") ) %>% tab_spanner(label = "number genes intersected", columns =c("input_count_intersect", "output_count_intersect") ) %>% tab_spanner(label = "average percent gene overlapped (per peak)", columns =c("input_annot_cov_avg", "output_annot_cov_avg") )%>% tab_spanner(label = "average percent peak overlapped", columns =c("input_peak_cov_avg", "output_peak_cov_avg") ) %>% cols_label(input_intersect_frac_annot="input", output_intersect_frac_annot="output", input_intersect_frac_peak = "input", output_intersect_frac_peak = "output", input_signal_avg = "input", output_signal_avg = "output", input_count_intersect = "input", output_count_intersect = "output", input_annot_cov_avg="input", output_annot_cov_avg = "output" , input_peak_cov_avg = "input", output_peak_cov_avg = "output", group = " ") %>% fmt_percent(columns = c("input_intersect_frac_annot", "output_intersect_frac_annot","input_intersect_frac_peak", "output_intersect_frac_peak", "input_annot_cov_avg", "output_annot_cov_avg", "input_peak_cov_avg", "output_peak_cov_avg"), decimals = 1) %>% fmt_number(columns = c("input_signal_avg", "output_signal_avg"), decimals = 2) %>% fmt_number(columns = c("input_count_intersect", "output_count_intersect"), decimals = 1, suffixing = T) %>% cols_hide(columns = vars(input_count_intersecting_peaks,input_count_nointersect,input_count_total_peaks,output_count_intersecting_peaks, output_count_nointersect,output_count_total_peaks))  %>% tab_header(title=paste("Table ",tbl_cnt, ". Peaks Exclusive Between Input and Output", sep = ""), subtitle= md("and their intersections with dm6_genes") ) 
-
-genesIntersectingExclusiveMerged.gt
-
-write(genesIntersectingExclusiveMerged.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_genesIntersectingExclusiveMerged.html", sep=""))
-
-
-
-```
-
-
-## Peaks and Annotated Repetitive Elements
-
-Repetitive DNA, such as low-complexity regions or retroelements, can also be important. Peaks were compared to the dm6 RepeatMasker annotation in the same manner as the gene annotation.
-
-
-
-```{r echo=FALSE, message=FALSE}
-
-
-#tbl_cnt <- tbl_cnt + 1
-#thing.gt <- asdfasdfasdf
-#thing.gt
-#write(thing.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_thing.html", sep=""))
-
-
-```
-
-```{r echo=FALSE, message=FALSE}
-
-
-# fig_cnt <- fig_cnt + 1
-# thing.gg <- asdfasdfasd
-# thing.gg
-# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
-# thing.gg
-# dev.off()
-# 
-
-```
+asdfasdfasdf
 
 
 # Bibliography

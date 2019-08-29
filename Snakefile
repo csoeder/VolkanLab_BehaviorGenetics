@@ -14,6 +14,10 @@ samplist_by_experimental = {c['experimental'] : [] for c in config['data_sets']}
 for c in config['data_sets']:
 	samplist_by_experimental[c["experimental"]].append(c)
 
+samples_by_put = { c['put'] : [] for c in config['data_sets'] }
+for c in config['data_sets']:
+	samples_by_put[c['put']].append(c)
+
 sampname_by_group = {}
 for s in sample_by_name.keys():
 	subgroup_lst = sample_by_name[s]['subgroups']
@@ -22,6 +26,7 @@ for s in sample_by_name.keys():
 			sampname_by_group[g].append(s)
 		else:
 			sampname_by_group[g] = [s]
+
 
 def return_file_relpath_by_sampname(wildcards):
 	sampname = wildcards.samplename
@@ -110,22 +115,22 @@ rule reference_genome_reporter:
 	input:
 		fai_in = lambda wildcards: ref_genome_by_name[wildcards.ref_gen]['fai'],
 	output:
-		report_out = "meta/reference_genomes/{ref_gen}.fai.report"
+		report_out = "summaries/reference_genomes/{ref_gen}.fai.report"
 	params:
 		runmem_gb=1,
 		runtime="5:00",
 		cores=1,
 	shell:
 		"""
-		mkdir -p meta/reference_genomes/
+		mkdir -p summaries/reference_genomes/
 		cat {input.fai_in} | awk '{{sum+=$2}} END {{ print "number_contigs\t",NR; print "number_bases\t",sum}}' | sed -e 's/^/{wildcards.ref_gen}\t/g' > {output.report_out};
 		"""
 
 rule demand_reference_genome_summary:
 	input:
-		refgen_reports = lambda wildcards: expand("meta/reference_genomes/{ref_gen}.fai.report", ref_gen=ref_genome_by_name.keys())
+		refgen_reports = lambda wildcards: expand("summaries/reference_genomes/{ref_gen}.fai.report", ref_gen=ref_genome_by_name.keys())
 	output:
-		refgen_summary = "meta/reference_genomes.summary"
+		refgen_summary = "summaries/reference_genomes.summary"
 	params:
 		runmem_gb=1,
 		runtime="5:00",
@@ -138,13 +143,13 @@ rule annotation_reporter:
 	input:
 		annot = lambda wildcards: annotation_by_name[wildcards.annot_name]["bed_path"]
 	output:
-		report_out = "meta/annotations/{annot_name}.stats"
+		report_out = "summaries/annotations/{annot_name}.stats"
 	params:
 		runmem_gb=1,
 		runtime="5:00",
 		cores=1,
 	run:
-		shell(""" mkdir -p meta/annotations/ """)
+		shell(""" mkdir -p summaries/annotations/ """)
 		shell(""" rm -f {output.report_out} """)
 		shell(""" cat {input.annot} | cut -f 1 | grep -v "chr2110000222\|chrmitochondrion\|Un\|rand\|chrrDNA" | sort | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.report_out} """)
 		shell(""" cat {input.annot} | wc -l | awk '{{print"count\ttotal\t"$0}}' >> {output.report_out} """)
@@ -153,9 +158,9 @@ rule annotation_reporter:
 
 rule demand_annotation_summaries:
 	input:
-		refgen_reports = lambda wildcards: expand("meta/annotations/{ref_ann}.stats", ref_ann= [a["name"] for a in config['annotations'] if not a["derived"] ] ) # annotation_by_name.keys())
+		refgen_reports = lambda wildcards: expand("summaries/annotations/{ref_ann}.stats", ref_ann= [a["name"] for a in config['annotations'] if not a["derived"] ] ) # annotation_by_name.keys())
 	output:
-		refann_summary = "meta/reference_annotations.summary"
+		refann_summary = "summaries/reference_annotations.summary"
 	params:
 		runmem_gb=1,
 		runtime="5:00",
@@ -164,7 +169,7 @@ rule demand_annotation_summaries:
 		print([a["name"] for a in config['annotations'] if not a["derived"] ])
 		shell(""" rm -f {output.refann_summary} """)
 		for anne in [a["name"] for a in config['annotations'] if not a["derived"] ]:
-			shell(""" cat meta/annotations/{anne}.stats | awk '{{print"{anne}\t"$0}}' >> {output.refann_summary}""")
+			shell(""" cat summaries/annotations/{anne}.stats | awk '{{print"{anne}\t"$0}}' >> {output.refann_summary}""")
 
 
 
@@ -173,7 +178,7 @@ rule geneListReporter:
 		list_in = lambda wildcards: genelist_by_name[wildcards.listicle]["list_path"],
 		bed_in = lambda wildcards: genelist_by_name[wildcards.listicle]["bed_path"],
 	output:
-		statsOut = "meta/geneLists/{listicle}.stats",
+		statsOut = "summaries/geneLists/{listicle}.stats",
 	params:
 		runmem_gb=1,
 		runtime="1:00",
@@ -189,9 +194,9 @@ rule geneListReporter:
 
 rule reportAllGeneLists:
 	input:
-		statsIn = expand( "meta/geneLists/{listicle}.stats", listicle=genelist_by_name.keys()),
+		statsIn = expand( "summaries/geneLists/{listicle}.stats", listicle=genelist_by_name.keys()),
 	output:
-		allStats = "meta/geneLists.stats",
+		allStats = "summaries/geneLists.stats",
 	params:
 		runmem_gb=1,
 		runtime="1:00",
@@ -199,7 +204,7 @@ rule reportAllGeneLists:
 	run:
 		for listicle in genelist_by_name.keys():
 			annot = annotation_by_name[genelist_by_name[listicle]["base"]]["name"]
-			shell(""" cat meta/geneLists/{listicle}.stats | awk '{{print"{listicle}\t{annot}\t"$0}}' >> {output.allStats} """)
+			shell(""" cat summaries/geneLists/{listicle}.stats | awk '{{print"{listicle}\t{annot}\t"$0}}' >> {output.allStats} """)
 
 rule fastp_clean_sample_se:
 	input:
@@ -223,7 +228,7 @@ rule FASTP_summarizer:
 	input: 
 		jason = lambda wildcards: expand("{path}{samp}.json", path=sample_by_name[wildcards.samplename]['path'], samp = wildcards.samplename, )
 	output:
-		jason_pruned = "meta/FASTP/{samplename}.json.pruned"
+		jason_pruned = "summaries/FASTP/{samplename}.json.pruned"
 	params:
 		runmem_gb=1,
 		runtime="5:00",
@@ -232,15 +237,15 @@ rule FASTP_summarizer:
 		"Summarizing reads for sample ({wildcards.samplename}) .... "	
 	shell:
 		"""
-		cp {input.jason} meta/FASTP/{wildcards.samplename}.json
+		cp {input.jason} summaries/FASTP/{wildcards.samplename}.json
 		python3 scripts/fastp_reporter.py {input.jason} {output.jason_pruned} -t {wildcards.samplename}
 		"""
 
 rule demand_FASTQ_analytics:	#forces a FASTP clean
 	input:
-		jasons_in = expand("meta/FASTP/{samplename}.json.pruned", samplename = sample_by_name.keys())
+		jasons_in = expand("summaries/FASTP/{samplename}.json.pruned", samplename = sample_by_name.keys())
 	output:
-		summary = "meta/sequenced_reads.dat"
+		summary = "summaries/sequenced_reads.dat"
 	params:
 		runmem_gb=1,
 		runtime="1:00",
@@ -275,7 +280,7 @@ rule bam_reporter:
 	input:
 		bam_in = "mapped_reads/{sample}.vs_{ref_genome}.{aligner}.sort.bam"
 	output:
-		report_out = "meta/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary"
+		report_out = "summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary"
 	params:
 		runmem_gb=8,
 		runtime="4:00:00",
@@ -296,9 +301,9 @@ rule bam_reporter:
 
 rule demand_BAM_analytics:
 	input:
-		bam_reports = lambda wildcards: expand("meta/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary", sample=sampname_by_group['all'], ref_genome=wildcards.ref_genome, aligner=wildcards.aligner)
+		bam_reports = lambda wildcards: expand("summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary", sample=sampname_by_group['all'], ref_genome=wildcards.ref_genome, aligner=wildcards.aligner)
 	output:
-		full_report = "meta/alignments.vs_{ref_genome}.{aligner}.summary"
+		full_report = "summaries/alignments.vs_{ref_genome}.{aligner}.summary"
 	params:
 		runmem_gb=1,
 		runtime="1:00",
@@ -312,62 +317,138 @@ rule demand_BAM_analytics:
 
 #build virtual environment rule??
 
-
 rule peakCall_MACS_indv:
 	input:
 		bam_in = "mapped_reads/{sample}.vs_{ref_genome}.bwa.sort.bam",
+		bam_cntrl = lambda wildcards: "mapped_reads/%s.vs_%s.bwa.sort.bam" % tuple([partition_experimental_by_put(sample_by_name[wildcards.sample]["experimental"])["in"][0]["name"], "dm6"]),
 	output:
-		peaks_out = "MACS/raw/indiv/{sample}.vs_{ref_genome}_summits.bed"
+		peaks_out = "MACS/raw/indiv/{sample}.vs_{ref_genome}.broadPeak.bed",
+		peak_stats = "summaries/peakStats/indiv/{sample}.vs_{ref_genome}.broadPeak.stats",
 	params:
 		runmem_gb=8,
-		runtime="1:00:00",
+		runtime="6:00:00",
 		cores=8,
+		macs_params = "--broad --nomodel -g dm ",
 	run:
-		shell(""" mkdir -p MACS/raw/indiv  """)
-#		shell(""" set +u; source py2/venv/bin/activate; module load macs/2.1.2;  macs2 callpeak -t {input.bam_in} -f BAM --outdir MACS/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
-		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak --nomodel -t {input.bam_in} -f BAM --outdir MACS/raw/indiv/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
 
-rule peakCall_MACS_pool:
+		shell(""" mkdir -p MACS/raw/indiv """)
+
+		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak {params.macs_params} -c {input.bam_cntrl} -t {input.bam_in} -f BAM --outdir MACS/raw/indiv/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
+
+		shell(""" mv MACS/raw/indiv/{wildcards.sample}.vs_{wildcards.ref_genome}_peaks.broadPeak {output.peaks_out} """)
+
+		shell(""" mkdir -p summaries/peakStats/indiv/ """)
+		shell(""" rm -f {output.peak_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' > {output.peak_stats}""" )
+		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.peak_stats} """ )
+		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.peak_stats} """ )
+		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.peak_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.peak_stats} """) 
+		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.peak_stats} """) #awk '{{sum+=$9; sumsq+=$9*$9}} END {{ print "pq\tavg\t",sum/NR; print "pq\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.peak_stats}""" )
+		#	MACS broadpeak output: BED6+ fold_change, -log10p, -log10q
+
+
+
+rule peakCall_MACS_pool_byGroup:
 	input:
-		bams_in = lambda wildcards: [ "mapped_reads/%s.vs_%s.bwa.sort.bam" % tuple([c['name'], wildcards.ref_genome]) for c in partition_experimental_by_put(wildcards.experimental)[wildcards.put]],
+		bams_rep = lambda wildcards: expand( "mapped_reads/{samp}.vs_{ref_gen}.bwa.sort.bam", samp =list(set(sampname_by_group[wildcards.group]).intersection(set([c['name'] for c in partition_experimental_by_put(wildcards.experimental)["out"]]) )), ref_gen=["dm6"] ), 
+		bam_cntrl = lambda wildcards: expand( "mapped_reads/{samp}.vs_{ref_gen}.bwa.sort.bam", samp = partition_experimental_by_put(wildcards.experimental)["in"][0]["name"], ref_gen=["dm6"] ),
+		#this assumes there is exactly one control and it's in all groups
 	output:
-		peaks_out = "MACS/raw/pool/{experimental}.{put}.vs_{ref_genome}_summits.bed"
+		peaks_out = "MACS/raw/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
+		peak_stats = "summaries/peakStats/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.stats"		
 	params:
 		runmem_gb=8,
-		runtime="1:00:00",
+		runtime="6:00:00",
 		cores=8,
+		macs_params = "--broad --nomodel -g dm ",
 	run:
  		shell(""" mkdir -p MACS/raw/pool  """)
- 		shell(""" samtools merge MACS/raw/pool/{experimental}.{put}.vs_{ref_genome}.sort.bam {input.bams_in}  """)
+# 		shell(""" samtools merge -f MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.sort.bam {input.bams_rep}  """)
 # #		shell(""" set +u; source py2/venv/bin/activate; module load macs/2.1.2;  macs2 callpeak -t {input.bam_in} -f BAM --outdir MACS/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
- 		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak -t potato.bam --nomodel -f BAM --outdir MACS/raw/pool/ --name {wildcards.experimental}.{wildcards.put}.vs_{wildcards.ref_genome}; deactivate; """ )
-		shell(""" rm MACS/raw/pool/{experimental}.{put}.vs_{ref_genome}.sort.bam """)
+ 		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak {params.macs_params} -c {input.bam_cntrl} -t {input.bams_rep} -f BAM --outdir MACS/raw/pool/ --name {wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}; deactivate; """ )
+#		shell(""" rm MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.sort.bam """)
+		shell(""" mv MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}_peaks.broadPeak MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.broadPeak.bed """)
 
-rule peakConfirm:
-	input: 
-		pooled_peaks = "MACS/raw/pool/{experimental}.{put}.vs_{ref_genome}_summits.bed",
-		indv_peaks = lambda wildcards: [ "MACS/raw/indiv/%s.vs_%s_summits.bed" % tuple([c['name'], wildcards.ref_genome]) for c in partition_experimental_by_put(wildcards.experimental)[wildcards.put]],
-	output:
-		peaks_out = "MACS/raw/confirmed/{experimental}.{put}.vs_{ref_genome}_summits.bed"
-	params:
-		runmem_gb=8,
-		runtime="1:00:00",
-		cores=8,
-	run:
-		shell(""" mkdir -p MACS/raw/confirmed/ """)
-		shell(""" bedtools intersect -wa -wb -a {input.pooled_peaks} -b {input.indv_peaks} > {output.peaks_out} """)
+		shell(""" mkdir -p summaries/peakStats/pool/ """)
+		shell(""" rm -f {output.peak_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.peak_stats}""" )
+		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.peak_stats} """ )
+		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.peak_stats} """ )
+		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.peak_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.peak_stats} """) 
+		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.peak_stats} """) 
 
-rule confirmAllPeaks:
+
+
+
+rule summonRawPeakStats:
 	input:
-		confirmed_peaks = expand("MACS/raw/confirmed/{experimental}.{put}.vs_{ref_genome}_summits.bed", experimental = ["Fru7","47b1_7","GH7","SH7"], put =["in","out"], ref_genome = "dm6")
+		indv_in = lambda wildcards: expand("summaries/peakStats/indiv/{sample}.vs_{ref_genome}.broadPeak.stats", sample = [s['name'] for s in samples_by_put["out"]], ref_genome=wildcards.ref_genome),
+		pool_in = lambda wildcards: expand("summaries/peakStats/pool/{spearmint}.{group}.vs_{ref_genome}.broadPeak.stats", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), put = ["in","out"], group = ["A","B","C"], ref_genome=wildcards.ref_genome)
 	output:
-		confirmedFlag = "utils/confirmPeaks.flag"
+		indv_out = "summaries/peakStats/individuals.vs_{ref_genome}.broadPeak.stats",
+		pool_out = "summaries/peakStats/pooled.vs_{ref_genome}.broadPeak.stats",
 	params:
 		runmem_gb=1,
 		runtime="1:00",
 		cores=1,
 	run:
-		shell(""" touch {output.confirmedFlag} """)
+		shell(""" rm -rf {output.indv_out} """)
+		for s in samples_by_put["out"]:
+			samp = s["name"]
+			shell(""" cat summaries/peakStats/indiv/{samp}.vs_{wildcards.ref_genome}.broadPeak.stats | awk '{{print"{samp}\t"$0 }}' >> {output.indv_out} """)
+
+		shell(""" rm -rf {output.pool_out} """)
+		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
+			for group in ["A","B","C"]:
+				shell(""" cat summaries/peakStats/pool/{spearmint}.{group}.vs_{wildcards.ref_genome}.broadPeak.stats | awk '{{print"{spearmint}\t{group}\t"$0 }}' >> {output.pool_out} """ )
+
+
+
+
+rule peakConfirm:
+	input: 
+		pooled_peaks = "MACS/raw/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
+		indv_peaks = lambda wildcards: expand( "MACS/raw/indiv/{samp}.vs_{ref_gen}.broadPeak.bed", samp =list(set(sampname_by_group[wildcards.group]).intersection(set([c['name'] for c in partition_experimental_by_put(wildcards.experimental)["out"]]) )), ref_gen=["dm6"] ), 
+	output:
+		peaks_out = "MACS/confirmed/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
+		peaks_intersect_loj = "MACS/confirmed/{experimental}.{group}.vs_{ref_genome}.confirmationLOJ.tbl",
+		confirmed_stats = "summaries/peakStats/confirmed/{experimental}.{group}.vs_{ref_genome}.stats",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	run:
+		shell(""" mkdir -p MACS/confirmed/ """)
+		shell(""" bedtools intersect -wao -a {input.pooled_peaks} -b {input.indv_peaks} > {output.peaks_intersect_loj} """)
+		shell(""" cat {output.peaks_intersect_loj} | awk '{{if($19!=0)print;}}' | cut -f 1-9 | sort | uniq > {output.peaks_out} """)
+
+		shell(""" mkdir -p summaries/peakStats/confirmed/ """)
+		shell(""" rm -f {output.confirmed_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.confirmed_stats}""" )
+		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.confirmed_stats} """ )
+		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.confirmed_stats} """ )
+		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.confirmed_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.confirmed_stats} """)
+		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.confirmed_stats} """)
+
+
+
+rule confirmAllPeaks:
+	input:
+		confirmed_peaks = expand("summaries/peakStats/confirmed/{experimental}.{group}.vs_{ref_genome}.stats", experimental = list(set([ s["experimental"] for s in config['data_sets'] ])), group =["A","B","C"], ref_genome = "dm6")
+	output:
+		confirmed_stats = "summaries/peakStats/confirmed.vs_dm6.broadPeak.stats",
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+	run:
+		shell(""" rm -rf {output.confirmed_stats} """)
+		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
+			for group in ["A","B","C"]:
+				shell(""" cat summaries/peakStats/confirmed/{spearmint}.{group}.vs_dm6.stats | awk '{{print"{spearmint}\t{group}\t"$0 }}' >> {output.confirmed_stats} """ )
 
 # rule callAllThePeaks:
 # 	input:
@@ -827,11 +908,12 @@ rule confirmAllPeaks:
 
 rule write_report:
 	input:
-		reference_genome_summary = ["meta/reference_genomes.summary"],
-		reference_annotation_summary = ["meta/reference_annotations.summary"],
-		gene_lists_summary = ["meta/geneLists.stats"],
-		sequenced_reads_summary=["meta/sequenced_reads.dat"],
-		aligned_reads_summary = ["meta/alignments.vs_dm6.bwa.summary"],
+		reference_genome_summary = ["summaries/reference_genomes.summary"],
+		reference_annotation_summary = ["summaries/reference_annotations.summary"],
+		gene_lists_summary = ["summaries/geneLists.stats"],
+		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
+		aligned_reads_summary = ["summaries/alignments.vs_dm6.bwa.summary"],
+		called_peak_stats = ["summaries/peakStats/individuals.vs_dm6.broadPeak.stats","summaries/peakStats/pooled.vs_dm6.broadPeak.stats", "summaries/peakStats/confirmed.vs_dm6.broadPeak.stats"]
 		# called_peak_stats = ["meta/basicPeakStats.vs_dm6.bwa.summary"],
 		# collapsed_peak_stats = ["meta/collapsedPeakStats.vs_dm6.bwa.summary"],
 		# merged_peak_stats = ["meta/mergedPeakStats.vs_dm6.bwa.summary"],
