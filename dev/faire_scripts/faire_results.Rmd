@@ -1,0 +1,753 @@
+---
+title: "Volkan Lab Faire-Seq"
+author: "Charlie Soeder"
+date: "8/29/2019"
+output:
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document: default
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/VolkanLab_BehaviorGenetics/')
+#knitr::opts_knit$set(root.dir=peaDubDee)
+#install.packages("remotes")
+#remotes::install_github("rstudio/gt")
+
+library("biomaRt")
+library("org.Dm.eg.db")
+
+library("yaml")
+library("readr")
+library("tidyverse")
+library("ggnewscale")
+library("scales")
+
+library("gt")
+library("GGally")
+
+```
+
+
+
+
+
+```{r include=FALSE}
+
+human_readable_croncher <- function(num_in) {
+	dig <- 3
+	num_out <- formatC(num_in, digits=dig, format='g') %>% as.numeric() %>% sitools::f2si()
+	return(num_out)
+}
+
+bam_summary_loader <- function(filename, aligner="bwa", reference='dm6'){
+	
+	tmp.df <- read_delim(filename, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	names(tmp.df) <- c("sample","measure","value")
+	
+	tmp.df$sample <- as.factor(tmp.df$sample)
+	tmp.df$measure <- as.factor(tmp.df$measure)
+	tmp.df$aligner <- as.factor(aligner)
+	tmp.df$reference <- as.factor(reference)
+	
+	return(tmp.df)
+	
+}
+
+fig_cnt <- 0
+tbl_cnt <- 0
+```
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+#tbl_cnt <- tbl_cnt + 1
+#thing.gt <- asdfasdfasdf
+#thing.gt
+#write(thing.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_thing.html", sep=""))
+
+
+```
+
+```{r echo=FALSE, message=FALSE}
+
+
+# fig_cnt <- fig_cnt + 1
+# thing.gg <- asdfasdfasd
+# thing.gg
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+# Introduction
+
+words words
+
+
+
+# Materials, Methods, Data, Software
+
+```{r include=FALSE}
+
+trammel <- read_yaml("config.yaml")
+
+```
+generic overview words
+
+
+## Reference Genomes
+
+
+```{r include=FALSE, echo = FALSE, message=FALSE}
+refGenomes_summary_df <- read_delim("summaries/reference_genomes.summary", 
+    "\t", escape_double = FALSE, col_names = FALSE, 
+    trim_ws = TRUE)
+
+names(refGenomes_summary_df) <- c("refGenome","measure","value")
+
+```
+
+The dm6 reference genome was used for read alignment:
+```{r echo=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Drosophila Melanogaster") %>%   fmt_number(columns = vars(dm6),suffixing = TRUE, decimals=0) %>% cols_label(measure = " ", dm6 = " ")
+
+refGenomes_summary.gt
+
+write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
+
+```
+
+
+## Reference Annotations
+
+Reference annotations were used to locate features within the genome for comparison:
+
+```{r include=FALSE, echo = FALSE, message=FALSE }
+
+ref_ann.stats <- read_delim("summaries/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(ref_ann.stats) <- c("annot", "measure", "type", "value")
+
+tbl_cnt <- tbl_cnt + 1
+ref_ann.stats.gt <- ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Reference Annotations and their Sizes", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
+
+ref_ann.stats.gt
+
+write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationSummary.html", sep=""))
+
+```
+
+
+In addition to the full annotations, subsets containing prespecified genes of interest will also be used.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+
+geneLists.stats <- read_delim("summaries/geneLists.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(geneLists.stats) <- c("query", "annot", "measure", "type", "value")
+geneLists.stats$query <- as.factor(geneLists.stats$query)
+geneLists.stats$annot <- as.factor(geneLists.stats$annot)
+geneLists.stats$measure <- as.factor(geneLists.stats$measure)
+geneLists.stats$type <- as.factor(geneLists.stats$type)
+
+geneList.tbl <-  geneLists.stats %>% filter(measure == "count") %>% unite(measure, type, measure, sep=" ") %>% select(c(query,measure,value)) 
+
+geneList.tbl <- rbind(geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="count" & type=="annotated"), ref_ann.stats %>% filter(measure=="count" & type=="total"), by=c("annot" = "annot"), suffix=c("", ".ann")) %>% mutate(measure = "percent of annotations", value=value/value.ann) %>% select(query, measure, value))
+
+geneList.tbl <- rbind( geneList.tbl, geneLists.stats %>%  filter(measure == "size") %>% filter(type == "total" | type == "avg") %>% unite(measure, type, measure, sep=" ") %>% select(query, measure, value)) 
+
+geneList.tbl <- rbind(geneList.tbl, geneLists.stats %>% filter(measure=="size" & type == "total") %>%  mutate(value = value/(refGenomes_summary_df %>% filter(measure=="number_bases") %>% select(value) %>% as.numeric() ) ) %>%  unite(measure, type, measure, sep=" ") %>% select(-c(annot)) %>% mutate(measure = "percent genome size") )
+
+
+geneList.tbl <- rbind( geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="size" & type == "total"), ref_ann.stats %>% filter(measure=="size" & type == "total"), by = c("annot" = "annot")) %>% mutate(value=value.x/value.y, measure = "percent annotation size") %>% select(query, measure, value) ) %>% mutate(measure=factor(measure, levels = c("total count","annotated count","percent of annotations","total size","avg size","percent genome size","percent annotation size")))
+
+
+```
+
+Here are those subsets and their sizes:
+
+```{r echo=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+geneList.gt<- geneList.tbl %>% spread(query, value) %>% gt() %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "size"), decimals=1, suffixing=T) %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "count"), decimals=0, suffixing=T)  %>% fmt_percent(columns=seq(2,6), rows=str_detect(measure, "percent"), decimals=1) %>% tab_header(title=paste("Table ",tbl_cnt, ". Predefined Subsets of Gene Annotation", sep = ""), subtitle= md("&nbsp;"))
+
+geneList.gt
+
+write(geneList.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_geneListSummary.html", sep=""))
+```
+
+
+### Ionotropic
+
+A list of ionotropic receptors supplied by Corbin via Flybase & George et al 2019  (email 28 May 2019). This contained 335 entries, some with mutiple genes, some not unique. Once merged & uniqued : 246
+Annotation symbols (CGxxxxx) converted to FlyBase gene games (FBgnxxxx) using flybase ID converter (http://flybase.org/convert/id) 
+
+239 converted cleanly; 5 had duplicate conversions and were corrected by hand:
+```
+CG11430 is FBgn0041585, not FBgn0050323
+CG43368 is FBgn0263111, not FBgn0041188
+CG8885 is FBgn0262467, not FBgn0081377
+CG9090 is FBgn0034497, not FBgn0082745
+CG9126 is FBgn0045073, not FBgn0053180
+```
+
+Two were corrected to be consistent with the dm6_genes annotation:
+```
+CG9907 (para), is listed as FBgn0264255 not FBgn0285944
+CG42345 (straw) is listed as FBgn0259247 (laccase2)
+```
+
+### Derived from GO terms
+
+```
+Sub Pull out by particular GO terms?
+o Nervous system development - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007399 
+o Mating - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007618
+o Histone modification - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0016570 
+o Dna-binding transcription factor - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0003700 
+o Synaptic signaling - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0099536 
+o Synapse organization - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0050808
+```
+(Bryson, email 24 July 2019)
+
+melanogaster-specific genes with these GO terms were retrieved using the FlyBase QueryBuilder. 
+
+
+Nervous System Development:
+```
+nrd, FBgn0002967, no annotated gene model
+l(2)23Ab, FBgn0014978, same
+aloof, FBgn0020609, same
+Imp, FBgn0285926, is FBgn0262735
+```
+
+Mating:
+```
+Only three, but all good
+```
+
+synapse signalling
+```
+1 gene
+```
+
+Histone modification, DNA trans factor act, synapse org
+```
+MT
+```
+
+## Sequenced Reads
+```{r include=FALSE}
+data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
+data_sets.df$name <- as.factor(data_sets.df$name)
+data_sets.df$day<- as.factor(data_sets.df$day)
+data_sets.df$experimental <- gsub("_", "-", data_sets.df$experimental)
+data_sets.df$experimental<- as.factor(data_sets.df$experimental)
+data_sets.df$subgroups<- as.factor(data_sets.df$subgroups)
+data_sets.df$rep<- as.factor(data_sets.df$rep)
+data_sets.df$housing<- as.factor(data_sets.df$housing)
+data_sets.df$genotype<- as.factor(data_sets.df$genotype)
+
+data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile)) %>% distinct() 
+
+```
+
+
+```{r include=FALSE}
+
+
+tbl_cnt <- tbl_cnt + 1
+
+GxEcombo.gt<- data_sets.df.sparse %>% select(c(experimental, genotype, housing)) %>% group_by(genotype, housing) %>% summarise(count=n())%>%  ungroup() %>% spread(key=housing, value=count )  %>% mutate(group=case_when(is.na(group) ~ "x", TRUE ~ "o" ), single=case_when(is.na(single) ~ "x", TRUE ~ "o" )  ) %>% gt() %>% tab_style(style = cells_styles(text_style = "italic", text_color="red"), locations = list(cells_data(columns = vars(group), rows = group=="x"), cells_data(columns = vars(single), rows = single=="x"))) %>% tab_spanner(label = "housing environment", columns = vars(single, group)) %>% tab_header(title=paste("Table ",tbl_cnt, ". Experimental Design", sep = ""), subtitle= md("genotype-environmental interactions tested"))
+
+GxEcombo.gt
+
+
+write(GxEcombo.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_experimentGxEcombos.html", sep=""))
+
+```
+
+
+FAIRE-Seq reads were sequenced for four experimental treatments. Each had one "input" (in which the DNA was fragmented without crosslinking to chromatin) and three replicates in which the DNA was crosslinked and then fragmented. 
+
+```{r echo=FALSE, results='asis'}
+
+tbl_cnt <- tbl_cnt + 1
+
+sampleBreakdown.gt <- data_sets.df.sparse  %>%  mutate(rep = case_when(rep == "input" ~ "input", rep != "input" ~ "output",)) %>% group_by(experimental,rep) %>% summarise(`sample count`=n())  %>% gt() %>%  tab_options(row_group.background.color = "#FFEFDB")  %>% tab_header(title=paste("Table ",tbl_cnt, ". Breakdown of Samples within Experiment", sep = ""), subtitle= md("&nbsp;")) %>% cols_label(rep = " ")
+
+sampleBreakdown.gt
+
+write(sampleBreakdown.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_sampleBreakdown.html", sep=""))
+```
+
+
+To accomodate varying data quality, analyses were done on three nested subsets of the data, each including an input and at least one replicate for each experimental treatment. Groups A, B, and C correspond to 1, 2, and 3:
+
+```
+ok, do the alignment and MACS2 analysis like you did before.  Do three version: 
+
+1) Only unmarked
+2) include the orange
+3) all date
+```
+(Corbin, 20 May 2019 email)
+
+```{r echo = FALSE}
+
+
+tbl_cnt <- tbl_cnt + 1
+
+groupDefinitions.gt <- data_sets.df %>% select(c(experimental, rep, subgroups)) %>% mutate(dummy="1") %>% filter(subgroups!='all') %>% group_by_at(vars(-dummy)) %>%  mutate(rowid=1:n()) %>% ungroup() %>% spread(key=subgroups, value=dummy ) %>%  select(-rowid) %>% mutate(A=case_when(is.na(A) ~ "x", TRUE ~ "o" ), B=case_when(is.na(B) ~ "x", TRUE ~ "o" ) , C=case_when(is.na(C) ~ "x", TRUE ~ "o" )  ) %>% gt() %>% tab_style(style = cells_styles(text_style = "italic", text_color="red"), locations = list(cells_data(columns = vars(A), rows = A=="x"), cells_data(columns = vars(B), rows = B=="x"))) %>%  tab_header(title=paste("Table ",tbl_cnt, ". Groups Defined by Samples", sep = ""), subtitle= md("&nbsp;"))
+
+groupDefinitions.gt
+
+write(groupDefinitions.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_groupDefintions.html", sep=""))
+```
+
+
+### Pre-Processing
+
+These reads were preprocessed with FASTP [@Chen2018] for quality control and analytics. 
+
+
+```{r echo=FALSE, include=FALSE, warning=FALSE}
+fastp_summary <- read_delim("summaries/sequenced_reads.dat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(fastp_summary ) <- c("name","type","measure","value")
+fastp_summary$name <- as.factor(fastp_summary$name)
+fastp_summary$type <- as.factor(fastp_summary$type)
+fastp_summary$measure <- as.factor(fastp_summary$measure)
+```
+
+
+```{r echo=FALSE, include=FALSE, warning=FALSE}
+filtration_stats <- inner_join(fastp_summary %>%  filter(type=="prefiltered" | type == 'postfiltered'), data_sets.df.sparse, by=c("name"="name"))
+filtration_stats$type <- factor(filtration_stats$type, levels=c("prefiltered", "postfiltered"))
+```
+
+
+Starting FASTQ files contained a total of  $`r sum( filtration_stats %>% filter(type =='prefiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$ reads; after QC, this dropped to $`r sum( filtration_stats %>% filter(type =='postfiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$. 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+pre_post_counts <- filtration_stats %>% filter(measure=='total_reads') %>%  group_by(type)  %>%  summarise(minimum = min(value), average=mean(value) , maximum = max(value)) 
+retention_percent <- filtration_stats %>% filter(measure=='total_reads') %>% select(c(name,type,value)) %>%  spread(type,value) %>% mutate(retention=100*postfiltered/prefiltered) %>%  summarise(type='percent retention', minimum = min(retention), average=mean(retention) , maximum = max(retention))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+read_retention_rate.gt <- rbind(pre_post_counts, retention_percent) %>% rename(" "=type) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Retention Rate during Preprocessing", sep = ""), subtitle= md("&nbsp;")) %>%  fmt_number(columns = vars(minimum, average,maximum),suffixing = TRUE, decimals=0)
+
+read_retention_rate.gt
+
+write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readRetentionRate.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+readQual.gg <- ggplot(filtration_stats %>% filter(measure == "q30_rate")) + geom_line(aes(group=name, x=type,y=100*value)) +  geom_point(aes(x=type, y = 100*value, color=experimental, shape=rep)) + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() + geom_text(data= . %>% filter(type=="postfiltered") %>% filter(value<0.97), aes(type,100*value,label=name))
+
+readQual.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readQualityThruProcessing.png", sep=""))
+readQual.gg
+dev.off()
+
+
+```
+
+
+Duplicate reads were also detected; however, duplicate reads are less concerning in FAIRE-seq given the relatively smaller genome they are sampled from. 
+
+https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/8%20Duplicate%20Sequences.html
+
+http://seqanswers.com/forums/showthread.php?t=40440
+
+https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html
+
+Furthermore, some peak-calling software (eg, MACS[@Zhang2008]) does internal deduplication. 
+
+```{r echo=FALSE, include=FALSE}
+dupe_stats <- inner_join(fastp_summary %>% filter(type=='duplication' & measure =='rate') %>%  mutate(percent=value*100) %>% select(c(name,percent)), data_sets.df.sparse, by=c("name"="name"))
+```
+
+```{r echo=FALSE, include=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+duplicationStats.gt <- dupe_stats %>%  summarise(minimum = min(percent), average=mean(percent), median=median(percent) , maximum = max(percent)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage Duplication", sep = ""), subtitle="FASTP estimate") %>% fmt_number(columns=vars(minimum,median,average,maximum), decimals=1, ) #kable(caption="Percentage Duplication",digits=1)
+
+duplicationStats.gt
+
+write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_duplicationStats.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+dupeStats.gg <- ggplot(dupe_stats) + geom_histogram(aes(x=percent, fill=experimental), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram", sep = ""), x="Read Duplication Rate (FASTP estimate)", y="Number Samples") + theme_bw()
+
+dupeStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+dupeStats.gg
+dev.off()
+
+
+```
+
+
+
+
+## Mapped Reads
+
+Reads were first mapped to the reference genome using the BWA SAMPE/SE algorithm. Currently, multimapping reads are assigned randomly and the alignments are used unfiltered. 
+
+```{r echo=FALSE, include=FALSE}
+
+vs_dm6.bwa <- bam_summary_loader(filename = "summaries/alignments.vs_dm6.bwa.summary",aligner="bwa", reference="dm6")
+#vs_dm6.bwaUniq <- bam_summary_loader(filename = "summaries/alignments.vs_dm6.bwaUniq.summary",aligner="bwaUniq", reference="dm6")
+
+all_alignments <- rbind(vs_dm6.bwa)#, vs_dm6.bwaUniq)
+```
+
+
+
+
+### Read & Alignment Quality
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+readcount_process <- all_alignments %>%  filter( measure=='total_read_count'| measure == 'total_mapped_count' ) %>% select(-c(reference, aligner))
+
+readcount_process$measure <- factor(readcount_process$measure, levels = c('total_read_count','total_mapped_count'))
+```
+
+The mapping rate per sample can be calculated from the number of mapped reads compared to the total number of sequenced reads:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+fig_cnt <- fig_cnt + 1
+
+readCountProcess.gg <- ggplot(inner_join(readcount_process%>% mutate(measure=gsub("_"," ",measure)), data_sets.df.sparse, by=c("sample"="name"))) + geom_line(aes(group=sample, x=measure,y=value)) + geom_point(aes(x=measure, y=value, group=sample,color=experimental, shape=rep))  + labs(title=paste("Figure ",fig_cnt, ". Read Counts by Processing Step: Unmapped, Mapped, Filtered", sep = ""), x="", y="Number Reads" ) + theme_bw() + theme(axis.text.x = element_text(angle = -45, hjust = 0), legend.position='none' ) + scale_y_log10()
+
+
+readCountProcess.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ReadCountThruProcess.png", sep=""))
+readCountProcess.gg
+dev.off()
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+readcount_process.spread <- readcount_process %>%  spread(measure, value) %>%  mutate(percent_mapping=100*total_mapped_count/total_read_count)#, filter_retention = filtered_mapped_count/total_mapped_count)
+
+tbl_cnt <- tbl_cnt + 1
+
+readCountProcess.gt <- readcount_process.spread %>% gather(total_read_count:percent_mapping, key="measure", value="value") %>%  group_by(measure) %>% summarise(minimum = min(value), average=mean(value), median = median(value), maximum = max(value)) %>% mutate(measure=gsub("_"," ",measure)) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Counts During Alignment & Filtration", sep = ""), subtitle= md("&nbsp;")) %>% fmt_number(columns=vars(minimum, average, median, maximum), rows =c(2,3), decimals=1, suffixing=TRUE)%>% fmt_number(columns=vars(minimum, average, median, maximum), rows =c(1), decimals=2)
+
+readCountProcess.gt
+
+write(readCountProcess.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readCountsDuringProcessing.html", sep=""))
+
+```
+
+#### Depth & Breadth of Coverage
+
+
+```{r echo=FALSE}
+breadth_stats <- inner_join(all_alignments %>% filter(measure=="total_breadth") %>% rename("total_breadth"=value) %>% select(-c(aligner, reference, measure)), data_sets.df.sparse %>% select(-c(day)), by=c("sample"="name") )
+
+```
+
+Depth of coverage is not especially meaningful here, but breadth of coverage may give an indication of background genomic DNA. This explains why the input samples tend to have higher breadth values.
+
+```{r echo=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+breadthStats.gg <- ggplot(breadth_stats %>% mutate(x=0)) + geom_boxplot(aes(y=100*total_breadth, x=x)) + geom_jitter(aes(y=100*total_breadth, shape=experimental, color=rep=="input", x=x), size=3, height=0, width=0.1) + theme_bw() + labs(y="Total Breadth (% of Genome Mapped To)", title="Breadth of Coverage for Alignments")
+
+
+
+
+breadthStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_BreadthStats.png", sep=""))
+breadthStats.gg
+dev.off()
+
+
+```
+
+
+
+## Peak Calling
+
+http://genome.ucsc.edu/ENCODE/protocols/dataStandards/ChIP_DNase_FAIRE_DNAme_v2_2011.pdf
+
+### MACS vs MACS2 vs F-Seq
+
+MACS [@Zhang2008] was used to QC pilot data, but it wasn't designed for use on FAIRE-Seq. MACS2 was extended for use with FAIRE [@Tsompana2014] but is still not necessesarily recommended for use with non-ChIP-Seq data. Here's Tao Liu:
+```
+Over the years, I have got many emails from users asking if they can analyze their X-Seq 
+(not ChIP-Seq) data using MACS2, or if they can turn on or off some features in callpeak for their
+special need. In most of cases, I would simply reply that they may have to find more dedicated tool 
+for the type of your data, because the callpeak module is specifically designed and tuned for 
+ChIP-Seq data.
+https://github.com/taoliu/MACS/wiki/Advanced%3A-Call-peaks-using-MACS2-subcommands
+```
+(goes on to say that a more complicated pipeline might be made bypassing callpeak; also: https://www.biostars.org/p/141214/ )
+
+Furthermore, the current official release of MACS2 is written in python2, which must be wrangled to coorperate with the python3 snakemake environment. Worse, it will become obselete when python2 deprecates at the start of 2020. An unmerged branch of MACS2 has been updated to run in python3: https://github.com/taoliu/MACS/tree/feat_py3
+
+On the other hand, MACS2 reports straightforward statistical measures and incorporates the input data as a baseline control, meaning that distinguishing between input/output exclusive and shared peaks is done for us. 
+
+In earlier versions, F-seq [@Boyle2008] is used to infer peaks from mapped reads. However, this software also has drawbacks. One is the interpretation of the reported signal statistic (which is the maximum kernel desnisty scaled by peak width; in particular, it is not obvious how to combine signal strength values when merging peaks. Worse, this statistic is not well-behaved; some peaks were called with a width of zero yet have a finite reported signal strength. 
+
+```
+There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file,
+then the start and end positions should never be the same (which would indicate zero bases). It is a
+zero-based position, so a peak with coordinates chr1:1000-1001 is a 1bp peak at chr1:1001. [...] I’ve
+cc’d Alan Boyle, who wrote the software, to confirm that there should not be any zero-width peaks. I’m
+at a loss here – I don’t think we’ve encountered this before.
+(emails from Terry Furey, 6 Aug 2019)
+```
+
+```
+I'm also at a loss - I didn't think that this would happen. I have a summer student re-writing 
+F-seq in python so I'll make sure that she checks for this edge case.
+(email from Alan Boyle, 15 Aug 2019)
+```
+
+### MACS2
+
+In this version, MACS2 was used to call peaks. The mapped reads were used to call individual peaks for each sample; reads were also pooled within each group and experimental treatment to produce per-group pooled peak calls. The input in each experimental category was used as a control in both pooled and individually called peaks; broad peaks were called and modeling was turned off:
+
+```
+macs2 callpeak --broad --nomodel -c {input.bam_cntrl} -t { pooled/individual reads } .....
+```
+
+These pooled peaks were then compared to the individually called peaks, and a pooled peak was retained as "confirmed" if it overlapped at least one individually called peak. A file of confirmed peaks was thus generated for each experimental treatment and group.
+
+```
+For each sample:
+Reads from step #4 above from each replicate are pooled together
+Peaks are called on the pooled data with MACS2 (using identical settings in step #5 above) 
+against sonicated genomic DNA
+[emails fwd'd by Dan McCay, following meeting 21 August]
+```
+
+
+????? WHY THE EMPTY OUTPUT FILES ?????????
+
+https://www.biostars.org/p/173967/
+
+https://github.com/taoliu/MACS/issues/235
+
+https://biostar.usegalaxy.org/p/15781/index.html
+
+https://biostar.usegalaxy.org/p/22487.1.html
+
+?????????????????????????????????????????????
+
+#### Individually called peaks
+
+Mapped reads from each output replicate were used to call peaks, with the single input replicate used as a control. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+indvPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/individuals.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+
+names(indvPeakStats_vs_dm6_bwa ) <- c("sample","dataType","dataSubtype","value")
+indvPeakStats_vs_dm6_bwa$sample <- as.factor(indvPeakStats_vs_dm6_bwa$sample)
+indvPeakStats_vs_dm6_bwa$dataType<- as.factor(indvPeakStats_vs_dm6_bwa$dataType)
+indvPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(indvPeakStats_vs_dm6_bwa$dataSubtype)
+
+```
+
+from the $`r indvPeakStats_vs_dm6_bwa %>% select(sample) %>% unique() %>% count() `$ samples,  $`r indvPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ total peaks were called:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+indvPeakStats_vs_dm6_bwa.count.sprud <- indvPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- indvPeakStats_vs_dm6_bwa.count.sprud %>% select(3:ncol(.)-1) %>% names()
+
+
+tbl_cnt <- tbl_cnt + 1
+
+calledPeakCounts.indv.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, experimental)), indvPeakStats_vs_dm6_bwa.count.sprud, by=c("name"="sample")) %>% select(-c(name)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = T) %>% tab_header(title=paste("Table ",tbl_cnt, ". Individually Called Peak Count", sep = ""), subtitle= "by contig and sample") %>% cols_label(rep=" ")
+
+calledPeakCounts.indv.gt
+
+write(calledPeakCounts.indv.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvCalledPeakCounts.html", sep=""))
+
+```
+
+We can also check the peak-calling efficiency:
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+indvPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(inner_join(indvPeakStats_vs_dm6_bwa.count.sprud %>% select(c("sample","total")), data_sets.df.sparse , by = c("sample"="name")), readcount_process.spread, by=c("sample"="sample")) %>% rename("total_peak_count"=total) %>% mutate(peaks_per_thousand_sequenced_reads = 1000*total_peak_count/total_read_count, peaks_per_thousand_mapped_reads = 1000*total_peak_count/total_mapped_count)
+
+tbl_cnt <- tbl_cnt + 1
+
+peakCallingEfficiency.indv.gt <- indvPeakStats_vs_dm6_bwa.count.sprud.aug  %>% select(-c("sample", "day")) %>% select_all(~gsub("_"," ",.)) %>% group_by(genotype, housing) %>%  gt()  %>% cols_move_to_start(columns = vars(experimental, rep)) %>% fmt_number(columns = vars(`total peak count`), suffixing = T, decimals = 0) %>% fmt_number(columns = vars(`peaks per thousand sequenced reads`, `peaks per thousand mapped reads`),  decimals = 1) %>% cols_hide(columns=vars(`total read count`, `total mapped count`, `percent mapping`, `experimental`, `put`)) %>% cols_label(`peaks per thousand sequenced reads` = "peaks per\nthousand sequenced reads", `peaks per thousand mapped reads`= "peaks per\nthousand mapped reads") %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Peak Calling Efficiency", sep = ""), subtitle= "peaks called per read sequenced/mapped")# %>% cols_move_to_start(columns = c("genotype", "housing", "rep"))
+
+peakCallingEfficiency.indv.gt
+
+write(peakCallingEfficiency.indv.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvPeakCallingEfficiency.html", sep=""))
+
+```
+
+
+
+#### Pooled peaks
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+poolPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/pooled.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+
+names(poolPeakStats_vs_dm6_bwa ) <- c("experimental","group","dataType","dataSubtype","value")
+poolPeakStats_vs_dm6_bwa$experimental <- as.factor(poolPeakStats_vs_dm6_bwa$experimental)
+poolPeakStats_vs_dm6_bwa$group <- as.factor(poolPeakStats_vs_dm6_bwa$group)
+poolPeakStats_vs_dm6_bwa$dataType<- as.factor(poolPeakStats_vs_dm6_bwa$dataType)
+poolPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(poolPeakStats_vs_dm6_bwa$dataSubtype)
+
+```
+
+As well as being used to call peaks individually, the replicate reads for each experimental treatment were pooled by group, and these pooled reads were used to call peaks with the input reads used as a control. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+poolPeakStats_vs_dm6_bwa.count.sprud <- poolPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- poolPeakStats_vs_dm6_bwa.count.sprud %>% select(4:ncol(.)-1) %>% names()
+
+
+tbl_cnt <- tbl_cnt + 1
+
+calledPeakCounts.pool.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(), poolPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) , by=c("experimental"="experimental")) %>% select(-c(experimental)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = F)  %>% tab_header(title=paste("Table ",tbl_cnt, ". Pooled Called Peak Count", sep = ""), subtitle= "by contig, experimental treatment, and group") %>% cols_label(group = " ")
+
+calledPeakCounts.pool.gt
+
+write(calledPeakCounts.pool.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_poolCalledPeakCounts.html", sep=""))
+
+
+
+```
+
+The treatment-wide peakcalling efficiency can also be calculated, 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+poolPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(poolPeakStats_vs_dm6_bwa.count.sprud %>% select(c("experimental","group","total")) %>% mutate(experimental=gsub("_","-",experimental)), inner_join(data_sets.df %>% filter(subgroups != "all" & put == "out" ) %>% select(subgroups, name, experimental), readcount_process.spread, by=c("name"="sample")) %>% group_by(experimental, subgroups) %>% summarise(grand_seq_total = sum(total_read_count), grand_mapt_total = sum(total_mapped_count)), by = c("group" = "subgroups", "experimental" = "experimental") ) %>% rename("grand_total_peak_count"=total) %>% mutate(peaks_per_thousand_sequenced_reads = 1000*grand_total_peak_count/grand_seq_total, peaks_per_thousand_mapped_reads = 1000*grand_total_peak_count/grand_mapt_total) %>% select(-c(grand_seq_total, grand_mapt_total))
+
+
+poolPeakStats_vs_dm6_bwa.count.sprud.aug <- inner_join(poolPeakStats_vs_dm6_bwa.count.sprud.aug, data_sets.df.sparse %>%  select(c(experimental, genotype, housing)) %>% unique() , by=c("experimental"="experimental")   ) %>% select(-c(experimental))
+
+
+tbl_cnt <- tbl_cnt + 1
+
+peakCallingEfficiency.pool.gt <- poolPeakStats_vs_dm6_bwa.count.sprud.aug   %>% group_by(genotype, housing) %>%  gt()  %>% fmt_number(columns = c("grand_total_peak_count"), suffixing = T, decimals = 1, drop_trailing_zeros=TRUE)  %>% fmt_number(columns = c("peaks_per_thousand_sequenced_reads", "peaks_per_thousand_mapped_reads"),  decimals = 2) %>% cols_label(`peaks_per_thousand_sequenced_reads` = "peaks per\nthousand sequenced reads", `peaks_per_thousand_mapped_reads`= "peaks per\nthousand mapped reads", `grand_total_peak_count`="Pooled Peak Count") %>% tab_header(title=paste("Table ",tbl_cnt, ". Pooled Peak Calling Efficiency", sep = ""), subtitle= "peaks called per read sequenced/mapped")# %>% cols_move_to_start(columns = c("genotype", "housing", "rep"))
+
+peakCallingEfficiency.pool.gt
+
+write(peakCallingEfficiency.pool.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_indvPeakCallingEfficiency.html", sep=""))
+
+```
+
+
+#### Confirmed Peaks
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+confPeakStats_vs_dm6_bwa <- read_delim("summaries/peakStats/confirmed.vs_dm6.broadPeak.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% as_tibble()
+names( confPeakStats_vs_dm6_bwa ) <- c("experimental","group","dataType","dataSubtype","value")
+confPeakStats_vs_dm6_bwa$experimental <- as.factor(confPeakStats_vs_dm6_bwa$experimental)
+confPeakStats_vs_dm6_bwa$group <- as.factor(confPeakStats_vs_dm6_bwa$group)
+confPeakStats_vs_dm6_bwa$dataType<- as.factor(confPeakStats_vs_dm6_bwa$dataType)
+confPeakStats_vs_dm6_bwa$dataSubtype<- as.factor(confPeakStats_vs_dm6_bwa$dataSubtype)
+
+```
+
+Once the pooled peaks were called, they were compared to the indivdually called peaks within their group. A pooled peak was considered to be "confirmed" if it overlapped at least one individually called peak.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+confPeakStats_vs_dm6_bwa.count.sprud <- confPeakStats_vs_dm6_bwa %>% filter(dataType == "count") %>% select(-c(dataType)) %>% spread(dataSubtype,value, fill=0)
+
+contigs <- confPeakStats_vs_dm6_bwa.count.sprud %>% select(4:ncol(.)-1) %>% names()
+
+
+tbl_cnt <- tbl_cnt + 1
+
+calledPeakCounts.conf.gt <- inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(), confPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) , by=c("experimental"="experimental")) %>% select(-c(experimental)) %>% group_by(genotype, housing) %>% gt()  %>%  tab_spanner(label="by contig", columns=vars(contigs )) %>% fmt_number(columns = c(contigs, "total"),  decimals = 0, suffixing = F)  %>% tab_header(title=paste("Table ",tbl_cnt, ". Confirmed Peak Count", sep = ""), subtitle= "by contig, experimental treatment, and group") %>% cols_label(group = " ")
+
+calledPeakCounts.conf.gt
+
+write(calledPeakCounts.conf.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_confirmedPeakCounts.html", sep=""))
+
+```
+
+
+We can also look at the peak confirmation rate, that is, the fraction of pooled peaks which are confirmed by an individual peak. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+confirmation_rate.tbl <- inner_join(inner_join(data_sets.df.sparse %>% select(-c(put, day, rep, name)) %>% unique(),confPeakStats_vs_dm6_bwa.count.sprud %>% mutate(experimental=gsub("_","-",experimental)) %>% select(c(experimental, group, total)), by=c("experimental"="experimental")) %>% mutate(confirmed= total) %>% select(-c(total,experimental)), poolPeakStats_vs_dm6_bwa.count.sprud.aug %>%  select(genotype, housing, group, grand_total_peak_count, ) %>% mutate(pooled = grand_total_peak_count) %>% select(-c(grand_total_peak_count)), by=c("genotype"="genotype", "housing" ="housing", "group"="group")) %>% mutate(confirmation_pct = confirmed/pooled) %>% select(c(group, genotype, housing, pooled, confirmed, confirmation_pct))
+
+
+tbl_cnt <- tbl_cnt + 1
+
+confirmationRate.gt <- confirmation_rate.tbl %>% group_by(genotype, housing) %>% gt() %>%  tab_spanner(label="peak counts", columns=vars(pooled, confirmed )) %>% fmt_number(columns = c("pooled", "confirmed"),  decimals = 1, suffixing = T, drop_trailing_zeros = T )  %>% fmt_percent(columns =c("confirmation_pct"), decimals=2,drop_trailing_zeros =T) %>% cols_label(confirmation_pct = "percent confimed",group = " ") %>% tab_header(title=paste("Table ",tbl_cnt, ". Peak Confirmation Rate", sep = ""), subtitle= "by genotype, housing, and group")
+
+confirmationRate.gt
+
+write(confirmationRate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_peakConfirmationRates.html", sep=""))
+
+
+```
+
+
+
+### Scrambled Peaks
+
+asdfasfasdfa
+
+# Results
+
+
+asdfasdfasdf
+
+
+# Bibliography
+```{r echo=FALSE}
+
+citation("topGO")
+citation("ggplot2")
+citation("GGally")
+citation("ggnewscale")
+
+```
+

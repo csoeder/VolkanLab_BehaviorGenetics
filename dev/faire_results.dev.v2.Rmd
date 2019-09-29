@@ -11,3 +11,184 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 6 Aug 2019
 
+
+### Raw Peaks
+
+```{r echo=FALSE}
+
+basicPeakStats_vs_dm6_bwa.size.sprud <- basicPeakStats_vs_dm6_bwa %>% filter(dataType == "width" | dataType == "signal") %>% unite(dataSubtype, dataType, col="measure", sep=" ")  %>% spread(measure, value) %>% select(sample, `avg width`, `std width`, `avg signal`, `std signal`)
+
+basicPeakStats_vs_dm6_bwa.size.sprud.aug <- inner_join(inner_join(basicPeakStats_vs_dm6_bwa.size.sprud, data_sets.df.sparse , by = c("sample"="name")),readcount_process.spread, by=c("sample"="sample") )
+
+	
+grand_mean_peak_width <- mean(basicPeakStats_vs_dm6_bwa.size.sprud$`avg width`)
+grand_mean_signal <- mean(basicPeakStats_vs_dm6_bwa.size.sprud$`avg signal`)
+```
+
+peaks had an average width of $`r human_readable_croncher(grand_mean_peak_width) `$ base pairs. Peaks also had intensity values measuring signal enhancement over the genomic background; these averaged at $`r human_readable_croncher(grand_mean_signal) `$ Both of these values were highly variable within and between samples:
+
+```{r gt, echo=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+PeakSizeStrength.gt <- basicPeakStats_vs_dm6_bwa.size.sprud.aug %>% select(experimental, rep, `avg width`, `std width`, `avg signal`, `std signal`) %>% gt() %>%  tab_spanner(label="width", columns=vars( `avg width`, `std width`)) %>%  tab_spanner(label="signal", columns=vars( `avg signal`, `std signal` )) %>% fmt_number(columns = vars(`avg width`, `std width`, `avg signal`, `std signal` ), decimals = 1, suffixing = F) %>% tab_header(title=paste("Table ",tbl_cnt, ". Peak Size & Signal Strength", sep = ""), subtitle= md("&nbsp;")) %>% cols_label(`avg width` = "avg", `std width` = "std", `avg signal` = "avg", `std signal` = "std" )
+
+PeakSizeStrength.gt
+
+write(PeakSizeStrength.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_peakSizeAndStrength.html", sep=""))
+
+
+```
+
+```{r echo=FALSE}
+
+basicPeakStats_vs_dm6_bwa.full.sprud.aug <- inner_join(basicPeakStats_vs_dm6_bwa.size.sprud.aug, basicPeakStats_vs_dm6_bwa.count.sprud.aug %>% select(-c(experimental,day,rep, total_read_count, total_mapped_count, percent_mapping)), by=c("sample"="sample")  )
+
+
+basicPeakStats_vs_dm6_bwa.full.sprud.aug.names <- basicPeakStats_vs_dm6_bwa.full.sprud.aug %>% names()
+names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- gsub(" ","\n", gsub("_", "\n", basicPeakStats_vs_dm6_bwa.full.sprud.aug %>% names()))
+
+fig_cnt <- fig_cnt + 1
+
+readPeakStatCorr.gg <- ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "std\nwidth", "avg\nsignal", "std\nsignal", "total\nread\ncount", "total\nmapped\ncount", "total\npeak\ncount" )) + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=paste("Figure ",fig_cnt, ". Distributions & Correlations for Read and Peak Stats", sep = ""))
+
+
+
+readPeakStatCorr.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ReadPeakStatCorr.png", sep=""))
+readPeakStatCorr.gg
+dev.off()
+
+
+
+png(height =  500, width = 800, filename = "results/figures/supp/Suppfig_ReadPeakStatCorr_byExp.png")
+ggscatmat(basicPeakStats_vs_dm6_bwa.full.sprud.aug, columns = c("avg\nwidth", "avg\nsignal", "total\nread\ncount", "total\nmapped\ncount", "percent\nmapping",  "total\npeak\ncount" ), color="experimental") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+dev.off()
+
+
+names(basicPeakStats_vs_dm6_bwa.full.sprud.aug) <- basicPeakStats_vs_dm6_bwa.full.sprud.aug.names 
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE}
+raw_called_peaks.df <-as.data.frame(c()) 
+for (nom in data_sets.df.sparse$name) {
+	
+	tmp.df <- read_delim(paste("fSeq/",nom,".vs_dm6.bwa.calledPeaks.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE) %>% select(X1,X2,X3,X7,X10)
+	names(tmp.df) <- c("chrom", "start", "stop", "signal", "center")
+	tmp.df$sample <- as.factor(nom)
+	raw_called_peaks.df <- rbind(raw_called_peaks.df, tmp.df)
+}
+
+raw_called_peaks.df <- raw_called_peaks.df %>% as_tibble()
+raw_called_peaks.df$chrom <- as.factor(raw_called_peaks.df$chrom)
+
+raw_called_peaks.df$peak_width <- raw_called_peaks.df$stop - raw_called_peaks.df$start
+raw_called_peaks.df <- inner_join(raw_called_peaks.df, data_sets.df.sparse, by=c("sample"="name"))
+
+```
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+of the $`r basicPeakStats_vs_dm6_bwa %>% filter(dataType=="count" & dataSubtype == "total") %>% select(value) %>% sum() %>% human_readable_croncher() `$ peaks, $`r raw_called_peaks.df %>% filter(peak_width==0) %>% nrow() %>% human_readable_croncher() `$ had a width of zero
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+```
+There shouldn’t be any peaks that consist of zero bases – if you’re looking at the narrow peak file,
+then the start and end positions should never be the same (which would indicate zero bases). It is a
+zero-based position, so a peak with coordinates chr1:1000-1001 is a 1bp peak at chr1:1001. [...] I’ve
+cc’d Alan Boyle, who wrote the software, to confirm that there should not be any zero-width peaks. I’m
+at a loss here – I don’t think we’ve encountered this before.
+(emails from Terry Furey, 6 Aug 2019)
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+rawPeakSizeStrengthHist.gg <- ggplot(raw_called_peaks.df %>% gather(signal, peak_width, key="measure", value="value")) + geom_histogram(aes(x=value, fill=experimental), bins=50) +facet_grid(chrom~measure, scales="free") + scale_x_log10() + theme_bw() + labs(title=paste("Figure ",fig_cnt, ". Histogram of Peak Width & Signal Strength,\nby Chromosome", sep = ""))
+
+
+rawPeakSizeStrengthHist.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_rawPeakSizeStrengthHist.png", sep=""))
+rawPeakSizeStrengthHist.gg
+dev.off()
+
+```
+
+The consistent spike in peak width in the 47b1-7 experiment, slightly above 1kb, comes from replicate 3. This sample has an order of magnitude more peaks large than 1kb, than the other 15.
+
+```{r echo=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+bigPeaks.gt <- raw_called_peaks.df %>% filter(peak_width > 1000 )  %>% group_by(experimental, rep) %>% summarize(n=n()) %>%  spread(rep, n) %>% ungroup() %>% gt() %>% tab_options(footnote.glyph = c("*")) %>% tab_style(style=cells_styles(text_color='red'), locations=list(cells_data(columns=vars(3), rows=experimental == "47b1-7"))) %>%  tab_footnote(footnote = "  ", locations=list(cells_data(columns=vars(3), rows=experimental == "47b1-7"))) %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of Peaks Larger than 1 kb", sep = ""), subtitle= "by experiment and replicate")
+
+bigPeaks.gt
+
+write(bigPeaks.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_bigPeaks.html", sep=""))
+
+
+```
+
+47b1-7 replicate #3 is only included in the "C" analysis group (Section 2.6). 
+
+
+check intrasample, inter-peak distances: look for potentially non-distinct peaks. 
+```{r echo=FALSE, message=FALSE}
+
+calledPeaks.selfDistance.df <-as.data.frame(c()) 
+for (nom in data_sets.df.sparse$name) {
+	tmp.df <- read_delim(paste("fSeq/closest/all/",nom,".to.",nom,  ".vs_dm6.bwa.closestPeaks.bed", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, guess_max = 1000000)
+	#names(tmp.df) <- c("chrom", "start", "stop", "signal", "center")
+	calledPeaks.selfDistance.df  <- rbind(calledPeaks.selfDistance.df , tmp.df)
+}
+
+calledPeaks.selfDistance.df <- calledPeaks.selfDistance.df  %>% as_tibble() %>% select(c(X1,X2,X3,X7,X10,X11,X12,X13,X17,X20,X21,X22))
+names(calledPeaks.selfDistance.df) <- c("chrom1", "start1", "stop1", "signal1", "center1", "chrom2", "start2", "stop2", "signal2", "center2", "distance", "sample" )
+calledPeaks.selfDistance.df$chrom1 <- as.factor(calledPeaks.selfDistance.df$chrom1)
+calledPeaks.selfDistance.df$chrom2 <- as.factor(calledPeaks.selfDistance.df$chrom2)
+calledPeaks.selfDistance.df$sample <- as.factor(calledPeaks.selfDistance.df$sample)
+
+calledPeaks.selfDistance.df <- inner_join(calledPeaks.selfDistance.df, data_sets.df.sparse, by=c("sample"="name"))
+
+
+```
+
+
+The distance between adjacent peaks within a sample was measured. 
+
+
+```{r echo=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+distanceBtwnAdjacentPeaks.gg <-  ggplot(calledPeaks.selfDistance.df %>% filter(chrom1 != "chrM")) + geom_freqpoly(aes(x=abs(distance), color=rep), bins=50) + facet_grid(experimental ~ chrom1) + scale_x_log10() +theme_bw()+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title = paste("Figure ",fig_cnt, ". Distance Between Adjacent Peaks,\nby sample and replicate", sep = ""), x= "distance (bp)") + theme_bw()
+
+
+distanceBtwnAdjacentPeaks.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_intraSamplePeakDistance.png", sep=""))
+distanceBtwnAdjacentPeaks.gg
+dev.off()
+
+```
+
+Some peaks were very close to other peaks; as many as 20% of peaks were within 10bp of another one, and as many as 65% were within 100 bp:
+
+```{r echo=FALSE}
+closePeaks <- calledPeaks.selfDistance.df %>% filter(abs(distance)<10) %>% group_by(sample) %>% summarise(lessThan10 = n() )
+closePeaks <- cbind( closePeaks, calledPeaks.selfDistance.df %>% filter(abs(distance)<100) %>% group_by(sample) %>% summarise(lessThan100 = n() ) %>% select(lessThan100))
+
+
+tbl_cnt <- tbl_cnt + 1
+
+#closePeaks <- 
+inner_join(closePeaks, basicPeakStats_vs_dm6_bwa.full.sprud.aug, by=c("sample"="sample")) %>% mutate(lessThan10 = lessThan10/total_peak_count, lessThan100 = lessThan100/total_peak_count, potato = "")  %>% select(experimental, rep, lessThan10, lessThan100, potato) %>% group_by(experimental) %>% gt(rowname_col = "potato") %>% fmt_percent(columns=vars(lessThan10, lessThan100), decimals = 1) %>% tab_stubhead_label(label="experimental treatment") %>% cols_label(lessThan10 = "< 10 bp", lessThan100 = "< 100 bp") %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage of Peaks Very Close to Other Peaks", sep = ""), subtitle= "within a sample")
+
+#ggplot(calledPeaks.selfDistance.df %>% mutate(one=stop1-start1, two = stop2-start2, distance=abs(distance)) %>% select(one, two, distance, experimental, rep) %>% gather(one, two, key="peak", value="width") ) + geom_point(aes(x=distance, y=width), alpha=0.1) + facet_grid(.~peak)
+
+```

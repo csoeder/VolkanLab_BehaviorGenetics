@@ -1,0 +1,336 @@
+CG	Name	Source
+CG10101 	Ionotropic receptor 84a (Ir84a) 	George2
+CG10173 	Bestrophin 2 (Best2) 	George
+CG10353 	N/A 	George2
+CG10369	Inwardly rectifying potassium channel 3	cdj
+CG10369 	Inwardly rectifying potassium channel 3 (Irk3) 	George
+CG10537	Resistant to dieldrin	cdj
+CG10537 	Resistant to dieldrin (Rdl) 	George2
+CG1058	ripped pocket	cdj
+CG1058 	ripped pocket (rpk) 	George
+CG10609 	Odorant receptor co-receptor (Orco) 	George2
+CG1063	Inositol 1,4,5,-tris-phosphate receptor	cdj
+CG1063 	Inositol 1,4,5,-tris-phosphate receptor (Itp-r83A) 	George
+CG10633 	Ionotropic receptor 64a (Ir64a) 	George2
+CG10693	slowpoke	cdj
+CG10693 	Slowpoke (Slo) 	George2
+CG10706	small conductance calcium-activated potassium channel	cdj
+CG10706 	Small conductance calcium- activated potassium channel (SK) 	George2
+CG10806	Na+/H+ hydrogen antiporter 1	cdj
+CG10844	Ryanodine receptor	cdj
+CG10844 	Ryanodine receptor (RyR) 	George2
+CG10858	pickpocket 27	cdj
+CG10858 	pickpocket 27 (ppk27) 	George2
+CG10864 	N/A 	George
+CG1090		cdj
+CG1090 	N/A 	George
+CG10952	ether a go-go	cdj
+CG10952 	ether a go go (eag) 	George2
+CG10972	pickpocket 12	cdj
+CG10972 	pickpocket 12 (ppk12) 	George2
+CG10997 	Chloride intracellular channel (Clic) 	George2
+CG11020	no mechanoreceptor potential C	cdj
+CG11155		cdj
+CG11155 	N/A 	George
+CG11163	Zinc transporter 41F	cdj
+CG11209	pickpocket 6	cdj
+CG11340 	pH-sensitive chloride channel 2 (pHCl-2) 	George2
+CG11348 	nicotinic Acetylcholine Receptor β1 (nAChRβ1) 	George
+CG11430	olf186-F	cdj
+CG11575 	Ionotropic receptor 100a (Ir100a) 	George2
+CG11775 	Ionotropic receptor 85a (Ir85a) 	George
+CG11775 	Ionotropic receptor 85a (Ir85a) 	George2
+CG11822 	nicotinic Acetylcholine Receptor β3 (nAChRβ3) 	George
+CG11958	Calnexin 99A	cdj
+CG11984 	Potassium channel modulatory factor 1 (Kcmf1) 	George2
+CG12048	pickpocket 21	cdj
+CG12048 	pickpocket 21 (ppk21) 	George
+CG12048 	pickpocket 21 (ppk21) 	George2
+CG12106		cdj
+CG12178	Na+/H+ hydrogen exchanger 1	cdj
+CG12292	spichthyin	cdj
+CG12295	straightjacket	cdj
+CG12295 	straightjacket (stj) 	George2
+CG12303 	Ionotropic receptor 67b (Ir67b) 	George2
+CG1232	temperature-induced paralytic E	cdj
+CG1232 	temperature-induced paralytic E (tipE) 	George
+CG12327 	Bestrophin 3 (Best3) 	George
+CG12344 	N/A 	George2
+CG12348	Shaker	cdj
+CG12348 	Shaker (Sh) 	George2
+CG12414 	nicotinic Acetylcholine Receptor α4 (nAChRα4) 	George2
+CG12525 	Ionotropic receptor 67a (Ir67a) 	George2
+CG12806	tipE homolog 1	cdj
+CG12806 	tipE homolog 1 (Teh1) 	George2
+CG13195 	Ionotropic receptor 48b (Ir48b) 	George2
+CG13225 	Odorant receptor 47a (Or47a) 	George2
+CG13278	pickpocket 17	cdj
+CG13278 	pickpocket 17 (ppk17) 	George2
+CG13568	pickpocket 29	cdj
+CG13568 	pickpocket 29 (ppk29) 	George2
+CG13762	brivido-3	cdj
+CG13762 	brivido-3 (brv3) 	George
+CG14076 	Ionotropic receptor 75d (Ir75d) 	George2
+CG14239	pickpocket 15	cdj
+CG14239 	pickpocket 15 (ppk15) 	George
+CG1448 	Innexin 3 (Inx3) 	George
+CG14575	Capability receptor	cdj
+CG14585 	Ionotropic receptor 75a (Ir75a) 	George2
+CG14619	Ubiquitin specific protease 2	cdj
+CG14723 	Histamine-gated chloride channel subunit 1 (HsCl1) 	George
+CG15003	tipE homolog 4	cdj
+CG15004	tipE homolog 2	cdj
+CG15004 	tipE homolog 2 (Teh2) 	George2
+CG15121 	Ionotropic receptor 56b (Ir56b) 	George2
+CG1517	narrow abdomen	cdj
+CG1517 	narrow abdomen (na) 	George2
+CG15324 	Ionotropic receptor 7c (Ir7c) 	George
+CG15325 	Ionotropic receptor 7g (Ir7g) 	George2
+CG15326 	Ionotropic receptor 7b (Ir7b) 	George
+CG15551	Copper transporter 1C	cdj
+CG15555	pickpocket 24	cdj
+CG15555 	pickpocket 24 (ppk24) 	George
+CG15627	Ionotropic receptor 25a	cdj
+CG15627 	Ionotropic receptor 25a (Ir25a) 	George2
+CG15685 	Ionotropic receptor 92a (Ir92a) 	George2
+CG15732 	Ionotropic receptor 11a (Ir11a) 	George
+CG15860	painless	cdj
+CG15899 	Ca2+-channel protein α1 subunit T (Ca-α1T) 	George
+CG15899 	Ca2+-channel protein α1 subunit T (Ca-α1T) 	George2
+CG1615 	Open rectifier K+ channel 1 (Ork1) 	George2
+CG16793	brivido-2	cdj
+CG16793 	brivido-2 (brv2) 	George2
+CG1688 	N/A 	George2
+CG17137	Porin2	cdj
+CG17137 	Porin2 	George
+CG17140; CG17139 	N/A 	George
+CG17142	pyrexia	cdj
+CG17336 	Ligand-gated chloride channel homolog 3 (Lcch3) 	George
+CG17381 	Ionotropic receptor 94g (Ir94g) 	George2
+CG17382 	Ionotropic receptor 94h (Ir94h) 	George
+CG17753	Copper chaperone for superoxide dismutase	cdj
+CG17922 	Cyclic nucleotide-gated ion channel subunit B (CngB) 	George
+CG18039	Glutamate receptor IID	cdj
+CG18039 	Glutamate receptor IID (GluRIID) 	George2
+CG18110	pickpocket 30	cdj
+CG18110 	pickpocket 30 (ppk30) 	George
+CG18110 	pickpocket 30 (ppk30) 	George2
+CG18287	pickpocket 19	cdj
+CG18287 	pickpocket 19 (ppk19) 	George2
+CG18345	transient receptor potential-like	cdj
+CG18345 	transient receptor potential-like (trpl) 	George2
+CG1840		cdj
+CG18437 	Uncoordinated 80 (unc80) 	George2
+CG1844	Selenoprotein G	cdj
+CG18549 	N/A 	George2
+CG18660	Nckx30C	cdj
+CG18676	tipE homolog 3	cdj
+CG2121		cdj
+CG2121 	N/A 	George
+CG2121 	N/A 	George2
+CG2177	Zinc/iron regulated transporter-related protein 102B	cdj
+CG2302 	nicotinic Acetylcholine Receptor α3 (nAChRα3) 	George2
+CG2657 	Ionotropic receptor 21a (Ir21a) 	George2
+CG2822	Shaker cognate w	cdj
+CG2822 	Shaker cognate w (Shaw) 	George2
+CG2902	NMDA receptor 1	cdj
+CG2902 	NMDA receptor 1 (Nmdar1) 	George2
+CG30181	pickpocket 3	cdj
+CG30468 	Ionotropic receptor 52c (Ir52c) 	George2
+CG30469 	Ionotropic receptor 52b (Ir52b) 	George2
+CG3078		cdj
+CG31065	pickpocket 31	cdj
+CG31105	pickpocket 22	cdj
+CG31116 	Chloride channel-a (ClC-a) 	George2
+CG31201	Glutamate receptor IIE	cdj
+CG31284	water witch	cdj
+CG31284 	water witch (wtrw) 	George
+CG3182	seizure	cdj
+CG3182 	Seizure (Sei) 	George2
+CG31860	Zinc transporter 33D	cdj
+CG32177	Nedd4 family interacting protein	cdj
+CG32446	Antioxidant 1 copper chaperone	cdj
+CG32451	Secretory Pathway Calcium atpase	cdj
+CG3252	Nutrient Amino Acid Transporter 1	cdj
+CG32538 	nicotinic Acetylcholine Receptor α7 (nAChRα7) 	George2
+CG32557	Multicopper oxidase 4	cdj
+CG32704	Ionotropic receptor 8a	cdj
+CG32704 	Ionotropic receptor 8a (Ir8a) 	George
+CG32792	pickpocket 8	cdj
+CG32810 	insomniac (inc) 	George2
+CG32975 	nicotinic Acetylcholine Receptor α5 (nAChRα5) 	George2
+CG33135	KCNQ potassium channel	cdj
+CG33135 	KCNQ potassium channel 	George2
+CG33289	pickpocket 5	cdj
+CG33348 	Chemosensory protein B 42a (CheB42a) 	George
+CG33349	pickpocket 25	cdj
+CG33349 	pickpocket 25 (ppk25) 	George
+CG33492 	Ionotropic receptor 41a (Ir41a) 	George
+CG33508	pickpocket 13	cdj
+CG33508 	pickpocket 13 (ppk13) 	George
+CG33513	NMDA receptor 2	cdj
+CG33513 	NMDA receptor 2 (Nmdar2) 	George2
+CG33933	I'm not dead yet 2	cdj
+CG33934		cdj
+CG34042	pickpocket 10	cdj
+CG34058	pickpocket 11	cdj
+CG34058 	pickpocket 11 (ppk11) 	George2
+CG34059	pickpocket 16	cdj
+CG34059 	pickpocket 16 (ppk16) 	George2
+CG34143 	Ionotropic receptor 10a (Ir10a) 	George2
+CG34322; CG42447; CG34321 	inaF-A; B; C 	George2
+CG34322; CG42447; CG34321; CG42563 	InaF-A; B; C; D 	George2
+CG34358 	shaking B (ShakB) 	George2
+CG34366	Shaw-like	cdj
+CG34366 	Shaw-like (Shawl) 	George2
+CG34369	pickpocket 9	cdj
+CG34369 	pickpocket 9 (ppk9) 	George2
+CG34396 	N/A 	George
+CG34405	Na channel protein 60E	cdj
+CG34405 	Na channel protein 60E (NaCP60E) 	George2
+CG34413	Na,K-ATPase Interacting	cdj
+CG3478	pickpocket	cdj
+CG3478 	pickpocket (ppk) 	George
+CG3478 	pickpocket (ppk) 	George2
+CG3671	Malvolio	cdj
+CG3725	Sarco/endoplasmic reticulum Ca(2+)-ATPase	cdj
+CG3725 	Sarco/endoplasmic reticulum Ca(2+)-ATPase (SERCA) 	George2
+CG3759	Multicopper oxidase 1	cdj
+CG3814 	Lifeguard (Lfg) 	George
+CG3822 	Kainate-type ionotropic glutamate receptor subunit 1D (KaiR1D) 	George2
+CG3977	Copper transporter 1A	cdj
+CG3979	I'm not dead yet	cdj
+CG4128 	nicotinic Acetylcholine Receptor α6 (nAChRα6) 	George2
+CG42253 	Na+-driven anion exchanger 1 (Ndae1) 	George2
+CG4226	Glutamate receptor IIC	cdj
+CG4226 	Glutamate receptor IIC (GluRIIC) 	George
+CG42260 	N/A 	George2
+CG42297 	Ionotropic receptor 94d (Ir94d) 	George2
+CG42314 	plasma membrane calcium ATPase (PMCA) 	George2
+CG42315 	Ionotropic receptor 93a (Ir93a) 	George2
+CG42340 	N/A 	George2
+CG42345	straw	cdj
+CG42352 	Ionotropic receptor 40a (Ir40a) 	George
+CG42496		cdj
+CG42584 	Ionotropic receptor 76a (Ir76a) 	George
+CG42594 	N/A 	George2
+CG42701 	Cyclic nucleotide-gated ion channel subunit A (CngA) 	George2
+CG42732	slowpoke 2	cdj
+CG42732 	slowpoke 2 (SLO2) 	George2
+CG43128	Shaker cognate b	cdj
+CG43128 	Shaker cognate b (Shab) 	George2
+CG43155 	N/A 	George2
+CG43368	cacophony	cdj
+CG43368 	Cacophony (Cac) 	George
+CG43388	Hyperkinetic	cdj
+CG43388 	Hyperkinetic (Hk) 	George2
+CG43395 	Cyclic nucleotide-gated ion channel-like (CngI) 	George2
+CG43442	Na+/H+ hydrogen antiporter 2	cdj
+CG4356 	muscarinic Acetylcholine Receptor, A-type (mAchR-A) 	George2
+CG4357	sodium chloride cotransporter 69	cdj
+CG4370	Inwardly rectifying potassium channel 2	cdj
+CG4370 	Inwardly rectifying potassium channel 2 (Irk2) 	George
+CG43743 	Glutamate receptor IB (GluRIB) 	George2
+CG43756	Slowpoke binding protein	cdj
+CG44122 	Piezo 	George2
+CG44152	pickpocket 18	cdj
+CG44152 	pickpocket 18 (ppk18) 	George2
+CG44159	Inwardly rectifying potassium channel 1	cdj
+CG44159 	Inwardly rectifying potassium channel 1 (Irk1) 	George
+CG44240	Transient receptor potential cation channel, subfamily M	cdj
+CG44240 	Transient receptor potential cation channel, subfamily M (Trpm) 	George2
+CG4535	FK506-binding protein 59kD	cdj
+CG4536	inactive	cdj
+CG4536 	Inactive (iav) 	George2
+CG4545 	Serotonin transporter (SerT) 	George
+CG4587 	N/A 	George2
+CG4722 	Big brain (bib) 	George2
+CG4805	pickpocket 28	cdj
+CG4805 	pickpocket 28 (ppk28) 	George2
+CG4894	Ca2+-channel protein α1 subunit D	cdj
+CG4894 	Ca2+-channel protein α1 subunit D (Ca-α1D) 	George2
+CG4928		cdj
+CG4928 	N/A 	George2
+CG4994	Mitochondrial phosphate carrier protein 2	cdj
+CG5076	Eag-like K+ channel	cdj
+CG5076 	Eag-like K+ channel (Elk) 	George2
+CG5237 	Uncoordinated 79 (Unc79) 	George2
+CG5284 	Chloride channel-c (ClC-c) 	George2
+CG5610 	nicotinic Acetylcholine Receptor α1 (nAChRα1) 	George2
+CG5621		cdj
+CG5621 	Grik 	George2
+CG5685	Na/Ca-exchange protein	cdj
+CG5685 	Na/Ca-exchange protein (Calx) 	George2
+CG5751	Transient receptor potential cation channel A1	cdj
+CG5751 	Transient receptor potential cation channel A1 (TrpA1) 	George
+CG5842	nanchung	cdj
+CG5842 	nanchung (nan) 	George
+CG5959	Multicopper oxidase 3	cdj
+CG5996	Transient receptor potential cation channel γ	cdj
+CG5996 	Transient receptor potential cation channel γ (Trpγ) 	George2
+CG6151	flower	cdj
+CG6151 	Flower (Few) 	George2
+CG6185 	Ionotropic receptor 68a (Ir68a) 	George2
+CG6264 	Bestrophin 1 (Best1) 	George2
+CG6410	Sorting nexin 16	cdj
+CG6647	porin	cdj
+CG6647 	Porin 	George2
+CG6798 	nicotinic Acetylcholine Receptor β2 (nAChRβ2) 	George2
+CG6817	fear-of-intimacy	cdj
+CG6844 	nicotinic Acetylcholine Receptor α2 (nAChRα2) 	George
+CG6927 	N/A 	George
+CG6938 	N/A 	George2
+CG6992	Glutamate receptor IIA	cdj
+CG6992 	Glutamate receptor IIA (GluRIIA) 	George2
+CG7177	Wnk kinase	cdj
+CG7234	Glutamate receptor IIB	cdj
+CG7234 	Glutamate receptor IIB (GluRIIB) 	George2
+CG7259 	Bestrophin 4 (Best 4) 	George2
+CG7309		cdj
+CG7385 	Ionotropic receptor 76b (Ir76b) 	George2
+CG7446	Glycine receptor	cdj
+CG7446 	Glycine receptor (Grd) 	George2
+CG7459	Copper transporter 1B	cdj
+CG7535 	GluClα 	George2
+CG7577	pickpocket 20	cdj
+CG7577 	pickpocket 20 (ppk20) 	George2
+CG7589 	N/A 	George
+CG7816	Zinc/iron regulated transporter-related protein 99C	cdj
+CG7875	transient receptor potential	cdj
+CG7875 	Transient receptor potential (trp) 	George2
+CG8178	Nach	cdj
+CG8442 	Glutamate receptor IA (GluRIA) 	George2
+CG8527	pickpocket 23	cdj
+CG8527 	pickpocket 23 (ppk23) 	George2
+CG8546	pickpocket 26	cdj
+CG8546 	pickpocket 26 (ppk26) 	George
+CG8585	Ih channel	cdj
+CG8585 	Ih channel (Ih) 	George2
+CG8594 	Chloride channel-b (ClC-b) 	George2
+CG8681	clumsy	cdj
+CG8681 	Clumsy 	George
+CG8713 	sandman (sand) 	George
+CG8726		cdj
+CG8743	Transient receptor potential cation channel, mucolipin	cdj
+CG8743 	Transient receptor potential cation channel, mucolipin (TrmpI) 	George
+CG8885	Synthesis of cytochrome c oxidase	cdj
+CG8916 	N/A 	George
+CG9065		cdj
+CG9090	Mitochondrial phosphate carrier protein 1	cdj
+CG9126	Stromal interaction molecule	cdj
+CG9126 	Stromal interaction molecule (Stim) 	George
+CG9194 	N/A 	George
+CG9262	Shaker cognate l	cdj
+CG9262 	Shaker cognate l (ShaI) 	George2
+CG9361 	TWIK-related acid-sensitive K+ channel 7 (Task7) 	George
+CG9472	brivido-1	cdj
+CG9472 	brivido-1 (brv1) 	George
+CG9499	pickpocket 7	cdj
+CG9499 	pickpocket 7 (ppk7) 	George
+CG9501	pickpocket 14	cdj
+CG9501 	pickpocket 14 (ppk14) 	George
+CG9637 	TWIK-related acid-sensitive K+ channel 6 (Task6) 	George2
+CG9907 	Paralytic (Para) 	George2
+CG9907 	Paralytic (Para) 	George2
+CG9935	Eye-enriched kainate receptor	cdj
+CG9935 	Eye-enriched kainate receptor (Ekar) 	George2

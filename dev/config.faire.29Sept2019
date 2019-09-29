@@ -1,0 +1,234 @@
+data_sets:
+    - name: 47b1_7_in
+      path: FASTQ/47b1_7/input/
+      readsfile: 47b1_7_input_CTTGTA_S11_L001_R1_001.fastq
+      experimental: 47b1_7
+      genotype: 47b1
+      housing: group
+      day: 7
+      rep: input
+      put: in
+      subgroups: [all,A,B,C]
+    - name: 47b1_7_r1
+      path: FASTQ/47b1_7/rep_1/
+      readsfile: 47b1_7_1_GATCAG_S1_L001_R1_001.fastq
+      experimental: 47b1_7
+      genotype: 47b1
+      housing: group
+      day: 7
+      rep: 1
+      put: out
+      subgroups: [all,A,B,C]
+    - name: 47b1_7_r2
+      path: FASTQ/47b1_7/rep_2/
+      readsfile: 47b1_7_2_TAGCTT_S2_L001_R1_001.fastq
+      experimental: 47b1_7
+      genotype: 47b1
+      housing: group
+      day: 7
+      rep: 2
+      put: out
+      subgroups: [all,A,B,C]
+    - name: 47b1_7_r3
+      path: FASTQ/47b1_7/rep_3/
+      readsfile: 47b1_7_3_GGCTAC_S10_L001_R1_001.fastq
+      experimental: 47b1_7
+      genotype: 47b1
+      housing: group
+      day: 7
+      rep: 3
+      put: out
+      subgroups: [all,C]
+    - name: Fru7_in
+      path: FASTQ/Fru7/input/
+      readsfile: Fru7_input_ATTCCT_S15_L001_R1_001.fastq  
+      experimental: Fru7
+      genotype: Fru
+      housing: group
+      day: 7
+      rep: input
+      put: in
+      subgroups: [all,A,B,C]
+    - name: Fru7_r1
+      path: FASTQ/Fru7/rep_1/
+      readsfile: Fru7_1_CGTACG_S12_L001_R1_001.fastq
+      experimental: Fru7
+      genotype: Fru
+      housing: group
+      day: 7
+      rep: 1
+      put: out
+      subgroups: [all,A,B,C]
+    - name: Fru7_r2
+      path: FASTQ/Fru7/rep_2/
+      readsfile: Fru7_2_GAGTGG_S13_L001_R1_001.fastq 
+      experimental: Fru7
+      genotype: Fru
+      housing: group
+      day: 7
+      rep: 2
+      put: out
+      subgroups: [all,B,C]
+    - name: Fru7_r3
+      path: FASTQ/Fru7/rep_3/
+      readsfile: Fru7_3_ACTGAT_S14_L001_R1_001.fastq 
+      experimental: Fru7
+      genotype: Fru
+      housing: group
+      day: 7
+      rep: 3
+      put: out
+      subgroups: [all,A,B,C]
+    - name: GH7_in
+      path: FASTQ/GH7/input/
+      readsfile: GH7_input_TGACCA_S7_L001_R1_001.fastq  
+      experimental: GH7
+      genotype: wt
+      housing: group
+      day: 7
+      rep: input
+      put: in
+      subgroups: [all,A,B,C]
+    - name: GH7_r1
+      path: FASTQ/GH7/rep_1/
+      readsfile: GH7_1_ATCACG_S16_L001_R1_001.fastq 
+      experimental: GH7
+      genotype: wt
+      housing: group
+      day: 7
+      rep: 1
+      put: out
+      subgroups: [all,C]
+    - name: GH7_r2
+      path: FASTQ/GH7/rep_2/
+      readsfile: GH7_2_CGATGT_S9_L001_R1_001.fastq 
+      experimental: GH7
+      genotype: wt
+      housing: group
+      day: 7
+      rep: 2
+      put: out
+      subgroups: [all,A,B,C]
+    - name: GH7_r3
+      path: FASTQ/GH7/rep_3/
+      readsfile: GH7_3_TTAGGC_S8_L001_R1_001.fastq
+      experimental: GH7
+      genotype: wt
+      housing: group
+      day: 7
+      rep: 3
+      put: out
+      subgroups: [all,A,B,C]
+    - name: SH7_in
+      path: FASTQ/SH7/input/
+      readsfile: SH7_input_ACTTGA_S3_L001_R1_001.fastq
+      experimental: SH7
+      genotype: wt
+      housing: single
+      day: 7
+      rep: input
+      put: in
+      subgroups: [all,A,B,C]
+    - name: SH7_r1
+      path: FASTQ/SH7/rep_1/
+      readsfile: SH7_1_ACAGTG_S6_L001_R1_001.fastq 
+      experimental: SH7
+      genotype: wt
+      housing: single
+      day: 7
+      rep: 1
+      put: out
+      subgroups: [all,B,C]
+    - name: SH7_r2
+      path: FASTQ/SH7/rep_2/
+      readsfile: SH7_2_GCCAAT_S5_L001_R1_001.fastq 
+      experimental: SH7
+      genotype: wt
+      housing: single
+      day: 7
+      rep: 2
+      put: out
+      subgroups: [all,A,B,C]
+    - name: SH7_r3
+      path: FASTQ/SH7/rep_3/
+      readsfile: SH7_3_CAGATC_S4_L001_R1_001.fastq 
+      experimental: SH7
+      genotype: wt
+      housing: single
+      day: 7
+      rep: 3
+      put: out
+      subgroups: [all,A,B,C]
+
+
+reference_genomes:
+    - name: dm6
+      species: drosophila melanogaster
+      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa
+      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa.fai
+      source: UCSC Genome Browser
+
+annotations:
+    - name: dm6_genes
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.bed
+      derived: False
+    - name: dm6_repeats
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dm6.repeatMasker.main.bed
+      derived: False
+    - name: ionotropic
+      bed_path: utils/annotations/ionotropic.bed
+      base: dm6_genes
+      derived: True
+    - name: nervSysDev
+      bed_path: utils/annotations/nervSysDev.bed
+      base: dm6_genes
+      derived: True
+    - name: histoneMod
+      bed_path: utils/annotations/histoneMod.bed
+      base: dm6_genes
+      derived: True
+    - name: mating
+      bed_path: utils/annotations/mating.bed
+      base: dm6_genes
+      derived: True
+    - name: synapseSig
+      bed_path: utils/annotations/synapseSig.bed
+      base: dm6_genes
+      derived: True
+
+gene_queries:
+    - name: ionotropic
+      list_path: utils/geneLists/ionotropic_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionotropic.bed
+    - name: nervSysDev
+      list_path: utils/geneLists/nervSysDev_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/nervSysDev.bed
+    - name: histoneMod
+      list_path: utils/geneLists/histoneMod_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/histoneMod.bed
+    - name: mating
+      list_path: utils/geneLists/mating_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/mating.bed
+    - name: synapseSig
+      list_path: utils/geneLists/synapseSig_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/synapseSig.bed
+
+
+
+distance_divisions:
+    - num: 0
+      distance: 0
+    - num: 1
+      distance: 100
+    - num: 2
+      distance: 1000
+    - num: 3
+      distance: 20000
+    - num: 4
+      distance: 1000000000000000000000000000000000000
+
