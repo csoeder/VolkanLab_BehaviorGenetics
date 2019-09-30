@@ -1,164 +1,220 @@
 data_sets:
-    - name: 47b1_7_in
-      path: FASTQ/47b1_7/input/
-      readsfile: 47b1_7_input_CTTGTA_S11_L001_R1_001.fastq
-      experimental: 47b1_7
-      genotype: 47b1
-      housing: group
-      day: 7
-      rep: input
-      put: in
-      subgroups: [all,A,B,C]
-    - name: 47b1_7_r1
-      path: FASTQ/47b1_7/rep_1/
-      readsfile: 47b1_7_1_GATCAG_S1_L001_R1_001.fastq
-      experimental: 47b1_7
-      genotype: 47b1
-      housing: group
-      day: 7
+    - name: 5D_47B1MUT_1
+      path: FASTQ/RNAseq/47B1MUT_5D/rep1/
+      paired: True
+      readsfile1: 5D_47B1MUT_1_TGGACTCT-CCGTAAGA_S5_L002_R1_001.fastq
+      readsfile2: 5D_47B1MUT_1_TGGACTCT-CCGTAAGA_S5_L002_R2_001.fastq
       rep: 1
-      put: out
-      subgroups: [all,A,B,C]
-    - name: 47b1_7_r2
-      path: FASTQ/47b1_7/rep_2/
-      readsfile: 47b1_7_2_TAGCTT_S2_L001_R1_001.fastq
-      experimental: 47b1_7
-      genotype: 47b1
+      day: 5
+      genotype: 47B1MUT
       housing: group
-      day: 7
+    - name: 5D_47B1MUT_2
+      path: FASTQ/RNAseq/47B1MUT_5D/rep2/
+      paired: True
+      readsfile1: 5D_47B1MUT_2_GTCGAAGA-CAATGTGG_S6_L002_R1_001.fastq
+      readsfile2: 5D_47B1MUT_2_GTCGAAGA-CAATGTGG_S6_L002_R2_001.fastq
       rep: 2
-      put: out
-      subgroups: [all,A,B,C]
-    - name: 47b1_7_r3
-      path: FASTQ/47b1_7/rep_3/
-      readsfile: 47b1_7_3_GGCTAC_S10_L001_R1_001.fastq
-      experimental: 47b1_7
-      genotype: 47b1
+      day: 5
+      genotype: 47B1MUT
       housing: group
-      day: 7
+    - name: 5D_47B1MUT_3
+      path: FASTQ/RNAseq/47B1MUT_5D/rep3/
+      paired: True
+      readsfile1: 5D_47B1MUT_3_GTCATCGA-AGTGGATC_S7_L002_R1_001.fastq
+      readsfile2: 5D_47B1MUT_3_GTCATCGA-AGTGGATC_S7_L002_R2_001.fastq
       rep: 3
-      put: out
-      subgroups: [all,C]
-    - name: Fru7_in
-      path: FASTQ/Fru7/input/
-      readsfile: Fru7_input_ATTCCT_S15_L001_R1_001.fastq  
-      experimental: Fru7
-      genotype: Fru
+      day: 5
+      genotype: 47B1MUT
       housing: group
-      day: 7
-      rep: input
-      put: in
-      subgroups: [all,A,B,C]
-    - name: Fru7_r1
-      path: FASTQ/Fru7/rep_1/
-      readsfile: Fru7_1_CGTACG_S12_L001_R1_001.fastq
-      experimental: Fru7
-      genotype: Fru
-      housing: group
-      day: 7
+    - name: 5D_88A47B2MUT_1
+      path: FASTQ/RNAseq/88A47B2MUT_5D/rep1/
+      paired: True
+      readsfile1: 5D_88A47B2MUT_1_GATGTGTG-CATGGCTA_S8_L002_R1_001.fastq
+      readsfile2: 5D_88A47B2MUT_1_GATGTGTG-CATGGCTA_S8_L002_R2_001.fastq
       rep: 1
-      put: out
-      subgroups: [all,A,B,C]
-    - name: Fru7_r2
-      path: FASTQ/Fru7/rep_2/
-      readsfile: Fru7_2_GAGTGG_S13_L001_R1_001.fastq 
-      experimental: Fru7
-      genotype: Fru
+      day: 5
+      genotype: 88A47B2MUT
       housing: group
-      day: 7
+    - name: 5D_88A47B2MUT_2
+      path: FASTQ/RNAseq/88A47B2MUT_5D/rep2/
+      paired: True
+      readsfile1: 5D_88A47B2MUT_2_ACGACTTG-TCGCTGTT_S9_L002_R1_001.fastq
+      readsfile2: 5D_88A47B2MUT_2_ACGACTTG-TCGCTGTT_S9_L002_R2_001.fastq
       rep: 2
-      put: out
-      subgroups: [all,B,C]
-    - name: Fru7_r3
-      path: FASTQ/Fru7/rep_3/
-      readsfile: Fru7_3_ACTGAT_S14_L001_R1_001.fastq 
-      experimental: Fru7
-      genotype: Fru
+      day: 5
+      genotype: 88A47B2MUT
       housing: group
-      day: 7
+    - name: 5D_88A47B2MUT_3
+      path: FASTQ/RNAseq/88A47B2MUT_5D/rep3/
+      paired: True
+      readsfile1: 5D_88A47B2MUT_3_TGCTTCCA-ATCGATCG_S10_L002_R1_001.fastq
+      readsfile2: 5D_88A47B2MUT_3_TGCTTCCA-ATCGATCG_S10_L002_R2_001.fastq
       rep: 3
-      put: out
-      subgroups: [all,A,B,C]
-    - name: GH7_in
-      path: FASTQ/GH7/input/
-      readsfile: GH7_input_TGACCA_S7_L001_R1_001.fastq  
-      experimental: GH7
-      genotype: wt
+      day: 5
+      genotype: 88A47B2MUT
       housing: group
-      day: 7
-      rep: input
-      put: in
-      subgroups: [all,A,B,C]
-    - name: GH7_r1
-      path: FASTQ/GH7/rep_1/
-      readsfile: GH7_1_ATCACG_S16_L001_R1_001.fastq 
-      experimental: GH7
-      genotype: wt
-      housing: group
-      day: 7
+    - name: 5D_88AMUT_1
+      path: FASTQ/RNAseq/88AMUT_5D/rep1/
+      paired: True
+      readsfile1: 5D_88AMUT_1_ACCACGAT-TTGCAGAC_S11_L002_R1_001.fastq
+      readsfile2: 5D_88AMUT_1_ACCACGAT-TTGCAGAC_S11_L002_R2_001.fastq
       rep: 1
-      put: out
-      subgroups: [all,C]
-    - name: GH7_r2
-      path: FASTQ/GH7/rep_2/
-      readsfile: GH7_2_CGATGT_S9_L001_R1_001.fastq 
-      experimental: GH7
-      genotype: wt
+      day: 5
+      genotype: 88AMUT
       housing: group
-      day: 7
+    - name: 5D_88AMUT_2
+      path: FASTQ/RNAseq/88AMUT_5D/rep2/
+      paired: True
+      readsfile1: 5D_88AMUT_2_AGCACTTC-TTGGACGT_S12_L002_R1_001.fastq
+      readsfile2: 5D_88AMUT_2_AGCACTTC-TTGGACGT_S12_L002_R2_001.fastq
       rep: 2
-      put: out
-      subgroups: [all,A,B,C]
-    - name: GH7_r3
-      path: FASTQ/GH7/rep_3/
-      readsfile: GH7_3_TTAGGC_S8_L001_R1_001.fastq
-      experimental: GH7
-      genotype: wt
+      day: 5
+      genotype: 88AMUT
       housing: group
-      day: 7
+    - name: 5D_88AMUT_3
+      path: FASTQ/RNAseq/88AMUT_5D/rep3/
+      paired: True
+      readsfile1: 5D_88AMUT_3_TTGCGAAG-AGCGTGTT_S13_L002_R1_001.fastq
+      readsfile2: 5D_88AMUT_3_TTGCGAAG-AGCGTGTT_S13_L002_R2_001.fastq
       rep: 3
-      put: out
-      subgroups: [all,A,B,C]
-    - name: SH7_in
-      path: FASTQ/SH7/input/
-      readsfile: SH7_input_ACTTGA_S3_L001_R1_001.fastq
-      experimental: SH7
-      genotype: wt
-      housing: single
-      day: 7
-      rep: input
-      put: in
-      subgroups: [all,A,B,C]
-    - name: SH7_r1
-      path: FASTQ/SH7/rep_1/
-      readsfile: SH7_1_ACAGTG_S6_L001_R1_001.fastq 
-      experimental: SH7
-      genotype: wt
-      housing: single
-      day: 7
+      day: 5
+      genotype: 88AMUT
+      housing: group
+    - name: 7D_47B1MUT_1
+      path: FASTQ/RNAseq/47B1MUT_7D/rep1/
+      paired: True
+      readsfile1: 7D_47B1MUT_1_GTTGACCT-AAGCACTG_S14_L002_R1_001.fastq
+      readsfile2: 7D_47B1MUT_1_GTTGACCT-AAGCACTG_S14_L002_R2_001.fastq
       rep: 1
-      put: out
-      subgroups: [all,B,C]
-    - name: SH7_r2
-      path: FASTQ/SH7/rep_2/
-      readsfile: SH7_2_GCCAAT_S5_L001_R1_001.fastq 
-      experimental: SH7
-      genotype: wt
-      housing: single
       day: 7
+      genotype: 47B1MUT
+      housing: group
+    - name: 7D_47B1MUT_2
+      path: FASTQ/RNAseq/47B1MUT_7D/rep2/
+      paired: True
+      readsfile1: 7D_47B1MUT_2_CACCTGTT-GCTATCCT_S15_L002_R1_001.fastq
+      readsfile2: 7D_47B1MUT_2_CACCTGTT-GCTATCCT_S15_L002_R2_001.fastq
       rep: 2
-      put: out
-      subgroups: [all,A,B,C]
-    - name: SH7_r3
-      path: FASTQ/SH7/rep_3/
-      readsfile: SH7_3_CAGATC_S4_L001_R1_001.fastq 
-      experimental: SH7
-      genotype: wt
-      housing: single
       day: 7
+      genotype: 47B1MUT
+      housing: group
+    - name: 7D_47B1MUT_3
+      path: FASTQ/RNAseq/47B1MUT_7D/rep3/
+      paired: True
+      readsfile1: 7D_47B1MUT_3_ACTCTCGA-TGGTACAG_S16_L002_R1_001.fastq
+      readsfile2: 7D_47B1MUT_3_ACTCTCGA-TGGTACAG_S16_L002_R2_001.fastq
       rep: 3
-      put: out
-      subgroups: [all,A,B,C]
+      day: 7
+      genotype: 47B1MUT
+      housing: group
+    - name: 7D_67DMUT_1
+      path: FASTQ/RNAseq/67DMUT_7D/rep1/
+      paired: True
+      readsfile1: 7D_67DMUT_1_AGTTCGTC-GATCGAGT_S17_L002_R1_001.fastq
+      readsfile2: 7D_67DMUT_1_AGTTCGTC-GATCGAGT_S17_L002_R2_001.fastq
+      rep: 1
+      day: 7
+      genotype: 67DMUT
+      housing: group
+    - name: 7D_67DMUT_2
+      path: FASTQ/RNAseq/67DMUT_7D/rep2/
+      paired: True
+      readsfile1: 7D_67DMUT_2_CGCAATCT-ATGCCTGT_S18_L002_R1_001.fastq
+      readsfile2: 7D_67DMUT_2_CGCAATCT-ATGCCTGT_S18_L002_R2_001.fastq
+      rep: 2
+      day: 7
+      genotype: 67DMUT
+      housing: group
+    - name: 7D_67DMUT_3
+      path: FASTQ/RNAseq/67DMUT_7D/rep3/
+      paired: True
+      readsfile1: 7D_67DMUT_3_CGTGTGTA-TTCGTTGG_S19_L002_R1_001.fastq
+      readsfile2: 7D_67DMUT_3_CGTGTGTA-TTCGTTGG_S19_L002_R2_001.fastq
+      rep: 3
+      day: 7
+      genotype: 67DMUT
+      housing: group
+    - name: 7D_GROUPHOUSE_1
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
+      paired: True
+      readsfile1: 7D_GROUPHOUSE_1_CTGATCGT-ATATGCGC_S20_L002_R1_001.fastq
+      readsfile2: 7D_GROUPHOUSE_1_CTGATCGT-ATATGCGC_S20_L002_R2_001.fastq
+      rep: 1
+      day: 7
+      genotype: wt
+      housing: group
+    - name: 7D_GROUPHOUSE_2
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
+      paired: True
+      readsfile1: 7D_GROUPHOUSE_2_TACGCTAC-ATCACACG_S21_L002_R1_001.fastq
+      readsfile2: 7D_GROUPHOUSE_2_TACGCTAC-ATCACACG_S21_L002_R2_001.fastq
+      rep: 2
+      day: 7
+      genotype: wt
+      housing: group
+    - name: 7D_GROUPHOUSE_3
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
+      paired: True
+      readsfile1: 7D_GROUPHOUSE_3_CCTTGATC-ACTCCATC_S22_L002_R1_001.fastq
+      readsfile2: 7D_GROUPHOUSE_3_CCTTGATC-ACTCCATC_S22_L002_R2_001.fastq
+      rep: 3
+      day: 7
+      genotype: wt
+      housing: group
+    - name: 7D_ISOLATED_1
+      path: FASTQ/RNAseq/ISOLATED_7D/rep1/
+      paired: True
+      readsfile1: 7D_ISOLATED_1_TGTGACTG-GATAGGCT_S23_L002_R1_001.fastq
+      readsfile2: 7D_ISOLATED_1_TGTGACTG-GATAGGCT_S23_L002_R2_001.fastq
+      rep: 1
+      day: 7
+      genotype: wt
+      housing: isolated
+    - name: 7D_ISOLATED_2
+      path: FASTQ/RNAseq/ISOLATED_7D/rep2/
+      paired: True
+      readsfile1: 7D_ISOLATED_2_GAGCAGTA-ACAGCTCA_S24_L002_R1_001.fastq
+      readsfile2: 7D_ISOLATED_2_GAGCAGTA-ACAGCTCA_S24_L002_R2_001.fastq
+      rep: 2
+      day: 7
+      genotype: wt
+      housing: isolated
+    - name: 7D_ISOLATED_3
+      path: FASTQ/RNAseq/ISOLATED_7D/rep3/
+      paired: True
+      readsfile1: 7D_ISOLATED_3_TGGTAGCT-CAACACCT_S25_L002_R1_001.fastq
+      readsfile2: 7D_ISOLATED_3_TGGTAGCT-CAACACCT_S25_L002_R2_001.fastq
+      rep: 3
+      day: 7
+      genotype: wt
+      housing: isolated
+    - name: FRULEXAFRU440_1_CTTCGACT-GCAAGATC
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
+      paired: True
+      readsfile1: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R1_001.fastq
+      readsfile2: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R2_001.fastq
+      rep: 1
+      day: 666
+      genotype: FRULEXAFRU440
+      housing: group
+    - name: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
+      paired: True
+      readsfile1: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC_S27_L002_R1_001.fastq
+      readsfile2: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC_S27_L002_R2_001.fastq
+      rep: 2
+      day: 666
+      genotype: FRULEXAFRU440
+      housing: group
+    - name: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
+      paired: True
+      readsfile1: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT_S28_L002_R1_001.fastq
+      readsfile2: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT_S28_L002_R2_001.fastq
+      rep: 3
+      day: 666
+      genotype: FRULEXAFRU440
+      housing: group
 
 
 reference_genomes:
@@ -218,17 +274,4 @@ gene_queries:
       base: dm6_genes
       bed_path: utils/annotations/synapseSig.bed
 
-
-
-distance_divisions:
-    - num: 0
-      distance: 0
-    - num: 1
-      distance: 100
-    - num: 2
-      distance: 1000
-    - num: 3
-      distance: 20000
-    - num: 4
-      distance: 1000000000000000000000000000000000000
 
