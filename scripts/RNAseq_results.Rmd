@@ -1,0 +1,604 @@
+---
+title: "Volkan Lab Behavioral Genetics RNA-Seq"
+author: "Charlie Soeder"
+date: "10/11/2019"
+output:
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document: default
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/VolkanLab_BehaviorGenetics/')
+#knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/VolkanLab_BehaviorGenetics/')
+knitr::opts_knit$set(root.dir=peaDubDee)
+#install.packages("remotes")
+#remotes::install_github("rstudio/gt")
+
+#library("biomaRt")
+#library("org.Dm.eg.db")
+#devtools::install_github("haleyjeppson/ggmosaic")
+#library("ggmosaic")
+
+library("yaml")
+library("readr")
+library("tidyverse")
+#library("ggnewscale")
+#library("scales")
+
+library("gt")
+#library("GGally")
+
+```
+
+
+
+
+
+```{r include=FALSE}
+
+human_readable_croncher <- function(num_in) {
+	dig <- 3
+	num_out <- formatC(num_in, digits=dig, format='g') %>% as.numeric() %>% sitools::f2si()
+	return(num_out)
+}
+
+bam_summary_loader <- function(filename, aligner="mapsplice", reference='dm6'){
+	
+	tmp.df <- read_delim(filename, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	names(tmp.df) <- c("sample","measure","value")
+	
+	tmp.df$sample <- as.factor(tmp.df$sample)
+	tmp.df$measure <- as.factor(tmp.df$measure)
+	tmp.df$aligner <- as.factor(aligner)
+	tmp.df$reference <- as.factor(reference)
+	
+	return(tmp.df)
+	
+}
+
+fig_cnt <- 0
+tbl_cnt <- 0
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+#tbl_cnt <- tbl_cnt + 1
+#thing.gt <- asdfasdfasdf
+#thing.gt
+#write(thing.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_thing.html", sep=""))
+
+
+```
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+# fig_cnt <- fig_cnt + 1
+# thing.gg <- asdfasdfasd
+# thing.gg
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+# Introduction
+
+words words
+
+
+
+# Materials, Methods, Data, Software
+
+```{r include=FALSE}
+
+trammel <- read_yaml("config.yaml")
+
+```
+generic overview words
+
+## Reference Genomes
+
+
+```{r include=FALSE, echo = FALSE, message=FALSE}
+refGenomes_summary_df <- read_delim("summaries/reference_genomes.summary", 
+    "\t", escape_double = FALSE, col_names = FALSE, 
+    trim_ws = TRUE)
+
+names(refGenomes_summary_df) <- c("refGenome","measure","value")
+
+```
+
+The dm6.13 reference genome was used for read alignment:
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Drosophila Melanogaster") %>%   fmt_number(columns = vars(dm6v13),suffixing = TRUE, decimals=0) %>% cols_label(measure = " ", dm6v13 = " ")
+
+refGenomes_summary.gt
+
+write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
+
+```
+
+
+## Reference Annotations
+
+Reference annotations were used to define gene locii for differential expression analysis:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+
+ref_ann.stats <- read_delim("summaries/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(ref_ann.stats) <- c("annot", "measure", "type", "value")
+
+tbl_cnt <- tbl_cnt + 1
+ref_ann.stats.gt <- ref_ann.stats %>%  filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Reference Annotations and their Sizes", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
+
+ref_ann.stats.gt
+
+write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationSummary.html", sep=""))
+
+```
+
+
+In addition to the full annotations, subsets containing prespecified genes of interest will also be used.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+
+geneLists.stats <- read_delim("summaries/geneLists.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(geneLists.stats) <- c("query", "annot", "measure", "type", "value")
+geneLists.stats$query <- as.factor(geneLists.stats$query)
+geneLists.stats$annot <- as.factor(geneLists.stats$annot)
+geneLists.stats$measure <- as.factor(geneLists.stats$measure)
+geneLists.stats$type <- as.factor(geneLists.stats$type)
+
+geneList.tbl <-  geneLists.stats %>% filter(measure == "count") %>% unite(measure, type, measure, sep=" ") %>% select(c(query,measure,value)) 
+
+geneList.tbl <- rbind(geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="count" & type=="annotated"), ref_ann.stats %>% filter(measure=="count" & type=="total"), by=c("annot" = "annot"), suffix=c("", ".ann")) %>% mutate(measure = "percent of annotations", value=value/value.ann) %>% select(query, measure, value))
+
+geneList.tbl <- rbind( geneList.tbl, geneLists.stats %>%  filter(measure == "size") %>% filter(type == "total" | type == "avg") %>% unite(measure, type, measure, sep=" ") %>% select(query, measure, value)) 
+
+geneList.tbl <- rbind(geneList.tbl, geneLists.stats %>% filter(measure=="size" & type == "total") %>%  mutate(value = value/(refGenomes_summary_df %>% filter(measure=="number_bases") %>% select(value) %>% as.numeric() ) ) %>%  unite(measure, type, measure, sep=" ") %>% select(-c(annot)) %>% mutate(measure = "percent genome size") )
+
+
+geneList.tbl <- rbind( geneList.tbl, inner_join(geneLists.stats %>% filter(measure=="size" & type == "total"), ref_ann.stats %>% filter(measure=="size" & type == "total"), by = c("annot" = "annot")) %>% mutate(value=value.x/value.y, measure = "percent annotation size") %>% select(query, measure, value) ) %>% mutate(measure=factor(measure, levels = c("total count","annotated count","percent of annotations","total size","avg size","percent genome size","percent annotation size")))
+
+
+```
+
+Here are those subsets and their sizes:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+geneList.gt<- geneList.tbl %>% spread(query, value) %>% gt() %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "size"), decimals=1, suffixing=T) %>% fmt_number(columns=seq(2,6), rows=str_detect(measure, "count"), decimals=0, suffixing=T)  %>% fmt_percent(columns=seq(2,6), rows=str_detect(measure, "percent"), decimals=1) %>% tab_header(title=paste("Table ",tbl_cnt, ". Predefined Subsets of Gene Annotation", sep = ""), subtitle= md("&nbsp;"))
+
+geneList.gt
+
+write(geneList.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_geneListSummary.html", sep=""))
+```
+
+
+### Ionotropic
+
+A list of ionotropic receptors supplied by Corbin via Flybase & George et al 2019  (email 28 May 2019). This contained 335 entries, some with mutiple genes, some not unique. Once merged & uniqued : 246
+Annotation symbols (CGxxxxx) converted to FlyBase gene games (FBgnxxxx) using flybase ID converter (http://flybase.org/convert/id) 
+
+239 converted cleanly; 5 had duplicate conversions and were corrected by hand:
+```
+CG11430 is FBgn0041585, not FBgn0050323
+CG43368 is FBgn0263111, not FBgn0041188
+CG8885 is FBgn0262467, not FBgn0081377
+CG9090 is FBgn0034497, not FBgn0082745
+CG9126 is FBgn0045073, not FBgn0053180
+```
+
+Two were corrected to be consistent with the dm6_genes annotation:
+```
+CG9907 (para), is listed as FBgn0264255 not FBgn0285944
+CG42345 (straw) is listed as FBgn0259247 (laccase2)
+```
+
+### Derived from GO terms
+
+```
+Sub Pull out by particular GO terms?
+o Nervous system development - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007399 
+o Mating - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0007618
+o Histone modification - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0016570 
+o Dna-binding transcription factor - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0003700 
+o Synaptic signaling - http://flybase.org/cgi-bin/cvreport.pl?rel=is_a&id=GO:0099536 
+o Synapse organization - http://flybase.org/cgi-bin/cvreport.pl?id=GO%3A0050808
+```
+(Bryson, email 24 July 2019)
+
+melanogaster-specific genes with these GO terms were retrieved using the FlyBase QueryBuilder. 
+
+
+Nervous System Development:
+```
+nrd, FBgn0002967, no annotated gene model
+l(2)23Ab, FBgn0014978, same
+aloof, FBgn0020609, same
+Imp, FBgn0285926, is FBgn0262735
+```
+
+Mating:
+```
+Only three, but all good
+```
+
+synapse signalling
+```
+1 gene
+```
+
+Histone modification, DNA trans factor act, synapse org
+```
+MT
+```
+
+## Sequenced Reads
+```{r echo=FALSE, message=FALSE, warning=FALSE  }
+data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
+data_sets.df$name <- as.factor(data_sets.df$name)
+data_sets.df$day<- as.factor(data_sets.df$day)
+#data_sets.df$experimental <- gsub("_", "-", data_sets.df$experimental)
+data_sets.df$subgroups<- as.factor(data_sets.df$subgroups)
+data_sets.df$rep<- as.factor(data_sets.df$rep)
+data_sets.df$housing<- as.factor(data_sets.df$housing)
+data_sets.df$genotype<- as.factor(data_sets.df$genotype)
+data_sets.df$tissue<- as.factor(data_sets.df$tissue)
+
+data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile1,readsfile2,paired)) %>% distinct() 
+
+data_sets.df.sparse.collapse <- data_sets.df.sparse %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," ))  %>% distinct()
+data_sets.df.sparse.collapse$genotype <- as.factor(data_sets.df.sparse.collapse$genotype)
+
+experimental_replicates.tbl  <- data_sets.df.sparse.collapse %>% group_by(genotype, housing, day, tissue) %>% summarise(replicate_count=n())
+
+```
+
+The sequence reads covered three replicates each of $`r ncol(experimental_replicates.tbl) `$ experimental conditions. The conditions included varying genotype, housing, and age (all RNA was collected from antenna tissue).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+experimental_replicates.gt<- experimental_replicates.tbl %>% ungroup()%>% gt() %>% cols_label(replicate_count = "# replicates", day = "age (days)") %>% tab_header(title=paste("Table ",tbl_cnt, ". Experimental Conditions and Replicates", sep = ""), subtitle= md("&nbsp"))
+
+experimental_replicates.gt
+
+
+write(experimental_replicates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_experimentalReplicates.html", sep=""))
+
+```
+
+These samples will allow direct comparison between wild-type flies reared under group and isolated conditions, as well as comparisons between group-raised wild-type flies and two kinds of mutants (67d and 47b1) at day 7:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(day == 7) %>% spread(key=housing, value = replicate_count) %>%  gt() %>% cols_move_to_start(c("day", "tissue"))  %>%  tab_spanner(columns = c("group", "isolated"), label = "variable") %>%  tab_spanner(columns = c("day", "tissue"), label = md(" ")) %>% tab_header(title=paste("Table ",tbl_cnt, "a. Genotype & Housing Comparison", sep = ""), subtitle= md("(replicate count)"))
+
+experimental_treatments.gt
+
+
+write(experimental_treatments.gt %>%  as_raw_html(), paste("results/tables/supp/tbl",tbl_cnt,"a_experimentalReplicates.html", sep=""))
+
+```
+
+These samples also allow for direct comparison between mutant genotypes (47b1, 88a, and 47b2/88a ) at day 5, and for a comparison between the same genotype (47b1 mutant) at two developmental stages:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(genotype != "wt") %>% spread(key=genotype, value = replicate_count, fill =0) %>%  gt() %>%  tab_spanner(columns = c("47b1", "47b2,88a", "88a", "FruLexaFru440", "67d"), label = "mutant genotypes") %>%  tab_spanner(columns = c("housing", "tissue"), label = md("&nbsp")) %>% tab_header(title=paste("Table ",tbl_cnt, "b. Genotype & Time Comparison", sep = ""), subtitle= md("(replicate count)"))
+
+experimental_treatments.gt
+
+write(experimental_treatments.gt %>%  as_raw_html(), paste("results/tables/supp/tbl",tbl_cnt,"b_experimentalReplicates.html", sep=""))
+
+```
+
+Moreover, samples taken at the same timepoint in different genotypes allow the effect of one mutation (88a) to be studied in two different genomic backgrounds (with and without the 47b2 mutation).
+
+* are we sure that 47b2 isn't a typo for 47b1?
+* is FruLexa/Fru440 one or two distinct genotypes?
+
+
+
+
+
+### Pre-Processing
+
+These reads were preprocessed with FASTP [@Chen2018] for quality control and analytics. 
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+fastp_summary <- read_delim("summaries/sequenced_reads.dat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(fastp_summary ) <- c("name","type","measure","value")
+fastp_summary$name <- as.factor(fastp_summary$name)
+fastp_summary$type <- as.factor(fastp_summary$type)
+fastp_summary$measure <- as.factor(fastp_summary$measure)
+```
+
+
+```{r echo=FALSE, include=FALSE, warning=FALSE}
+filtration_stats <- inner_join(fastp_summary %>%  filter(type=="prefiltered" | type == 'postfiltered'), data_sets.df.sparse.collapse, by=c("name"="name"))
+filtration_stats$type <- factor(filtration_stats$type, levels=c("prefiltered", "postfiltered"))
+```
+
+
+Starting FASTQ files contained a total of  $`r sum( filtration_stats %>% filter(type =='prefiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$ reads; after QC, this dropped to $`r sum( filtration_stats %>% filter(type =='postfiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$. 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+pre_post_counts <- filtration_stats %>% filter(measure=='total_reads') %>%  group_by(type)  %>%  summarise(minimum = min(value), average=mean(value) , maximum = max(value)) 
+
+retention_percent <- filtration_stats %>% filter(measure=='total_reads') %>% select(c(name,type,value)) %>%  spread(type,value) %>% mutate(retention=100*postfiltered/prefiltered) %>%  summarise(type='percent retention', minimum = min(retention), average=mean(retention) , maximum = max(retention))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+read_retention_rate.gt <- rbind(pre_post_counts, retention_percent) %>% rename(" "=type) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Retention Rate during Preprocessing", sep = ""), subtitle= md("&nbsp;")) %>%  fmt_number(columns = vars(minimum, average,maximum),suffixing = TRUE, decimals=0)
+
+read_retention_rate.gt
+
+write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readRetentionRate.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+readQual.gg <- ggplot(filtration_stats %>% filter(measure == "q30_rate")) + geom_line(aes(group=name, x=type,y=100*value)) +  geom_point(aes(x=type, y = 100*value, color=genotype, shape=housing, group=rep)) + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() #+ geom_text(data= . %>% filter(type=="postfiltered") %>% filter(value<0.97), aes(type,100*value,label=name))
+
+readQual.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readQualityThruProcessing.png", sep=""))
+readQual.gg
+dev.off()
+
+
+```
+
+
+Duplicate reads were also detected
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+dupe_stats <- inner_join(fastp_summary %>% filter(type=='duplication' & measure =='rate') %>%  mutate(percent=value*100) %>% select(c(name,percent)), data_sets.df.sparse.collapse, by=c("name"="name"))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+duplicationStats.gt <- dupe_stats %>%  summarise(minimum = min(percent), average=mean(percent), median=median(percent) , maximum = max(percent)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage Duplication", sep = ""), subtitle="FASTP estimate") %>% fmt_number(columns=vars(minimum,median,average,maximum), decimals=1, ) #kable(caption="Percentage Duplication",digits=1)
+
+duplicationStats.gt
+
+write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_duplicationStats.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+dupeStats.gg <- ggplot(dupe_stats) + geom_histogram(aes(x=percent, fill=genotype), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (FASTP estimate)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
+
+dupeStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+dupeStats.gg
+dev.off()
+
+
+```
+
+
+
+
+## Mapped Reads
+
+Reads were mapped to the reference genome using MapSplice2 [@Wang2010]. Because MapSplice is written in python2, the code was downloaded and automatically refactored using the 2to3 python utility so that it would run in the python3 snakemake environment:
+https://docs.python.org/2/library/2to3.html
+
+### Raw Mapsplice
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.mapspliceRaw <- read_delim("summaries/alignments.vs_dm6main.mapspliceRaw.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(vs_dm6.mapspliceRaw)<- c("ref_genome","aligner","sample","measure","value")
+
+vs_dm6.mapspliceRaw <- vs_dm6.mapspliceRaw %>% mutate(ref_genome = as.factor(ref_genome), aligner = as.factor(aligner), sample = as.factor(sample), ref_genome = as.factor(ref_genome))
+
+all_alignments <- rbind(vs_dm6.mapspliceRaw)#, vs_dm6.bwaUniq)
+
+vs_dm6.mapspliceRaw.meta <- inner_join(vs_dm6.mapspliceRaw, data_sets.df.sparse.collapse, by = c("sample"="name")) 
+
+#all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+vs_dm6.mapspliceRaw.meta.stats <- vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count","total_mapped_count","properly_paired_count", "duplicate_reads")) %>% select(-c("ref_genome", "tissue", "aligner")) %>% spread(key="measure", value="value") %>% mutate(percent_mapped=total_mapped_count/total_read_count, percent_proper = properly_paired_count/total_read_count, percent_duplicate = duplicate_reads/total_mapped_count)
+
+```
+
+Of the  $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) %>% human_readable_croncher() `$ reads, MapSplice was able to align  $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) ) %>% human_readable_croncher() `$ of them, for an overall mapping rate of  $`r 100*sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) `$ percent.
+
+Individual mapping rates were generally more than 98%.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+percentMapping.raw.gt <- vs_dm6.mapspliceRaw.meta.stats  %>% select(percent_mapped) %>% mutate(mack = max(.$percent_mapped),min = min(.$percent_mapped), avg = mean(.$percent_mapped), med = median(.$percent_mapped)) %>% select(-c(percent_mapped)) %>% unique() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percent of Reads Mapping", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(mack,min,avg,med), decimals=1, ) %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_move(columns = c("min"), after="med")
+
+percentMapping.raw.gt
+
+write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentMappingRaw.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+percentMappingIndv.raw.gt <- vs_dm6.mapspliceRaw.meta.stats %>% select(-c("duplicate_reads", "properly_paired_count", "percent_duplicate", "percent_proper", "sample"))  %>% group_by(housing, genotype) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Mapping Rates", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(percent_mapped), decimals=1, ) %>% fmt_number(columns = c("total_mapped_count", "total_read_count"), decimals = 1, suffixing = T) %>% cols_label(total_mapped_count="reads mapped", total_read_count="total reads", percent_mapped = "percent mapped")  %>% cols_move(columns = c("total_mapped_count"), after="total_read_count")
+
+percentMappingIndv.raw.gt
+
+write(percentMappingIndv.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentMappingRawIndv.html", sep=""))
+
+```
+
+Duplicate reads have at this point been marked using the Samtools MarkDup utility [@Li2009] but not yet removed; duplication rates varied from ~15 to ~30%. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+percentDupe.raw.gt <- vs_dm6.mapspliceRaw.meta.stats  %>% select(percent_duplicate) %>% mutate(mack = max(.$percent_duplicate),min = min(.$percent_duplicate), avg = mean(.$percent_duplicate), med = median(.$percent_duplicate)) %>% select(-c(percent_duplicate)) %>% unique() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percent of Duplicate Reads", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(mack,min,avg,med), decimals=1, ) %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_move(columns = c("min"), after="med")
+
+percentDupe.raw.gt
+
+write(percentDupe.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentDuplicateRawMpSplc.html", sep=""))
+
+```
+
+
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+
+dupeStats.gg <- ggplot(vs_dm6.mapspliceRaw.meta.stats %>% mutate(percent = 100*percent_duplicate)) + geom_histogram(aes(x=percent, color=genotype), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (Raw Mapsplice Alignment)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
+
+dupeStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+dupeStats.gg
+dev.off()
+
+
+```
+
+Although Samtools marks duplicates at a higher rate than FASTP, the estimates are correlated; in particular, both agree that FruLexa/Fru440 day 7 replicate 1 is a highly duplicated outlier:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+dupeStatsCompare.gg <- ggplot(inner_join(dupe_stats , vs_dm6.mapspliceRaw.meta.stats %>%  select(c("sample", "percent_duplicate")), by=c("name"="sample"))) + geom_point(aes(x=percent, y=100*percent_duplicate, color=genotype, shape = day)) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Duplication Rate Estimates", sep = ""), x="FASTP estimate (percent)", y="MarkDup estimate (percent)") + theme_bw()
+
+dupeStatsCompare.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_DupeRateExtCompare.png", sep=""))
+dupeStatsCompare.gg
+
+dev.off()
+
+```
+
+Genome-wide depth of coverage is not very meaningful here, in the case of RNA-Seq. Breadth of coverage (the fraction of the genome which is covered by at least one read) is, but the ideal case is not 100% coverage like in a DNA-Seq; rather, we'd expect breadth to approximate the fraction of the genome which is under active transcription. Another complication is whether the reads which fall on splice junctions are treated as covering the intronic region or not (this corresponds to the distinction between the percent of the genome which is a transcribed locus vs the percent which is a transcribed exon).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+breadthStats.raw.gg <- ggplot(vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count", "total_mapped_count", "spanned_breadth", "split_breadth")) %>%  spread(key = measure, value = value) %>%  gather(spanned_breadth, split_breadth, key = "type", value = "breadth") %>% mutate(type=case_when(type == "spanned_breadth" ~ "locus", type =="split_breadth" ~"exon")) %>% mutate(type = as.factor(type))
+) + geom_point(aes(x=total_read_count, y=100*breadth, color=genotype, shape = day)) + facet_grid(type~., scales='free_y') + labs(title=paste("Figure ",fig_cnt, ". Breadth of Coverage of Raw Mapsplice Alignment Compared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Genome Covered") + theme_bw()
+
+breadthStats.raw.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_breadthStatsRaw.png", sep=""))
+breadthStats.raw.gg
+
+dev.off()
+
+```
+
+There appears to be a slight dependence of breadth upon sequencing depth (ie, the number of reads sequenced), meaning that sequencing depth of these samples is not so great that the breadth covered is saturated. When transcribed locii are considered, the breadth of the group-housed wildtype replicate 1 is unusually low given the sequencing depth.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+sexChrBrd <- as.data.frame(c())
+for (samp in data_sets.df.sparse.collapse$name){
+	
+	df.tmp <- read_delim(paste("mapped_reads/mapspliceRaw/",samp, "/", samp, ".vs_dm6main.mapspliceRaw.sort.bam.span.genomcov", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	df.tmp$sample <- samp
+
+	sexChrBrd <- rbind(sexChrBrd, df.tmp)
+	
+}
+
+names(sexChrBrd) <- c("chrom", "cov", "val", "tot", "frac", "sample")
+sexChrBrd.aug <- inner_join(sexChrBrd %>%  filter(chrom %in% c("chrX", "chrY") ) %>%  filter(cov==1) %>% dplyr::select(c("chrom","frac","sample")), vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count", "total_mapped_count")) %>%  spread(key = measure, value = value) %>%  dplyr::select(-c("ref_genome", "tissue")), by = c("sample"="sample"))
+
+
+
+```
+
+We can also compare the breadth of coverage on the X and Y chromosomes to confirm that the flies sampled are all the same sex. The only outlier is the group-housed wildtype replicate 1, which is also anomalous genome-wide. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+sexChrBrd.gg <- ggplot(sexChrBrd.aug) + geom_point(aes(x = total_read_count, y = 100*frac, color = genotype, shape = rep)) + facet_grid(chrom~., scales = "free_y")+ labs(title=paste("Figure ",fig_cnt, ". Fraction of Sex Chromosome Covered in Raw Mapsplice Alignments Compared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Chromosome Covered") + theme_bw()
+
+sexChrBrd.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_sexChromCoverage.png", sep=""))
+sexChrBrd.gg
+
+dev.off()
+
+```
+
+### Filtered Multimap
+
+From the raw MapSplice output, three filtered alignments were produced. The first, mapspliceMulti, has had duplicates marked and removed, and has been filtered to require proper pairing and a minimum mapping quality (SAM flags "-q 20 -F 0x0200 -F 0x04 -f 0x0002"; markdup flags "-rS"). Thus, mapspliceMulti is a filtered alignment that retains all locii for multimapped reads. 
+
+### Uniquely Mapped
+
+mapspliceUniq is derived from mapspliceMulti by further filtering out the multimapped reads and keeping only those which map uniquely. 
+
+### Downsampled Multimapped
+
+mapspliceRando is a downsampled alignment constructed by selecting at random a single location for each multimapped read, then merging the unambiguously located reads with mapspliceUniq. 
+
+
+
+# Results
+
+
+(we live in a society)
+
+
+# Bibliography
+```{r echo=FALSE}
+
+#citation("topGO")
+citation("ggplot2")
+#citation("GGally")
+#citation("ggnewscale")
+
+```
+

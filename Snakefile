@@ -1,6 +1,5 @@
 configfile: 'config.yaml'
-#	module load python/3.6.6 fseq bedtools bedops samtools bwa r/3.5.0 rstudio/1.1.453
-#PATH=$PATH:/nas/longleaf/home/csoeder/modules/gem_old/GEM_prerelease3/bin:/nas/longleaf/home/csoeder/modules/bffBuilder/bin
+#	module load python/3.6.6 bedtools bedops samtools r/3.5.0 rstudio/1.1.453 bowtie
 
 #from itertools import combinations
 
@@ -8,15 +7,15 @@ sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
 annotation_by_name = { a['name'] : a for a in config['annotations']}
 genelist_by_name = { l['name'] : l for l in config['gene_queries']}
-distance_categories = ["I","II","III","IV","V","VI","VII","VIII","IX","X"]
-distance_breaks = { distance_categories[n] : [config["distance_divisions"][n]['distance'],config["distance_divisions"][n+1]['distance']] for n in range(0, len(config["distance_divisions"])-1) }
-samplist_by_experimental = {c['experimental'] : [] for c in config['data_sets']}
-for c in config['data_sets']:
-	samplist_by_experimental[c["experimental"]].append(c)
+#distance_categories = ["I","II","III","IV","V","VI","VII","VIII","IX","X"]
+#distance_breaks = { distance_categories[n] : [config["distance_divisions"][n]['distance'],config["distance_divisions"][n+1]['distance']] for n in range(0, len(config["distance_divisions"])-1) }
+# samplist_by_experimental = {c['experimental'] : [] for c in config['data_sets']}
+# for c in config['data_sets']:
+# 	samplist_by_experimental[c["experimental"]].append(c)
 
-samples_by_put = { c['put'] : [] for c in config['data_sets'] }
-for c in config['data_sets']:
-	samples_by_put[c['put']].append(c)
+# samples_by_put = { c['put'] : [] for c in config['data_sets'] }
+# for c in config['data_sets']:
+# 	samples_by_put[c['put']].append(c)
 
 sampname_by_group = {}
 for s in sample_by_name.keys():
@@ -28,11 +27,23 @@ for s in sample_by_name.keys():
 			sampname_by_group[g] = [s]
 
 
+
+
+def return_filename_by_sampname(sampname):
+	filenames = []
+	if sample_by_name[sampname]['paired']:
+		filenames.append(sample_by_name[sampname]['readsfile1'])
+		filenames.append(sample_by_name[sampname]['readsfile2'])
+	else:
+		filenames.append(sample_by_name[sampname]['readsfile'])
+	return filenames
+
+
 def return_file_relpath_by_sampname(wildcards):
 	sampname = wildcards.samplename
 	pathprefix = sample_by_name[sampname]["path"]
-	filesin = sample_by_name[sampname]['readsfile']
-	pathsout = ["".join([pathprefix, filesin])]
+	filesin = return_filename_by_sampname(sampname)
+	pathsout = ["".join([pathprefix, fq]) for fq in filesin]
 	return pathsout
 
 def partition_experimental_by_put(exp):
@@ -52,35 +63,30 @@ rule all:
 		cores=1,
 	run:
 		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').pdf """)
-		shell(""" tar cf results.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
+		shell(""" tar cf results.$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
 
 
-
-
-rule install_MACS_py3:
+rule mapsplice_builder:
 	output:
-		binary = "utils/macs2VE/bin/macs2",
+		windowed='utils/MapSplice-v2.1.8/mapsplice.py.bak'
 	params:
-		runmem_gb=1,
-		runtime="1:00:00",
+		runmem_gb=8,
+		runtime="30:00",
 		cores=1,
 	run:
-		#virtual env
-		shell(""" python3 -m venv utils/macs2VE/ ;""")
-		shell(""" 
-			set +u;
-			source utils/macs2VE/bin/activate ;
-			pip install numpy==1.17 ; 
-			git config --global http.postBuffer 1048576000 ; 
-			cd utils/; 
-			git clone -b feat_py3 https://github.com/taoliu/MACS/ ; 
-			cd MACS/;
-			python setup_w_cython.py install;
-			cd ../../;
-			chmod +x {output.binary};
-			deactivate;
-			""")
-
+		shell("mkdir -p utils/")
+		shell(
+			""" 
+			cd utils;
+			wget http://protocols.netlab.uky.edu/~zeng/MapSplice-v2.1.8.zip ;
+			unzip MapSplice-v2.1.8.zip;
+			2to3 -w MapSplice-v2.1.8/;
+			cd MapSplice-v2.1.8/;
+			make;
+			cd ..;
+			rm MapSplice-v2.1.8.zip;
+			"""
+		)		
 
 
 
@@ -206,22 +212,27 @@ rule reportAllGeneLists:
 			annot = annotation_by_name[genelist_by_name[listicle]["base"]]["name"]
 			shell(""" cat summaries/geneLists/{listicle}.stats | awk '{{print"{listicle}\t{annot}\t"$0}}' >> {output.allStats} """)
 
-rule fastp_clean_sample_se:
+
+
+rule fastp_clean_sample_pe:
 	input:
 		fileIn = lambda wildcards: return_file_relpath_by_sampname(wildcards)
 	output:
-		fileOut = ["{pathprefix}/{samplename}.clean.fastq"],
-		jason = "{pathprefix}/{samplename}.json",
+		fileOut = ["{pathprefix}/{samplename}.clean.R1.fastq","{pathprefix}/{samplename}.clean.R2.fastq"],
+		jason = "{pathprefix}/{samplename}.json"
 	params:
 		runmem_gb=8,
 		runtime="3:00:00",
 		cores=1,
-		se_params = "",
+		#--trim_front1 and -t, --trim_tail1
+		#--trim_front2 and -T, --trim_tail2. 
 		common_params = "--json {pathprefix}/{samplename}.json",# --html meta/FASTP/{samplename}.html", 
+		pe_params = "--detect_adapter_for_pe --correction",
 	message:
-		"FASTP QA/QC on single-ended reads ({wildcards.samplename}) in progress.... "
+		"FASTP QA/QC on paired-ended reads ({wildcards.samplename}) in progress.... "
 	shell:
-		"/nas/longleaf/home/csoeder/modules/fastp/fastp {params.common_params} {params.se_params} --in1 {input.fileIn[0]} --out1 {output.fileOut[0]}"
+		"/nas/longleaf/home/csoeder/modules/fastp/fastp {params.common_params} {params.pe_params} --in1 {input.fileIn[0]} --out1 {output.fileOut[0]} --in2 {input.fileIn[1]} --out2 {output.fileOut[1]}"
+
 
 
 rule FASTP_summarizer:
@@ -257,12 +268,14 @@ rule demand_FASTQ_analytics:	#forces a FASTP clean
 
 
 
-rule bwa_align:
+rule mapsplice2_align_raw:
 	input:
-		reads_in = lambda wildcards: expand("{path}{sample}.clean.fastq", path=sample_by_name[wildcards.sample]['path'], sample=wildcards.sample),
-		ref_genome_file = lambda wildcards: ref_genome_by_name[wildcards.ref_genome]['path'],
+		mapsplice = "utils/MapSplice-v2.1.8/mapsplice.py.bak",
+		reads_in = lambda wildcards: expand("{path}{sample}.clean.R{pair}.fastq", path=sample_by_name[wildcards.sample]['path'], sample=wildcards.sample, pair = [1,2]),
 	output:
-		bam_out = "mapped_reads/{sample}.vs_{ref_genome}.bwa.sort.bam",
+		raw_bam = "mapped_reads/mapspliceRaw/{sample}/{sample}.vs_{ref_genome}.mapspliceRaw.sort.bam",
+#		bam_out = "mapped_reads/mapsplice/{sample}/{sample}.vs_{ref_genome}.mapsplice.sort.bam",
+#		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
 		runmem_gb=32,
 		runtime="8:00:00",
@@ -270,15 +283,101 @@ rule bwa_align:
 	message:
 		"aligning reads from {wildcards.sample} to reference_genome {wildcards.ref_genome} .... "
 	run:
-		shell("bwa aln {input.ref_genome_file} {input.reads_in} > {input.reads_in}.sai ")
-		shell("bwa samse {input.ref_genome_file} {input.reads_in}.sai {input.reads_in} | samtools view -Shb | samtools addreplacerg -r ID:{wildcards.sample} -r SM:{wildcards.sample} - | samtools sort -o {output.bam_out} - ")
-		shell("samtools index {output.bam_out}")
+		ref_genome_split = ref_genome_by_name[wildcards.ref_genome]['split'],
+		ref_genome_bwt = ref_genome_by_name[wildcards.ref_genome]['bowtie'],
+		shell(""" mkdir -p mapped_reads/mapspliceRaw/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+			python utils/MapSplice-v2.1.8/mapsplice.py -c {ref_genome_split} -x {ref_genome_bwt} -1 {input.reads_in[0]} -2 {input.reads_in[1]} -o mapped_reads/mapspliceRaw/{wildcards.sample} 
+			""")
+		shell(""" 
+			samtools view -Sbh mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam | samtools sort - > mapped_reads/mapspliceRaw/{wildcards.sample}/{wildcards.sample}.vs_{wildcards.ref_genome}.mapspliceRaw.sort.bam;
+			samtools index {output.raw_bam};
+			rm mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam;
+			""")
+#			mv mapped_reads/mapsplice/{wildcards.sample}/stats.txt summaries/BAMs/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.fresh.stats;
+#			mv mapped_reads/mapsplice/{wildcards.sample}/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats summaries/BAMs/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats;
+
+#			samtools view -Sbh alignments.sam | samtools sort -n | samtools fixmate -m | samtools sort - | samtools markdup {params.dup_flg} -s - {wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.sort.bam 2> {wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats;
+
+#		
 
 
 
-rule bam_reporter:
+rule mapsplice2_align_multi:
 	input:
-		bam_in = "mapped_reads/{sample}.vs_{ref_genome}.{aligner}.sort.bam"
+		raw_bam = "mapped_reads/mapspliceRaw/{sample}/{sample}.vs_{ref_genome}.mapspliceRaw.sort.bam",
+	output:
+		multi_bam = "mapped_reads/mapspliceMulti/{sample}/{sample}.vs_{ref_genome}.mapspliceMulti.sort.bam",
+#		bam_out = "mapped_reads/mapsplice/{sample}/{sample}.vs_{ref_genome}.mapsplice.sort.bam",
+#		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+		dup_flg = "-rS ",#remove marked duplicates; remove secondary alignments of marked duplicates
+		quality="-q 20 -F 0x0200 -F 0x04 -f 0x0002", # no QC fails, no duplicates, proper pairs only, mapping qual >20
+	message:
+		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
+	run:
+		shell(""" mkdir -p mapped_reads/mapspliceMulti/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+			samtools sort -n {input.raw_bam} | samtools fixmate -m - - | samtools sort -| samtools markdup {params.dup_flg} - - | samtools view -bh {params.quality} > {output.multi_bam} ;
+			samtools index {output.multi_bam} 
+			""")
+
+
+
+rule mapsplice2_align_uniq:
+	input:
+		multi_bam = "mapped_reads/mapspliceMulti/{sample}/{sample}.vs_{ref_genome}.mapspliceMulti.sort.bam",
+	output:
+		uniq_bam = "mapped_reads/mapspliceUniq/{sample}/{sample}.vs_{ref_genome}.mapspliceUniq.sort.bam",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	message:
+		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
+	run:
+		shell(""" mkdir -p mapped_reads/mapspliceUniq/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+			samtools view {input.multi_bam} | grep -w "IH:i:1" | cat <( samtools view -H {input.multi_bam} ) - | samtools view -Sbh > {output.uniq_bam};
+			samtools index {output.uniq_bam}
+			""")
+### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
+
+rule mapsplice2_align_rando:
+	input:
+		multi_bam = "mapped_reads/mapspliceMulti/{sample}/{sample}.vs_{ref_genome}.mapspliceMulti.sort.bam",
+		uniq_bam = "mapped_reads/mapspliceUniq/{sample}/{sample}.vs_{ref_genome}.mapspliceUniq.sort.bam",
+	output:
+		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+	message:
+		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
+	run:
+		shell(""" mkdir -p mapped_reads/mapspliceRando/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+
+			samtools sort -n {input.multi_bam} | samtools view | grep -v "IH:i:[01]" > {output.rando_bam}.multi.unsampled
+
+			echo > {output.rando_bam}.multi.sampled
+			for idx in $(cut -f 1 {output.rando_bam}.multi.unsampled | sort | uniq); do 
+				grep -w $idx {output.rando_bam}.multi.unsampled | sort  --random-sort | head -n 1 >> {output.rando_bam}.multi.sampled
+			done;
+
+			cat <( samtools view -h {input.uniq_bam} ) {output.rando_bam}.multi.sampled | samtools view -Sbh > {output.rando_bam};
+			samtools index {output.rando_bam}
+			rm {output.rando_bam}.multi.unsampled {output.rando_bam}.multi.sampled
+			""")
+
+
+rule spliced_alignment_reporter:
+	input:
+		bam_in = "mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam",
 	output:
 		report_out = "summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary"
 	params:
@@ -288,15 +387,30 @@ rule bam_reporter:
 	message:
 		"Collecting metadata for the {wildcards.aligner} alignment of {wildcards.sample} to {wildcards.ref_genome}.... "
 	run:
-		ref_genome_idx=ref_genome_by_name[wildcards.ref_genome]['fai']
-		shell("samtools idxstats {input.bam_in} > {input.bam_in}.idxstats")
+ 		ref_genome_idx=ref_genome_by_name[wildcards.ref_genome]['fai']
+ 		shell(""" which samtools """)
+ 		shell("samtools idxstats {input.bam_in} > {input.bam_in}.idxstats")
 		shell("samtools flagstat {input.bam_in} > {input.bam_in}.flagstat")
-		shell("bedtools genomecov -max 1 -ibam {input.bam_in} -g {ref_genome_idx} > {input.bam_in}.genomcov")
-		#change the -max flag as needed to set 
-		shell("""samtools depth -a {input.bam_in} | awk '{{sum+=$3; sumsq+=$3*$3}} END {{ print "average_depth\t",sum/NR; print "std_depth\t",sqrt(sumsq/NR - (sum/NR)**2)}}' > {input.bam_in}.dpthStats""")
-		#https://www.biostars.org/p/5165/
-		#save the depth file and offload the statistics to the bam_summarizer script?? 
-		shell("python3 scripts/bam_summarizer.py -f {input.bam_in}.flagstat -i {input.bam_in}.idxstats -g {input.bam_in}.genomcov -d {input.bam_in}.dpthStats -o {output.report_out} -t {wildcards.sample}")
+		shell("bedtools genomecov -max 1 -i <( bedtools bamtobed -i {input.bam_in} | cut -f 1-3 ) -g {ref_genome_idx} > {input.bam_in}.span.genomcov")
+		shell("bedtools genomecov -max 1 -i <( bedtools bamtobed -split -i {input.bam_in} | cut -f 1-3 ) -g {ref_genome_idx} > {input.bam_in}.split.genomcov")
+# 		#change the -max flag as needed to set 
+		shell(""" samtools depth -a {input.bam_in} | awk '{{sum+=$3; sumsq+=$3*$3}} END {{ print "average_depth\t",sum/NR; print "std_depth\t",sqrt(sumsq/NR - (sum/NR)**2)}}' > {input.bam_in}.dpthStats """)
+# 		#https://www.biostars.org/p/5165/
+# 		#save the depth file and offload the statistics to the bam_summarizer script?? 
+		### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
+		shell("""samtools view -F 4 {input.bam_in} | cut -f 13  | cut -f 3 -d ":" | sort | uniq -c | tr -s " " | awk -F " " '{{print$2"\t"$1}}' > {input.bam_in}.mapmult""")
+		shell(""" which samtools """)
+		shell(""" samtools sort -n {input.bam_in} | samtools fixmate -m - -  | samtools sort - | samtools markdup -sS - - 1> /dev/null 2> {input.bam_in}.dupe """)# /dev/null 2> {input.bam_in}.dupe;""")
+		shell("python3 scripts/bam_summarizer.mapspliced.py -f {input.bam_in}.flagstat -i {input.bam_in}.idxstats -g {input.bam_in}.split.genomcov -G {input.bam_in}.span.genomcov -d {input.bam_in}.dpthStats -D {input.bam_in}.dupe -m {input.bam_in}.mapmult -o {output.report_out} -t {wildcards.sample}")
+
+# cat stats.pass1.txt  | grep -A4 "By mapping uniqueness" | grep -v "By mapping uniqueness" | cut -f 2 | paste <(echo -e "total_reads\nuniquely_mapped\nmultimapped\nunmapped") - 
+# cat stats.pass1.txt | grep paired_reads | grep -v fusion | cut -f 1,2
+# cat stats.pass1.txt | grep -A 3 "alignment types" | tail -n +2 | head -n 2 | sed -e 's/spliced/spliced_alignments/g'
+# cat stats.pass1.txt | grep -A 3 "Splice junctions" | tail -n +2 | head -n 2 | cut -f 1,2
+#https://github.com/broadinstitute/rnaseqc
+#awk '($6 ~ /N/)' | wc -l
+
+### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
 
 
 rule demand_BAM_analytics:
@@ -311,592 +425,7 @@ rule demand_BAM_analytics:
 	message:
 		"collecting all alignment metadata.... "
 	shell:
-		"cat {input.bam_reports} > {output.full_report}"
-
-
-
-#build virtual environment rule??
-
-rule peakCall_MACS_indv:
-	input:
-		bam_in = "mapped_reads/{sample}.vs_{ref_genome}.bwa.sort.bam",
-		bam_cntrl = lambda wildcards: "mapped_reads/%s.vs_%s.bwa.sort.bam" % tuple([partition_experimental_by_put(sample_by_name[wildcards.sample]["experimental"])["in"][0]["name"], "dm6"]),
-	output:
-		peaks_out = "MACS/raw/indiv/{sample}.vs_{ref_genome}.broadPeak.bed",
-		peak_stats = "summaries/peakStats/indiv/{sample}.vs_{ref_genome}.broadPeak.stats",
-	params:
-		runmem_gb=8,
-		runtime="6:00:00",
-		cores=8,
-		macs_params = "--broad --nomodel -g dm ",
-	run:
-
-		shell(""" mkdir -p MACS/raw/indiv """)
-
-		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak {params.macs_params} -c {input.bam_cntrl} -t {input.bam_in} -f BAM --outdir MACS/raw/indiv/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
-
-		shell(""" mv MACS/raw/indiv/{wildcards.sample}.vs_{wildcards.ref_genome}_peaks.broadPeak {output.peaks_out} """)
-
-		shell(""" mkdir -p summaries/peakStats/indiv/ """)
-		shell(""" rm -f {output.peak_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' > {output.peak_stats}""" )
-		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.peak_stats} """ )
-		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.peak_stats} """ )
-		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.peak_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.peak_stats} """) 
-		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.peak_stats} """) #awk '{{sum+=$9; sumsq+=$9*$9}} END {{ print "pq\tavg\t",sum/NR; print "pq\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.peak_stats}""" )
-		#	MACS broadpeak output: BED6+ fold_change, -log10p, -log10q
-
-
-
-rule peakCall_MACS_pool_byGroup:
-	input:
-		bams_rep = lambda wildcards: expand( "mapped_reads/{samp}.vs_{ref_gen}.bwa.sort.bam", samp =list(set(sampname_by_group[wildcards.group]).intersection(set([c['name'] for c in partition_experimental_by_put(wildcards.experimental)["out"]]) )), ref_gen=["dm6"] ), 
-		bam_cntrl = lambda wildcards: expand( "mapped_reads/{samp}.vs_{ref_gen}.bwa.sort.bam", samp = partition_experimental_by_put(wildcards.experimental)["in"][0]["name"], ref_gen=["dm6"] ),
-		#this assumes there is exactly one control and it's in all groups
-	output:
-		peaks_out = "MACS/raw/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
-		peak_stats = "summaries/peakStats/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.stats"		
-	params:
-		runmem_gb=8,
-		runtime="6:00:00",
-		cores=8,
-		macs_params = "--broad --nomodel -g dm ",
-	run:
- 		shell(""" mkdir -p MACS/raw/pool  """)
-# 		shell(""" samtools merge -f MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.sort.bam {input.bams_rep}  """)
-# #		shell(""" set +u; source py2/venv/bin/activate; module load macs/2.1.2;  macs2 callpeak -t {input.bam_in} -f BAM --outdir MACS/ --name {wildcards.sample}.vs_{wildcards.ref_genome}; deactivate; """ )
- 		shell(""" set +u; source utils/macs2VE/bin/activate; utils/MACS/bin/macs2 callpeak {params.macs_params} -c {input.bam_cntrl} -t {input.bams_rep} -f BAM --outdir MACS/raw/pool/ --name {wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}; deactivate; """ )
-#		shell(""" rm MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.sort.bam """)
-		shell(""" mv MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}_peaks.broadPeak MACS/raw/pool/{wildcards.experimental}.{wildcards.group}.vs_{wildcards.ref_genome}.broadPeak.bed """)
-
-		shell(""" mkdir -p summaries/peakStats/pool/ """)
-		shell(""" rm -f {output.peak_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.peak_stats}""" )
-		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.peak_stats} """ )
-		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.peak_stats} """ )
-		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.peak_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.peak_stats} """) 
-		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.peak_stats} """) 
-
-
-
-
-rule summonRawPeakStats:
-	input:
-		indv_in = lambda wildcards: expand("summaries/peakStats/indiv/{sample}.vs_{ref_genome}.broadPeak.stats", sample = [s['name'] for s in samples_by_put["out"]], ref_genome=wildcards.ref_genome),
-		pool_in = lambda wildcards: expand("summaries/peakStats/pool/{spearmint}.{group}.vs_{ref_genome}.broadPeak.stats", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), put = ["in","out"], group = ["A","B","C"], ref_genome=wildcards.ref_genome)
-	output:
-		indv_out = "summaries/peakStats/individuals.vs_{ref_genome}.broadPeak.stats",
-		pool_out = "summaries/peakStats/pooled.vs_{ref_genome}.broadPeak.stats",
-	params:
-		runmem_gb=1,
-		runtime="1:00",
-		cores=1,
-	run:
-		shell(""" rm -rf {output.indv_out} """)
-		for s in samples_by_put["out"]:
-			samp = s["name"]
-			shell(""" cat summaries/peakStats/indiv/{samp}.vs_{wildcards.ref_genome}.broadPeak.stats | awk '{{print"{samp}\t"$0 }}' >> {output.indv_out} """)
-
-		shell(""" rm -rf {output.pool_out} """)
-		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-			for group in ["A","B","C"]:
-				shell(""" cat summaries/peakStats/pool/{spearmint}.{group}.vs_{wildcards.ref_genome}.broadPeak.stats | awk '{{print"{spearmint}\t{group}\t"$0 }}' >> {output.pool_out} """ )
-
-
-
-
-rule peakConfirm:
-	input: 
-		pooled_peaks = "MACS/raw/pool/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
-		indv_peaks = lambda wildcards: expand( "MACS/raw/indiv/{samp}.vs_{ref_gen}.broadPeak.bed", samp =list(set(sampname_by_group[wildcards.group]).intersection(set([c['name'] for c in partition_experimental_by_put(wildcards.experimental)["out"]]) )), ref_gen=["dm6"] ), 
-	output:
-		peaks_out = "MACS/confirmed/{experimental}.{group}.vs_{ref_genome}.broadPeak.bed",
-		peaks_intersect_loj = "MACS/confirmed/{experimental}.{group}.vs_{ref_genome}.confirmationLOJ.tbl",
-		confirmed_stats = "summaries/peakStats/confirmed/{experimental}.{group}.vs_{ref_genome}.stats",
-	params:
-		runmem_gb=8,
-		runtime="1:00:00",
-		cores=8,
-	run:
-		shell(""" mkdir -p MACS/confirmed/ """)
-		shell(""" bedtools intersect -wao -a {input.pooled_peaks} -b {input.indv_peaks} > {output.peaks_intersect_loj} """)
-		shell(""" cat {output.peaks_intersect_loj} | awk '{{if($19!=0)print;}}' | cut -f 1-9 | sort | uniq > {output.peaks_out} """)
-
-		shell(""" mkdir -p summaries/peakStats/confirmed/ """)
-		shell(""" rm -f {output.confirmed_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.confirmed_stats}""" )
-		shell(""" echo "count	total	$(wc -l {output.peaks_out} | cut -f 1 -d " " )" >> {output.confirmed_stats} """ )
-		shell(""" cat {output.peaks_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "width\tavg\t",avg; print "width\tstd\t",std; }}' >> {output.confirmed_stats} """ )
-		shell(""" cat {output.peaks_out} | cut -f 7 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "foldchange\tavg\t",avg; print "foldchange\tstd\t",std; }}'>> {output.confirmed_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pp\tavg\t",avg; print "pp\tstd\t",std; }}'>> {output.confirmed_stats} """)
-		shell(""" cat {output.peaks_out} | cut -f 9 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ if(NR>0) {{avg = sum/NR; std = sqrt(sumsq/NR - (sum/NR)**2);}} else {{avg="NA"; std="NA"}} print "pq\tavg\t",avg; print "pq\tstd\t",std; }}'>> {output.confirmed_stats} """)
-
-
-
-rule confirmAllPeaks:
-	input:
-		confirmed_peaks = expand("summaries/peakStats/confirmed/{experimental}.{group}.vs_{ref_genome}.stats", experimental = list(set([ s["experimental"] for s in config['data_sets'] ])), group =["A","B","C"], ref_genome = "dm6")
-	output:
-		confirmed_stats = "summaries/peakStats/confirmed.vs_dm6.broadPeak.stats",
-	params:
-		runmem_gb=1,
-		runtime="1:00",
-		cores=1,
-	run:
-		shell(""" rm -rf {output.confirmed_stats} """)
-		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-			for group in ["A","B","C"]:
-				shell(""" cat summaries/peakStats/confirmed/{spearmint}.{group}.vs_dm6.stats | awk '{{print"{spearmint}\t{group}\t"$0 }}' >> {output.confirmed_stats} """ )
-
-# rule callAllThePeaks:
-# 	input:
-# 		expand("fSeq/{sample}.vs_dm6.bwa.calledPeaks.bed", sample = sampname_by_group['all'])
-# 	output:
-# 		flug = "utils/fseqDone.flg"
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" touch {output.flug} """)
-
-# rule basicPeakStats:
-# 	input:
-# 		peak2Peek = "fSeq/{sample}.vs_dm6.bwa.calledPeaks.bed",
-# 	output:
-# 		peakStatsOut = "meta/peakStats/{sample}.vs_dm6.bwa.calledPeaks.stats",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" mkdir -p meta/peakStats/ """)
-# 		shell(""" rm -f {output.peakStatsOut} """)
-# 		shell(""" cat {input.peak2Peek} | cut -f 1 | uniq -c | tr -s " " | tr " " "\t" | awk '{{print"count\t"$2"\t"$1}}' >> {output.peakStatsOut}""" )
-# 		shell(""" echo "count	total	$(wc -l {input.peak2Peek} | cut -f 1 -d " " )" >> {output.peakStatsOut}""" )
-# 		shell(""" cat {input.peak2Peek}| awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.peakStatsOut}""" )
-# 		shell(""" cat {input.peak2Peek}| awk '{{sum+=$7; sumsq+=$7*$7}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.peakStatsOut}""" )
-# 		shell(""" touch {output}""")
-
-# rule summonBasicPeakStats:
-# 	input:
-# 		peakStatsIn = expand("meta/peakStats/{sample}.vs_dm6.bwa.calledPeaks.stats", sample=sampname_by_group['all']),
-# 	output:
-# 		fullPeakStatsOut = "meta/basicPeakStats.vs_dm6.bwa.summary",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		for samp in sampname_by_group['all']:
-# 			shell(""" cat meta/peakStats/{samp}.vs_dm6.bwa.calledPeaks.stats | awk '{{print"{samp}\t"$0}}' >> {output.fullPeakStatsOut} """ )
-
-# rule singleDistance:
-# 	input:
-# 		peek1 = "fSeq/{samp1}.vs_dm6.bwa.calledPeaks.bed", 
-# 		peek2 = "fSeq/{samp2}.vs_dm6.bwa.calledPeaks.bed", 
-# 	output:
-# 		distOut = "fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p fSeq/closest/all/ """)
-# 		shell("""  bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {input.peek1} ) -b <( bedtools sort -i {input.peek2} ) | awk '{{print$0"\t{wildcards.samp2}"}}' > {output.distOut}""")
-
-# rule roundRobinDist:
-# 	input:
-# 		distances_in = expand("fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed", samp1 = sampname_by_group['all'], samp2 = sampname_by_group['all']),
-# 	output:
-# 		allClose_flag = 'utils/closestCalcd.flg'
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" touch {output.allClose_flag} """)
-
-# rule consolidate_distance_by_group:
-# 	input:
-# 		allClose_flag = 'utils/closestCalcd.flg'
-# 	output:
-# 		grupFlg = 'utils/closest_{group}.flg'
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p fSeq/closest/{wildcards.group} """)
-# 		for samp in sampname_by_group[wildcards.group]:
-# 			for cramp in sampname_by_group[wildcards.group]:
-# 				shell(""" cat fSeq/closest/all/{samp}.to.{cramp}.vs_dm6.bwa.closestPeaks.bed >> fSeq/closest/{wildcards.group}/{samp}.vs_dm6.bwa.closestPeaks.{wildcards.group}.bed """ )
-# 		shell(""" touch {output.grupFlg} """)
-
-
-
-
-
-# rule collapseIntersects_byGroup:
-# 	input:
-# 		uncollapsed_in = lambda wildcards: expand("fSeq/{sample}.vs_dm6.bwa.calledPeaks.bed", sample = [s for s in sampname_by_group[wildcards.group] if (sample_by_name[s]["experimental"] == wildcards.spearmint and sample_by_name[s]["rep"] == "input" )]),
-# 		uncollapsed_out = lambda wildcards: expand("fSeq/{sample}.vs_dm6.bwa.calledPeaks.bed", sample = [s for s in sampname_by_group[wildcards.group] if (sample_by_name[s]["experimental"] == wildcards.spearmint and sample_by_name[s]["rep"] != "input" )]),
-# 	output:
-# 		collapsed_in = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.bed",
-# 		collapsed_in_stats = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.stat",
-# 		collapsed_in_hist = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.autoDist.hist",
-# 		collapsed_out = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.bed",
-# 		collapsed_out_stats = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.stat",
-# 		collapsed_out_hist = "meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.autoDist.hist",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		ref_fai = ref_genome_by_name["dm6"]["fai"]
-# 		rep_count = len(input.uncollapsed_in)
-
-# 		put = "input"
-# 		#*peaksCollapsed.bed: chrom/start/stop/contributorList/signals/maxPkHt/peakWidth
-# 		shell(""" mkdir -p fSeq/collapse/ meta/collapseStats/""")
-# 		shell(""" cat {input.uncollapsed_in} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_in}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed """ )
-# 		shell(""" paste <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalCollapser.py -i fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_in} """)
-# 		shell(""" echo "{put}\tcount\ttotal\t$(cat {output.collapsed_in} | wc -l)" > {output.collapsed_in_stats}""")
-# 		shell(""" cat {output.collapsed_in} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_in_stats} """)
-# 		shell(""" cat {output.collapsed_in} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_in_stats} """)
-# 		shell(""" cat {output.collapsed_in} |cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_in_stats} """)
-
-# 		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.collapsed_in} ) -b <( bedtools sort -i {output.collapsed_in} ) | awk '{{print$1"~"$17}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.collapsed_in_hist} """)
-
-# 		# shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg """)
-# 		# shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
-# 		# for num_included in range(1,rep_count+1):
-# 		# 	shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_in} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed """)
-# 		# shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.collapsed.bed """)
-# 		# shell(""" touch {output.collapsed_in} """)
-
-# 		put = "output"
-# 		rep_count = len(input.uncollapsed_out)
-# 		shell(""" cat {input.uncollapsed_out} | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat {input.uncollapsed_out}  | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed """ )
-# 		shell(""" paste <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed | cut -f 1-4 ) <(python3 scripts/overlapSignalCollapser.py -i fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksCollapsed.bed  -r {rep_count}) | rev |cut -f 2- | rev > {output.collapsed_out} """)
-# 		shell(""" echo "{put}\tcount\ttotal\t$(cat {output.collapsed_out} | wc -l)" > {output.collapsed_out_stats}""")
-# 		shell(""" cat {output.collapsed_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_out_stats} """)
-# 		shell(""" cat {output.collapsed_out} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_out_stats} """)
-# 		shell(""" cat {output.collapsed_out} |cut -f 8 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.collapsed_out_stats} """)
-
-# 		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.collapsed_out} ) -b <( bedtools sort -i {output.collapsed_out} ) | awk '{{print$1"~"$17}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.collapsed_out_hist} """)
-
-# 		# shell(""" bedtools genomecov -bg -g {ref_fai} -i <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
-# 		# shell(""" rm -rf fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
-# 		# for num_included in range(1,rep_count+1):
-# 		# 	shell(""" bedtools intersect -wb -a  <( cat {input.uncollapsed_out} | sort -k1,1 -k2,2n ) -b <( cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg | awk '{{if($4=={num_included})print;}}')  >> fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed """)
-# 		# shell("""cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed | sort -k1,1 -k2,2n | bedtools merge -i - | bedtools map -b <(cat fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bed| cut -f 1-7,9,10,14 | sort -k1,1 -k2,2n | awk '{{print$0"\t"$7*($3-$2)"\t"$3-$2}}' ) -a - -c 1,4,7,10,11,12 -o count,collapse,collapse,collapse,collapse,collapse > fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.collapsed.bed """)
-# 		# shell(""" touch {output.collapsed_out} """)
-# 		# shell(""" rm fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.subIntervals.bg fSeq/collapse/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.subIntervals.bg """)
-
-		
-
-
-# rule collapse_all_intersects:
-# 	input:
-# 		clpsd_in = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
-# 		clpsd_out = expand("meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
-# 	output:
-# 		clpsd_stat = "meta/collapsedPeakStats.vs_dm6.bwa.summary",
-# 		clpsd_distHist = "meta/collapsedPeakStats.vs_dm6.bwa.autoDist.hist",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.clpsd_stat} {output.clpsd_distHist} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
-# 			for grup in ["A","B","C"]:
-# 				shell(""" cat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsCollapsed.stat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsCollapsed.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.clpsd_stat} """)
-# 				shell(""" cat meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsCollapsed.autoDist.hist meta/collapseStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsCollapsed.autoDist.hist | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.clpsd_distHist} """)
-
-# rule merge_nearby_collapsed:
-# 	input:
-# 		unmerged_in = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsCollapsed.bed",
-# 		unmerged_out = "fSeq/collapse/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsCollapsed.bed",
-# 	output:
-# 		merged_in = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.bed",
-# 		merged_in_stats = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.stat",
-# 		merged_in_hist = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.autoDist.hist",
-# 		merged_out = "fSeq/merge/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.bed",
-# 		merged_out_stats = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.stat",
-# 		merged_out_hist = "meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.autoDist.hist",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 		merge_dist = 100,
-# 		col2merge = 9, # column containing the input signal. default is 9, the Pessimist
-# 		col2report = 7, # column to report in the *.stats
-# 	run:
-# 		shell(""" mkdir -p fSeq/merge/ meta/mergeStats """)
-
-# 		put = "input"
-# 		shell(""" cat {input.unmerged_in}  | awk '{{print$0"\t"$3-$2}}' | bedtools merge -d {params.merge_dist} -c 1,4,5,6,7,8,9 -o count,collapse,collapse,collapse,collapse,collapse,collapse -i - > fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksMerged.bed """)
-# 		# output: chromStartStop, contribs to merged, contribs to collapsed, collapsed avg, collapsed rescale, collapsed weighted, collapsed pess, collapsed int lengths
-# 		shell(""" paste <(cat fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksMerged.bed | cut -f 1-4 ) <(python3 scripts/collapsedSignalMerger.py -i fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.input.peaksMerged.bed  -c {params.col2merge} ) | rev |cut -f 2- | rev > {output.merged_in} """)
-
-# 		shell(""" echo "{put}\tcount\ttotal\t$(cat {output.merged_in} | wc -l) " > {output.merged_in_stats}""")
-# 		shell(""" cat {output.merged_in} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
-# 		shell(""" cat {output.merged_in} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
-# 		shell(""" cat {output.merged_in} |cut -f {params.col2report} | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_in_stats} """)
-# 		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.merged_in} ) -b <( bedtools sort -i {output.merged_in} ) | awk '{{print$1"~"$15}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.merged_in_hist} """)
-
-
-# 		put = "output"
-# 		shell(""" cat {input.unmerged_out}  | awk '{{print$0"\t"$3-$2}}' | bedtools merge -d {params.merge_dist} -c 1,4,5,6,7,8,9 -o count,collapse,collapse,collapse,collapse,collapse,collapse -i - > fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksMerged.bed """)
-# 		shell(""" paste <(cat fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksMerged.bed | cut -f 1-4 ) <(python3 scripts/collapsedSignalMerger.py -i fSeq/merge/{wildcards.spearmint}.vs_dm6.bwa.group_{wildcards.group}.output.peaksMerged.bed  -c {params.col2merge} ) | rev |cut -f 2- | rev > {output.merged_out} """)
-
-# 		shell(""" echo "{put}\tcount\ttotal\t$(cat {output.merged_out} | wc -l) " > {output.merged_out_stats}""")
-# 		shell(""" cat {output.merged_out} | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
-# 		shell(""" cat {output.merged_out} |cut -f 4 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "contribs\tavg\t",sum/NR; print "contribs\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
-# 		shell(""" cat {output.merged_out} |cut -f {params.col2report}  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' | awk '{{print"{put}\t"$0}}' >> {output.merged_out_stats} """)
-# 		shell(""" bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {output.merged_out} ) -b <( bedtools sort -i {output.merged_out} ) | awk '{{print$1"~"$15}}' | sed -e 's/~-/~/g'| sort | uniq -c | tr -s " " | tr " " "\t" | tr "~" "\t" | awk '{{print$2"\t"$3"\t"$1}}' | sort -k 3 -g | awk '{{print"{put}\t"$0}}' > {output.merged_out_hist} """)
-
-
-# rule merge_all_collapsed:
-# 	input:
-# 		mrgd_in = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
-# 		mrgd_out = expand("meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], statsuff = ["stat", "autoDist.hist"]),
-# 	output:
-# 		mrgd_stats = "meta/mergedPeakStats.vs_dm6.bwa.summary",
-# 		mrgd_distHist = "meta/mergedPeakStats.vs_dm6.bwa.autoDist.hist",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.mrgd_stats} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
-# 			for grup in ["A","B","C"]:
-# 				shell(""" cat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsMerged.stat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsMerged.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.mrgd_stats} """)
-# 				shell(""" cat meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.input.signalsMerged.autoDist.hist meta/mergeStats/{spearmint}.vs_dm6.bwa.group_{grup}.output.signalsMerged.autoDist.hist | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.mrgd_distHist} """)
-
-
-# rule merged_fseq_scromble:
-# 	input:
-# 		bed_in = "fSeq/merge/{spearmint}.vs_{ref_gen}.bwa.group_{group}.{put}.signalsMerged.bed"
-# 	output:
-# 		bed_out = "fSeq/merge/scramble/{spearmint}.vs_{ref_gen}.bwa.group_{group}.{put}.signalsMerged.scram_{n}.bed"
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 		seeds = [13,69,420,777,12345],
-# 		scram = "-chrom -noOverlapping -maxTries 1000000",
-# 	run:
-# 		reffai = ref_genome_by_name[wildcards.ref_gen]["fai"]
-# 		try:
-# 			seed = "-seed %s" % tuple([ params.seeds[int(wildcards.n)] ])
-# 		except NameError:
-# 			seed = ""
-# 		except IndexError:
-# 			print("warning: unspecified seed index; using pRNG. ")
-# 			seed = ""
-# 		shell(""" bedtools shuffle {seed} {params.scram} -i {input.bed_in} -g {reffai} > {output.bed_out} """)
-
-# rule merged_scromble_summoner:
-# 	input:
-# 		scrombles_in = expand("fSeq/merge/scramble/{spearmint}.vs_{ref_gen}.bwa.group_{group}.{put}put.signalsMerged.scram_{n}.bed", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group = ["A","B","C"] , ref_gen = "dm6", n = [i for i in range(0,5)], put = ["in","out"])
-# 	output:
-# 		scrombled_flg = "utils/scromble.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell( """ touch {output.scrombled_flg} """)
-
-
-
-
-
-# rule contrast_merged_peaks:
-# 	input:
-# 		inputPeaks= "fSeq/merge{subdir}/{spearmint}.vs_dm6.bwa.group_{group}.input.signalsMerged{scram}.bed",
-# 		outputPeaks= "fSeq/merge{subdir}/{spearmint}.vs_dm6.bwa.group_{group}.output.signalsMerged{scram}.bed",
-# 	output:
-# 		inputClosest = "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.inputClosest{scram,[.scram_]+[0-9]+}.dubBed",
-# 		outputClosest = "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.outputClosest{scram,[.scram_]+[0-9]+}.dubBed",
-# 		inputSharedPeaks= "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.input_shared{scram,[.scram_]+[0-9]+}.contrast.bed",
-# 		outputSharedPeaks= "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.output_shared{scram,[.scram_]+[0-9]+}.contrast.bed",
-# 		sharedLocii = "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.sharedLocii{scram,[.scram_]+[0-9]+}.bed",
-# 		sharedPeaks_stats = "meta/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.shared.contrast{scram,[.scram_]+[0-9]+}.stat",
-# 		inputExclusivePeaks= "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast{scram,[.scram_]+[0-9]+}.bed",
-# 		inputExclusivePeaks_stats= "meta/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast{scram,[.scram_]+[0-9]+}.stat",
-# 		outputExclusivePeaks= "fSeq/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.contrast{scram,[.scram_]+[0-9]+}.bed",
-# 		outputExclusivePeaks_stats= "meta/contrast{subdir,[/]*[A-Za-z0-9]*}/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.contrast{scram,[.scram_]+[0-9]+}.stat",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 		contrast_thresh = 100,
-# 	run:
-# 		###		get ready to rumble
-# 		shell(""" mkdir -p fSeq/contrast/ meta/contrast/ """)
-
-# 		###		Measure distances to nearest neighbor	###
-# 		#a few assumptions: we're only interested in a single merged signal track (column 7, weighted)
-# 		shell(""" bedtools closest -d -D ref -t all -filenames -a <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -b <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) > {output.inputClosest} """)
-
-# 		###		if as close as the threshold: dump to shared double-bed
-# 		shell(""" cat {output.inputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<={params.contrast_thresh})print;}}' | cut -f 1-5,11 | sort | uniq > {output.inputSharedPeaks} """)
-# 		###		report stats on shared input peaks
-# 			###	how many input peaks are shared?
-# 		shell(""" cat {output.inputSharedPeaks} | wc -l | awk '{{print "count\tinput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-# 			### how many intersect an output?
-# 		shell(""" cat {output.inputSharedPeaks} | awk '{{if($6==0)print;}}' |cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\tinput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.inputSharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq| awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_width\ttotal\t",sum; print "input_width\tavg\t",sum/NR; print "input_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.inputSharedPeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_signal\tavg\t",sum/NR; print "input_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.inputSharedPeaks} | cut -f 6 | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_dist\tavg\t",sum/NR; print "input_dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.inputSharedPeaks} | cut -f 6 | awk '{{if($1!=0)print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "input_non0dist\tavg\t",sum/NR; print "input_non0dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}""")
-
-# 		shell(""" bedtools closest -d -D ref -t all -filenames -b <( bedtools sort -i {input.inputPeaks} | cut -f 1-4,7 ) -a <( bedtools sort -i {input.outputPeaks} | cut -f 1-4,7) > {output.outputClosest} """)
-# 		shell(""" cat {output.outputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<={params.contrast_thresh})print;}}' | cut -f 1-5,11 | sort | uniq > {output.outputSharedPeaks} """)
-# 		shell(""" cat {output.outputSharedPeaks} | cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\toutput\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.outputSharedPeaks} | awk '{{if($6==0)print;}}' | cut -f 1-5 | sort | uniq | wc -l | awk '{{print "count\toutput_intersect\t"$1;}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.outputSharedPeaks} | cut -f 1-3 | sort -k1,1 -k2,2n | uniq | awk '{{print$3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_width\ttotal\t",sum; print "output_width\tavg\t",sum/NR; print "output_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.outputSharedPeaks} | cut -f 1-5 | sort -k1,1 -k2,2n | uniq| cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_signal\tavg\t",sum/NR; print "output_signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.outputSharedPeaks} | cut -f 6 | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'  | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_dist\tavg\t",sum/NR; print "output_dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-# 		shell(""" cat {output.outputSharedPeaks} | cut -f 6 | awk '{{if($1!=0)print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{print abs($1);}}'   | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "output_non0dist\tavg\t",sum/NR; print "output_non0dist\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >> {output.sharedPeaks_stats}  """)
-
-
-# 		###		if more distant than thresh, collect the input-exclusive
-# 		shell(""" cat {output.inputClosest} | awk 'function abs(x) {{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>{params.contrast_thresh})print;}}' | cut -f 1-5 | sort | uniq > {output.inputExclusivePeaks} """)
-# 		###		report on stats
-# 		shell( """ cat {output.inputExclusivePeaks} | wc -l | awk '{{print "total\tcount\t"$1}}' > {output.inputExclusivePeaks_stats} """ )
-# 		shell( """ cat {output.inputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\ttotal\t",sum; print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats} """ )
-# 		shell( """ cat {output.inputExclusivePeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats} """ )
-# 		shell(""" cat {output.inputClosest}| cut -f 1-5,11 | sort -k1,1 -k2,2n | uniq  | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($6)>{params.contrast_thresh})print abs($6);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.inputExclusivePeaks_stats}  """)
-
-# 		###		if more distant than thresh, collect the output-exclusive
-# 		###		gotta recalculate for the output
-# 		shell(""" cat {output.outputClosest} | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>{params.contrast_thresh})print;}}' | cut -f 1-5 | sort | uniq > {output.outputExclusivePeaks} """)
-# 		###		report on stats
-# 		shell( """ cat {output.outputExclusivePeaks} | wc -l | awk '{{print "total\tcount\t"$1}}' > {output.outputExclusivePeaks_stats} """ )
-# 		shell( """ cat {output.outputExclusivePeaks} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "width\ttotal\t",sum; print "width\tavg\t",sum/NR; print "width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats} """ )
-# 		shell( """ cat {output.outputExclusivePeaks} | cut -f 5 | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats} """ )
-# 		shell(""" cat {output.outputClosest}| cut -f 1-5,11 | sort -k1,1 -k2,2n | uniq  | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($6)>{params.contrast_thresh})print abs($6);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "nearest\tavg\t",sum/NR; print "nearest\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.outputExclusivePeaks_stats}  """)
-
-# 		shell(""" bedtools merge -d {params.contrast_thresh} -i <(cat <( cut -f 1-3 {output.inputSharedPeaks} ) <( cut -f 1-3 {output.outputSharedPeaks} )  | sort -k1,1 -k2,2n  ) > {output.sharedLocii} """)
-# 		shell(""" cat {output.sharedLocii}| wc -l | awk '{{print "count\tlocii\t"$1;}}' >> {output.sharedPeaks_stats} """)
-# 		shell(""" cat {output.sharedLocii} | awk '{{print $3-$2}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "locii_width\ttotal\t",sum; print "locii_width\tavg\t",sum/NR; print "locii_width\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}' >>  {output.sharedPeaks_stats} """ )
-
-
-
-
-
-
-
-
-# rule contrast_all_merged:
-# 	input:
-# 		cntrst_out = expand("meta/contrast/{spearmint}.vs_dm6.bwa.group_{group}.{partition}.contrast.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], partition = ["shared","input_exclusive","output_exclusive"], statsuff = ["stat"]),
-# 		scram_cntrst_out = expand("meta/contrast/scramble/{spearmint}.vs_dm6.bwa.group_{group}.{partition}.contrast.scram_{n}.{statsuff}", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], partition = ["shared","input_exclusive","output_exclusive"], statsuff = ["stat"],n = [i for i in range(0,5)]),
-# 	output:
-# 		cntrst_stats_shared = "meta/contrastedPeakStats.shared.vs_dm6.bwa.summary",
-# 		cntrst_stats_shared_scram = "meta/contrastedPeakStats.shared.vs_dm6.bwa.scrambled.summary",
-# 		cntrst_stats_xclusiv = "meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary",
-# 		cntrst_stats_xclusiv_scram = "meta/contrastedPeakStats.exclusive.vs_dm6.bwa.scrambled.summary",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.cntrst_stats_shared} {output.cntrst_stats_xclusiv} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
-# 			for grup in ["A","B","C"]:
-# 				shell(""" cat meta/contrast/{spearmint}.vs_dm6.bwa.group_{grup}.shared.contrast.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.cntrst_stats_shared} """)
-# 				for scram in range(0,5):
-# 					shell(""" cat meta/contrast/scramble/{spearmint}.vs_dm6.bwa.group_{grup}.shared.contrast.scram_{scram}.stat | awk '{{print"{scram}\t{spearmint}\t{grup}\t"$0}}' >> {output.cntrst_stats_shared_scram} """)
-# 				for contrast in ["input", "output"]:
-# 					shell(""" cat meta/contrast/{spearmint}.vs_dm6.bwa.group_{grup}.{contrast}_exclusive.contrast.stat | awk '{{print"{spearmint}\t{grup}\t{contrast}\t"$0}}' >> {output.cntrst_stats_xclusiv} """)
-# 					for scram in range(0,5):
-# 						shell(""" cat meta/contrast/scramble/{spearmint}.vs_dm6.bwa.group_{grup}.{contrast}_exclusive.contrast.scram_{scram}.stat | awk '{{print"{spearmint}\t{grup}\t{contrast}\t"$0}}' >> {output.cntrst_stats_xclusiv_scram} """)
-	
-
-# rule contrastIntersectWithAnnot:
-# 	input:
-# 		inputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_shared.contrast.bed",
-# 		outputSharedPeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.output_shared.contrast.bed",
-# 		sharedLocii = "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.sharedLocii.bed",
-# 		inputExclusivePeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.contrast.bed",
-# 		outputExclusivePeaks= "fSeq/contrast/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.contrast.bed",
-# 		annot_file = lambda wildcards: annotation_by_name[wildcards.annot_name]["bed_path"],
-# 	output:
-# 		input_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.intersect.{annot_name}.bed",
-# 		input_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.input_exclusive.intersect.{annot_name}.stat",
-# 		output_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.bed",
-# 		output_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.stat",
-# 		shared_intersect = "features/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.bed",
-# 		shared_intersect_stats = "meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.stat",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p features/intersect/ meta/intersect/ """)
-# 		shell(""" bedtools intersect -wao -a {input.annot_file} -b {input.inputExclusivePeaks} > {output.input_intersect} """)
-# 		#	note: this intersects the *annotation* with the *peaks*. There may be peaks which do not intersect with anything!
-
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.input_intersect_stats}""")
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.input_intersect_stats}""")
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "peak_cov\tavg\t",sum/NR; print "peak_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
-# 		shell(""" cat {output.input_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_peaks\t"$1}}' >> {output.input_intersect_stats} """ ) 
-# 		shell(""" cat {input.inputExclusivePeaks} | cut -f 1-3 | sort | uniq | wc -l| awk '{{print"count\ttotal_peaks\t"$1}}' >> {output.input_intersect_stats} """ ) 
-
-
-# 		shell(""" bedtools intersect -wao -a {input.annot_file} -b {input.outputExclusivePeaks} > {output.output_intersect} """)
-# 		#	note: this intersects the *annotation* with the *peaks*. There may be peaks which do not intersect with anything!
-
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.output_intersect_stats}""")
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.output_intersect_stats}""")
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "peak_cov\tavg\t",sum/NR; print "peak_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.output_intersect_stats}""")
-# 		shell(""" cat {output.output_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_peaks\t"$1}}' >> {output.output_intersect_stats} """ ) 
-# 		shell(""" cat {input.outputExclusivePeaks} | cut -f 1-3 | sort | uniq | wc -l| awk '{{print"count\ttotal_peaks\t"$1}}' >> {output.output_intersect_stats} """ ) 
-
-
-# 		shell(""" bedtools intersect -wao -a {input.annot_file}  -b <(bedtools map -a <( bedtools sort -i {input.sharedLocii} ) -b <( bedtools sort -i {input.inputSharedPeaks} ) -c 5 -o collapse | paste - <(bedtools map -a <( bedtools sort -i {input.sharedLocii} ) -b <( bedtools sort -i {input.outputSharedPeaks} ) -c 5 -o collapse | cut -f 4) ) > {output.shared_intersect}""")
-# 		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1==0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tnointersect\t"$1}}' > {output.shared_intersect_stats}""")
-# 		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | cut -f 4 | sort | uniq | wc -l | awk '{{print"count\tintersect\t"$1}}' >> {output.shared_intersect_stats}""")
-# 		#shell(""" cat {output.shared_intersect} | rev | awk '{if($1!=0)print;}' | cut -f 2 | rev |  awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "signal\tavg\t",sum/NR; print "signal\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.input_intersect_stats}""")
-# 		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($3-$2);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "annot_cov\tavg\t",sum/NR; print "annot_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.shared_intersect_stats}""")
-# 		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | rev | awk '{{print $13/($10-$9);}}' | awk '{{sum+=$1; sumsq+=$1*$1}} END {{ print "locus_cov\tavg\t",sum/NR; print "locus_cov\tstd\t",sqrt(sumsq/NR - (sum/NR)**2)}}'  >> {output.shared_intersect_stats}""")
-# 		shell(""" cat {output.shared_intersect} | rev | awk '{{if($1!=0)print;}}' | cut -f 8-10 | sort | uniq | wc -l | awk '{{print"count\tintersecting_locii\t"$1}}' >> {output.shared_intersect_stats} """ ) 
-# 		shell(""" cat {input.sharedLocii}  | wc -l | awk '{{print"count\ttotal_locii\t"$1}}' >> {output.shared_intersect_stats} """ ) 
-
-
-
-# rule summonAllContrastIntersects:
-# 	input:
-# 		intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.{partition}.intersect.{annot_name}.stat", spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), group=["A","B","C"], partition = ["shared","input_exclusive","output_exclusive"], annot_name = ["dm6_genes"]),
-# #		output_intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.output_exclusive.intersect.{annot_name}.stat"),
-# #		shared_intersect_stats = expand("meta/intersect/{spearmint}.vs_dm6.bwa.group_{group}.shared.intersect.{annot_name}.stat"),
-# 	output:
-# 		exclusive_intersect_summary = "meta/contrastPeakIntersects.exclusive.{annot_name}.stat",
-# 		shared_intersect_summary = "meta/contrastPeakIntersects.shared.{annot_name}.stat",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.exclusive_intersect_summary} {output.shared_intersect_summary} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])) : 
-# 			for grup in ["A","B","C"]:
-# 				shell(""" cat meta/intersect/{spearmint}.vs_dm6.bwa.group_{grup}.shared.intersect.{wildcards.annot_name}.stat | awk '{{print"{spearmint}\t{grup}\t"$0}}' >> {output.shared_intersect_summary} """)
-# 				for contrast in ["input", "output"]:
-# 					shell(""" cat meta/intersect/{spearmint}.vs_dm6.bwa.group_{grup}.{contrast}_exclusive.intersect.{wildcards.annot_name}.stat | awk '{{print"{spearmint}\t{grup}\t{contrast}\t"$0}}' >> {output.exclusive_intersect_summary} """)
+		"""cat {input.bam_reports} | awk '{{print "{wildcards.ref_genome}\t{wildcards.aligner}\t"$0}}'> {output.full_report}"""
 
 
 
@@ -912,13 +441,7 @@ rule write_report:
 		reference_annotation_summary = ["summaries/reference_annotations.summary"],
 		gene_lists_summary = ["summaries/geneLists.stats"],
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
-		aligned_reads_summary = ["summaries/alignments.vs_dm6.bwa.summary"],
-		called_peak_stats = ["summaries/peakStats/individuals.vs_dm6.broadPeak.stats","summaries/peakStats/pooled.vs_dm6.broadPeak.stats", "summaries/peakStats/confirmed.vs_dm6.broadPeak.stats"]
-		# called_peak_stats = ["meta/basicPeakStats.vs_dm6.bwa.summary"],
-		# collapsed_peak_stats = ["meta/collapsedPeakStats.vs_dm6.bwa.summary"],
-		# merged_peak_stats = ["meta/mergedPeakStats.vs_dm6.bwa.summary"],
-		# contrast_stats = ["meta/contrastedPeakStats.shared.vs_dm6.bwa.summary", "meta/contrastedPeakStats.exclusive.vs_dm6.bwa.summary"],
-		# intersect_stats = ["meta/contrastPeakIntersects.exclusive.dm6_genes.stat", "meta/contrastPeakIntersects.shared.dm6_genes.stat"],
+		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti"])#,"mapspliceRando","mapspliceUniq",]),
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:
@@ -931,260 +454,9 @@ rule write_report:
 		pandoc_path="/nas/longleaf/apps/rstudio/1.0.136/bin/pandoc"
 		pwd = subprocess.check_output("pwd",shell=True).decode().rstrip()+"/"
 		shell("""mkdir -p results/figures/supp/ results/tables/supp/""")
-		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/faire_results.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
+		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/RNAseq_results.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
 #		shell(""" tar cf results.tar results/ """)
 
-
-
-# rule singleDistance:
-# 	input:
-# 		peek1 = "fSeq/{samp1}.vs_dm6.bwa.calledPeaks.bed", 
-# 		peek2 = "fSeq/{samp2}.vs_dm6.bwa.calledPeaks.bed", 
-# 	output:
-# 		distOut = "fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p fSeq/closest/all/ """)
-# 		shell("""  bedtools closest -io -d -D ref -t all -filenames -a <( bedtools sort -i {input.peek1} ) -b <( bedtools sort -i {input.peek2} ) | awk '{{print$0"\t{wildcards.samp2}"}}' > {output.distOut}""")
-
-# rule roundRobinDist:
-# 	input:
-# 		distances_in = expand("fSeq/closest/all/{samp1}.to.{samp2}.vs_dm6.bwa.closestPeaks.bed", samp1 = sampname_by_group['all'], samp2 = sampname_by_group['all']),
-# 	output:
-# 		allClose_flag = 'utils/closestCalcd.flg'
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" touch {output.allClose_flag} """)
-
-# rule consolidate_distance_by_group:
-# 	input:
-# 		allClose_flag = 'utils/closestCalcd.flg'
-# 	output:
-# 		grupFlg = 'utils/closest_{group}.flg'
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p fSeq/closest/{wildcards.group} """)
-# 		for samp in sampname_by_group[wildcards.group]:
-# 			for cramp in sampname_by_group[wildcards.group]:
-# 				shell(""" cat fSeq/closest/all/{samp}.to.{cramp}.vs_dm6.bwa.closestPeaks.bed >> fSeq/closest/{wildcards.group}/{samp}.vs_dm6.bwa.closestPeaks.{wildcards.group}.bed """ )
-# 		shell(""" touch {output.grupFlg} """)
-
-
-
-# rule annotation_intersect_bed:
-# 	input:
-# 		bed3 = "fSeq/{bed_prefix}.bed",
-# 	output:
-# 		full_intersect = "features/intersects/{bed_prefix}.intersect.{annot_name}.full.bed",
-# 		#simpleIntersect = "features/intersects/{bed_prefix}.intersect.{annot_name}.compact.bed",
-# 		#strictlyIntronic = "features/intersects/{bed_prefix}.intersect.{annot_name}.intronic.bed",
-# 		intersect_report = "meta/intersects/{bed_prefix}.intersect.{annot_name}.full.stats",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,	
-# 	run:
-# 		shell(""" mkdir -p features/intersects/ meta/intersects/""")
-# 		shell(""" rm -f {output.intersect_report} """)
-# 		annot_bed = annotation_by_name[wildcards.annot_name]["bed_path"]
-# 		shell(""" bedtools intersect -wa -wb -a <(cat {input.bed3} | cut -f 1-3) -b {annot_bed}  > {output.full_intersect} """)
-# 		#shell(""" cat {output.fullIntersect} | grep -w gene | cut -f 1-4,7,8,10,12| tr -d '"' | tr -d ";" | tr " " "\t" | cut -f 1-7,9,11 > {output.simpleIntersect} """)
-# 		#shell(""" bedtools intersect -v -a {output.simpleIntersect} -b <(cat {output.fullIntersect} | grep -w exon | cut -f 1-3) > {output.strictlyIntronic} """)
-# 		shell(""" echo "count\tuniqA\t"$(cat {output.full_intersect} | cut -f 1-3 | uniq | wc -l ) >> {output.intersect_report} """)		
-# 		shell(""" echo "count\tuniqB\t"$(cat {output.full_intersect} | cut -f 4-6 | uniq | wc -l ) >> {output.intersect_report} """)
-# 		shell(""" echo "max\tAperB\t"$(cat {output.full_intersect} | cut -f 1-3 | uniq -c | tr -s " " | cut -f 2 -d " " | awk 'BEGIN{{a=   0}}{{if ($1>0+a) a=$1}} END{{print a}}' ) >> {output.intersect_report} """)
-# 		shell(""" cat {output.full_intersect} | cut -f 1-3 | uniq -c | tr -s " " | cut -f 2 -d " " | awk '{{sum+=$1}} END {{ if (NR + 0 != 0) print "avg\tAperB\t",sum/NR; else print "avg\tAperB\t0";}}'  >> {output.intersect_report}; """)
-# 		shell(""" echo "max\tBperA\t"$(cat {output.full_intersect} | cut -f 4-6 | uniq -c | tr -s " " | cut -f 2 -d " " | awk 'BEGIN{{a=   0}}{{if ($1>0+a) a=$1}} END{{print a}}' ) >> {output.intersect_report} """)
-# 		shell(""" cat {output.full_intersect} | cut -f 4-6 | uniq -c | tr -s " " | cut -f 2 -d " " | awk '{{sum+=$1}} END {{ if (NR + 0 != 0) print "avg\tBperA\t",sum/NR; else print "avg\tAperB\t0";}}' >> {output.intersect_report}; """)
-
-# #cat /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.gtf | awk '{if($3=="gene")print;}' | awk '{print "chr"$1,$4,$5,$7,$10,$12;}' | tr " " "\t" | tr -d ";" | tr -d '"' | awk '{print$1,$2,$3,$5,"0",$4,$6}' | tr " " "\t" > /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.bed 
-
-
-# rule SummarizeAnnotationIntersects:
-# 	input:
-# 		intersects = lambda wildcards: expand("features/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.intersect.{annot_name}.full.bed",spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"], annot_name=wildcards.annot_name ),
-# 		stats = lambda wildcards: expand("meta/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.intersect.{annot_name}.full.stats",spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["input_exclusive","output_exclusive","shared"], grup = ["A","B","C"], annot_name=wildcards.annot_name ),
-# 	output:
-# 		annotIntersectStats = "meta/vs_dm6.bwa.collapsed.intersect.{annot_name}.full.stats",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.annotIntersectStats} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-# 			for grup in ["A","B","C"]:
-# 				for pile in ["shared","input_exclusive","output_exclusive"]:
-# 					shell(""" cat meta/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.intersect.{wildcards.annot_name}.full.stats | awk '{{print "{pile}\t{spearmint}\t{grup}\t"$0}}' >> {output.annotIntersectStats} """)
-
-# rule countInteresectingPeaks_byAnnotation:
-# 	input:
-# 		intersectBed = "features/intersects/{bed_prefix}.intersect.{annot_name}.full.bed",
-# 	output:
-# 		interesectGeneCounts = "features/intersects/{bed_prefix}.intersect.{annot_name}.byGenePeaks.count",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=1,
-# 		col = 7,
-# 	run:
-# 		shell(""" cat {input.intersectBed} | cut -f 7 | sort | uniq -c | tr -s " " | tr " " "\t" | awk '{{print $2"\t"$1}}' > {output.interesectGeneCounts} """)
-
-
-# rule summonPeakCounts_byAnnotation:
-# 	input:
-# 		counts_in = lambda wildcards: expand("features/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.intersect.{annot_name}.byGenePeaks.count",spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"], annot_name=wildcards.annot_name ),
-# 	output:
-# 		peakCountsByAnn_tbl = "features/intersects/peakCountsByAnn.{annot_name}.tbl",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		#shell(""" touch {output.peakCountsByAnn_flag} """)
-# 		shell(""" rm -rf {output.peakCountsByAnn_tbl} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-# 			for grup in ["A","B","C"]:
-# 				for pile in ["shared","input_exclusive","output_exclusive"]:
-# 					shell(""" cat features/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.intersect.{wildcards.annot_name}.byGenePeaks.count | sed -e 's/^/{spearmint}\t{pile}\t{grup}\t/g' >> {output.peakCountsByAnn_tbl} """)		
-
-
-
-
-
-
-
-
-
-# rule bed2ann_dist:
-# 	input:
-# 		bed3 = "fSeq/{bed_prefix}.bed",
-# 	output:
-# 		upstream_closest = "features/closest/{bed_prefix}.closestUpstreamFeat.{annot_name}.full.bed",
-# 		downstream_closest = "features/closest/{bed_prefix}.closestDownstreamFeat.{annot_name}.full.bed",
-# 		overall_closest = "features/closest/{bed_prefix}.closestFeatOverall.{annot_name}.full.bed",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		#numfields=awk '{print NF}' closestUpstream.neg | sort | uniq # numfields is currently 11,but use this to generalize?
-# 		annot_bed = annotation_by_name[wildcards.annot_name]["bed_path"]
-# 		shell(""" mkdir -p features/closest/""" )#" meta/intersects/""")
-# 		shell(""" bedtools closest -id -d -D ref -a <( cut -f 1-3 {input.bed3} | bedtools sort -i - ) -b <( bedtools sort -i {annot_bed} | awk '{{if($6=="+")print}}') > features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.pos """)
-# 		shell(""" bedtools closest -iu -d -D ref -a <( cut -f 1-3 {input.bed3} | bedtools sort -i - ) -b <( bedtools sort -i {annot_bed} | awk '{{if($6=="-")print}}') > features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.neg """)		
-# 		shell(""" bedtools intersect -wa -wb -a features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.neg -b features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.pos |  awk '{{if($1==$12 && $2==$13 && $3==$14)print;}}' > features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if($15==".")print;}}' | awk '{{if($4!=".")print;}}' | cut -f 1-11 > features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if($4==".")print;}}' | awk '{{if($15!=".")print;}}' | cut -f 12- >> features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if( $15!="." && $4!="." )print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<abs($22))print;}}' | cut -f 1-11 >> features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if( $15!="." && $4!="." )print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>abs($22))print;}}' | cut -f 12- >> features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" bedtools sort -i features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt > {output.upstream_closest} """)
-
-# 		shell(""" bedtools closest -id -d -D ref -a <( cut -f 1-3 {input.bed3} | bedtools sort -i -  ) -b <( bedtools sort -i {annot_bed} | awk '{{if($6=="-")print}}') > features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.pos """)
-# 		shell(""" bedtools closest -iu -d -D ref -a <( cut -f 1-3 {input.bed3} | bedtools sort -i - ) -b <( bedtools sort -i {annot_bed} | awk '{{if($6=="+")print}}') > features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.neg """)
-# 		shell(""" bedtools intersect -wa -wb -a features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.neg -b features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.pos |  awk '{{if($1==$12 && $2==$13 && $3==$14)print;}}' > features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if($15==".")print;}}' | awk '{{if($4!=".")print;}}' | cut -f 1-11 > features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if($4==".")print;}}' | awk '{{if($15!=".")print;}}' | cut -f 12- >> features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if( $15!="." && $4!="." )print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)<abs($22))print;}}' | cut -f 1-11 >> features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" cat features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint | awk '{{if( $15!="." && $4!="." )print;}}' | awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs($11)>abs($22))print;}}' | cut -f 12- >> features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt """)
-# 		shell(""" bedtools sort -i features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt > {output.downstream_closest} """)
-
-# 		shell(""" bedtools closest -d -D ref -a <( cut -f 1-3 {input.bed3} ) -b <( bedtools sort -i {annot_bed} ) > {output.overall_closest} """)
-
-# 		shell(""" rm -f features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.unsrt features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.joint features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.pos features/closest/{wildcards.bed_prefix}.closestDownstreamFeat.{wildcards.annot_name}.full.neg """)
-# 		shell(""" rm -f features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.unsrt features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.joint features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.pos features/closest/{wildcards.bed_prefix}.closestUpstreamFeat.{wildcards.annot_name}.full.neg """)
-
-
-
-# rule summon_bed2annDist_byContrast:
-# 	input:
-# 		upstream_closest = expand("features/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.closestUpstreamFeat.{annot_name}.full.bed", annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		downstream_closest = expand("features/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.closestDownstreamFeat.{annot_name}.full.bed", annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		overall_closest = expand("features/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.closestFeatOverall.{annot_name}.full.bed", annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 	output:
-# 		annot_dist_flag = "utils/dist2ann.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00:00",
-# 		cores=1,
-# 	run:
-# 		shell( """ touch {output.annot_dist_flag} """)
-
-
-# rule extractGeneList_byAnnotationDist:
-# 	input:
-# 		annotDist = "features/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.{featType}.{annot_name}.full.bed",
-# 		#closestFeatOverall, annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 	output:
-# 		distList = "features/genelists/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.{featType}.{annot_name}.{distcat}.list",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 		name_column=7,
-# 		dist_column=11,
-# 	run:
-# 		break1 = distance_breaks[wildcards.distcat][0]
-# 		break2 = distance_breaks[wildcards.distcat][1]
-# 		shell(""" cat {input.annotDist} | awk '{{if(${params.name_column}!=".")print;}}'| awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs(${params.dist_column})>{break1})print;}}' |  awk 'function abs(x){{return ((x < 0.0) ? -x : x)}} {{if(abs(${params.dist_column})<={break2})print;}}' | cut -f {params.name_column} | sort | uniq > {output.distList} """)
-
-
-# rule annotationDist_geneList_similarity:
-# 	input: #features/genelists/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.{featType}.{annot_name}.{distcat}.list
-# 		closest_lists = lambda wildcards : expand("features/genelists/closest/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.{closest}.{annot_name}.{distcat}.list",annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"], distcat = distance_breaks.keys(), closest=wildcards.closest ),
-# 	output:
-# 		similarity = "features/genelists/similarities/{closest}.geneLists.similarities"
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 		brakes = [0,100,1000,20000, 2000000000000],
-# 	run:
-# 		shell(""" rm -f {output.similarity} """)
-# 		for list1 in input.closest_lists:
-# 			for list2 in input.closest_lists:
-
-# 					shell(""" echo {list1} > {output.similarity}.tmp """)
-# 					shell(""" echo {list2} >> {output.similarity}.tmp """)
-
-# 					shell(""" cat {list1} | wc -l >> {output.similarity}.tmp """)
-# 					shell(""" cat {list2} | wc -l >> {output.similarity}.tmp """)
-# 					shell(""" grep -c -wFf {list1} {list2} >> {output.similarity}.tmp || true """)
-# 					shell(""" cat {output.similarity}.tmp  | tr "\n" "\t" >> {output.similarity} """)
-# 					shell(""" echo "\n" >> {output.similarity} """)
-# 		shell(""" cat {output.similarity} | sed -e 's/features\/genelists\/closest\///g' | sed -e 's/.vs_dm6.bwa./\t/g' | sed -e 's/.group_/\t/g' | sed -e 's/.list//g' | tr -s "\n" > {output.similarity}.tmp """)
-# 		shell(""" cat {output.similarity}.tmp |tr -s "\n" | tr "." "\t" > {output.similarity} """)
-# 		shell(""" rm -f {output.similarity}.tmp """)
-
-
-# rule annotationDist_geneList_similarities_allStreams:
-# 	input:
-# 		upstream_sim = "features/genelists/similarities/closestUpstreamFeat.geneLists.similarities",
-# 		downstream_sim = "features/genelists/similarities/closestDownstreamFeat.geneLists.similarities",
-# 		overall_sim = "features/genelists/similarities/closestFeatOverall.geneLists.similarities",
-# 	output:
-# 		upstream_byDist = "features/genelists/closestUpstreamFeat.geneLists.similarities.byDist",
-# 		downstream_byDist = "features/genelists/closestDownstreamFeat.geneLists.similarities.byDist",
-# 		overall_byDist = "features/genelists/closestFeatOverall.geneLists.similarities.byDist",
-# 		stream_flag = "utils/allStreamClosest.GeneListSim.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" cat {input.upstream_sim} | awk '{{if($6==$12)print;}}' > {output.upstream_byDist} """)
-# 		shell(""" cat {input.downstream_sim} | awk '{{if($6==$12)print;}}' > {output.downstream_byDist} """)
-# 		shell(""" cat {input.overall_sim} | awk '{{if($6==$12)print;}}' > {output.overall_byDist} """)
-# 		shell(""" touch {output.stream_flag} """)
 
 
 # rule geneList_ontologist:
@@ -1199,237 +471,3 @@ rule write_report:
 # 	run:
 # 		shell(""" mkdir -p features/ontologies/ """)
 # 		shell(""" Rscript scripts/geneOntologer.R {input.gene_list} {output.list_ontology} """)
-
-
-# rule summon_all_proximity_GOs:
-# 	input:
-# 		closest_lists = lambda wildcards : expand("features/ontologies/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.{closest}.{annot_name}.{distcat}.go", annot_name = ["dm6_genes"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"], distcat = distance_breaks.keys(), closest=wildcards.closest ),
-# 	output:
-# 		megaGo = "features/ontologies/{closest}.dm6_genes.go"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		annot_name = "dm6_genes"
-# 		shell(""" rm -f {output.megaGo} """)
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-# 			for grup in ["A","B","C"]:
-# 				for pile in ["shared","input_exclusive","output_exclusive"]:
-# 					for distcat in distance_breaks.keys():
-# 						shell(""" cat features/ontologies/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.{wildcards.closest}.{annot_name}.{distcat}.go | awk '{{print"{spearmint}\t{pile}\t{grup}\t{wildcards.closest}\t{distcat}\t"$0}}' >> {output.megaGo} """)
-
-
-
-
-# rule annotationDist_geneList_ontologies_allStreams:
-# 	input:
-# 		upstream_go = "features/ontologies/closestUpstreamFeat.dm6_genes.go",
-# 		downstream_go = "features/ontologies/closestDownstreamFeat.dm6_genes.go",
-# 		overall_go = "features/ontologies/closestFeatOverall.dm6_genes.go",
-# 	output:
-# 		ont_flag = "utils/allStreamClosest.GeneListOntolog.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" touch {output.ont_flag} """)
-
-
-# rule ann2bed_dist:
-# 	input:
-# 		bed3 = "fSeq/{bed_prefix}.bed",		
-# 	output:
-# 		upstream_closest = "features/closest/{annot_name}.closestUpstreamPeak.{bed_prefix}.full.bed",
-# 		downstream_closest = "features/closest/{annot_name}.closestDownstreamPeak.{bed_prefix}.full.bed",
-# 		overall_closest = "features/closest/{annot_name}.closestPeakOverall.{bed_prefix}.full.bed",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		annot_bed = annotation_by_name[wildcards.annot_name]["bed_path"]
-# 		shell(""" bedtools closest -d -io -id -D a -a <( bedtools sort -i {annot_bed} ) -b <( cut -f 1-3 {input.bed3} | bedtools sort -i - ) > {output.upstream_closest} """)
-# 		shell(""" bedtools closest -d -io -iu -D a -a <( bedtools sort -i {annot_bed} ) -b <( cut -f 1-3 {input.bed3} | bedtools sort -i - ) > {output.downstream_closest} """)
-# 		shell(""" bedtools closest -d -io -D a -a <( bedtools sort -i {annot_bed} ) -b <( cut -f 1-3 {input.bed3} | bedtools sort -i -  ) > {output.overall_closest} """)
-
-
-# rule summon_ann2bedDist_byContrast:
-# 	input:
-# 		upstream_closest = expand("features/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		downstream_closest = expand("features/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		overall_closest = expand("features/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 	output:
-# 		annot_dist_flag = "utils/ann2dist.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell( """ touch {output.annot_dist_flag} """)
-
-
-# rule ann2bedDist_byContrast_scrombleCompresser:
-# 	input:
-# 		upstream_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scram}.full.bed",scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# 		downstream_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scram}.full.bed",scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# 		overall_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scram}.full.bed",scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# 	output:
-# 		upstream_compress = "features/scrambled/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed",
-# 		downstream_compress = "features/scrambled/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed",
-# 		overall_compress = "features/scrambled/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed",
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell("""mkdir -p features/scrambled/closest/""")
-
-# 		up_base = input.upstream_scromble[0]
-# 		shell(""" cat {up_base} | rev | cut -f 5- | rev > {output.upstream_compress} """)
-# 		for upstr in input.upstream_scromble:
-# 			shell(""" paste {output.upstream_compress} <(cat {upstr} | rev | cut -f 1 | rev ) > {output.upstream_compress}.tmp """)
-# 			shell(""" mv {output.upstream_compress}.tmp {output.upstream_compress} """)
-
-# 		down_base = input.downstream_scromble[0]
-# 		shell(""" cat {down_base} | rev | cut -f 5- | rev > {output.downstream_compress} """)
-# 		for dwnstr in input.downstream_scromble:
-# 			shell(""" paste {output.downstream_compress} <(cat {dwnstr} | rev | cut -f 1 | rev ) > {output.downstream_compress}.tmp """)
-# 			shell(""" mv {output.downstream_compress}.tmp {output.downstream_compress} """)
-
-# 		all_base = input.overall_scromble[0]
-# 		shell(""" cat {all_base} | rev | cut -f 5- | rev > {output.overall_compress} """)
-# 		for vrl in input.overall_scromble:
-# 			shell(""" paste {output.overall_compress} <(cat {vrl} | rev | cut -f 1 | rev ) > {output.overall_compress}.tmp """)
-# 			shell(""" mv {output.overall_compress}.tmp {output.overall_compress} """)
-
-#  		##shell(""" rm {input} """)
-
-# rule annot_scromble_intersector:
-# 	input:
-# 		moveme = "features/intersects/{bed_prefix}.intersect.{annot_name}.full.bed",
-# 	output:
-# 		moved = "features/scrambled/intersects/{bed_prefix}.intersect.{annot_name}.full.bed",
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" mkdir -p features/scrambled/intersects/ """)
-# 		shell(""" mv {input.moveme} {output.moved} """)
-
-# rule summon_annot_scromble_intersects:
-# 	input:
-# 		expand("features/scrambled/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scrm}.intersect.{annot_name}.full.bed", annot_name=["ionotropic", "nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), grup = [ g for g in sampname_by_group.keys() if g != "all" ], pile=["shared","input_exclusive","output_exclusive"], scrm = range(0,len(rules.fseq_scromble.params.seeds)) )
-# 	output:
-# 		annotScrmblIntersectStats = "meta/scrambledPeaks_intersectWithAnnots.counts"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell(""" rm -rf {output.annotScrmblIntersectStats} """)		
-# 		for spearmint in list(set([ s["experimental"] for s in config['data_sets'] ])):
-# 			for grup in [ g for g in sampname_by_group.keys() if g != "all" ]:
-# 				for pile in ["shared","input_exclusive","output_exclusive"]:
-# 					for annot_name in ["ionotropic"]:
-# 						for scrm in range(0,len(rules.fseq_scromble.params.seeds)):
-# 							shell(""" cat features/scrambled/intersects/{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scrm}.intersect.{annot_name}.full.bed |cut -f 4- |sort | uniq | wc -l | awk '{{print "{annot_name}\t{pile}\t{spearmint}\t{grup}\t{scrm}\t"$0}}' >> {output.annotScrmblIntersectStats} """)
-
-
-
-
-
-
-
-# # rule ann2bedDist_byContrast_scrombleCompresser:
-# # 	input:
-# # 		upstream_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scram}.full.bed",scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# # 		downstream_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.scramble_{scram}.collapsed.full.bed",  scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# # 		overall_scromble = lambda wildcards: expand("features/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.scramble_{scram}.collapsed.full.bed" , scram = [0,1,2,3,4], annot_name = wildcards.annot_name, spearmint = wildcards.spearmint, pile = wildcards.pile, grup = wildcards.grup),
-# # 	output:
-# # 		upstream_compress = "features/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scrambled.bed",
-# # 		downstream_compress = "features/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scrambled.bed",
-# # 		overall_compress = "features/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scrambled.bed",
-# # 	params:
-# # 		runmem_gb=8,
-# # 		runtime="1:00:00",
-# # 		cores=8,
-# # 	run:
-# # 		shell("""mkdir -p features/closest/scrambled/""")
-
-# # 		up_base = input.upstream_scromble[0]
-# # 		shell(""" cat {up_base} | rev | cut -f 5- | rev > {output.upstream_compress} """)
-# # 		for upstr in input.upstream_scromble:
-# # 			shell(""" paste {output.upstream_compress} <(cat {upstr} | rev | cut -f 1 | rev ) > {output.upstream_compress}.tmp """)
-# # 			shell(""" mv {output.upstream_compress}.tmp {output.upstream_compress} """)
-
-# # 		down_base = input.downstream_scromble[0]
-# # 		shell(""" cat {down_base} | rev | cut -f 5- | rev > {output.downstream_compress} """)
-# # 		for dwnstr in input.downstream_scromble:
-# # 			shell(""" paste {output.downstream_compress} <(cat {dwnstr} | rev | cut -f 1 | rev ) > {output.downstream_compress}.tmp """)
-# # 			shell(""" mv {output.downstream_compress}.tmp {output.downstream_compress} """)
-
-# # 		all_base = input.overall_scromble[0]
-# # 		shell(""" cat {all_base} | rev | cut -f 5- | rev > {output.overall_compress} """)
-# # 		for vrl in input.overall_scromble:
-# # 			shell(""" paste {output.overall_compress} <(cat {vrl} | rev | cut -f 1 | rev ) > {output.overall_compress}.tmp """)
-# # 			shell(""" mv {output.overall_compress}.tmp {output.overall_compress} """)
-
-# # 		shell(""" rm {input} """)
-
-
-
-
-
-# rule compressAll_ann2bedDist_byContrast_scrombles:
-# 	input:
-# 		upstream_compress = expand("features/scrambled/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		downstream_compress = expand("features/scrambled/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 		overall_compress = expand("features/scrambled/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.scrmbl.bed", annot_name = ["dm6_genes","ionotropic","nervSysDev","histoneMod","mating","synapseSig"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ),
-# 	output:
-# 		scrombled_flag = "utils/ann2dist.scromble.flg"
-# 	params:
-# 		runmem_gb=1,
-# 		runtime="1:00",
-# 		cores=1,
-# 	run:
-# 		shell( """ touch {output.scrombled_flag} """)
-
-
-
-
-# # 		upstream_compress = expand("features/closest/scrambled/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed",annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ,),
-# # 		downstream_compress =  expand("features/closest/scrambled/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed",annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ,),
-# # 		overall_compress =  expand("features/closest/scrambled/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.full.bed",annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] ,),
-# # 	output:
-# # 		scrombled_flag = "utils/ann2dist.scromble.flg"
-# # 	params:
-# # 		runmem_gb=1,
-# # 		runtime="1:00",
-# # 		cores=1,
-# # 	run:
-# # 		shell( """ touch {output.scrombled_flag} """)
-
-
-
-
-# #  
-
-# # rule summon_ann2bedDist_byContrast_scromble:
-# # 	input:
-# # 		upstream_closest = expand("features/closest/{annot_name}.closestUpstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.collapsed.scramble_{scram}.full.bed", annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] , scram = [0,1,2,3,4]),
-# # 		downstream_closest = expand("features/closest/{annot_name}.closestDownstreamPeak.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.scramble_{scram}.collapsed.full.bed", annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] , scram = [0,1,2,3,4]),
-# # 		overall_closest = expand("features/closest/{annot_name}.closestPeakOverall.{spearmint}.vs_dm6.bwa.{pile}.group_{grup}.scramble_{scram}.collapsed.full.bed", annot_name = ["dm6_genes","ionotropic"], spearmint = list(set([ s["experimental"] for s in config['data_sets'] ])), pile=["shared","input_exclusive","output_exclusive"], grup = ["A","B","C"] , scram = [0,1,2,3,4]),
-# # 	output:
-# # 		annot_dist_flag = "utils/ann2dist.scram.flg"
-# # 	params:
-# # 		runmem_gb=1,
-# # 		runtime="1:00",
-# # 		cores=1,
-# # 	run:
-# # 		shell( """ touch {output.annot_dist_flag} """)
-
-
-

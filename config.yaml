@@ -6,8 +6,10 @@ data_sets:
       readsfile2: 5D_47B1MUT_1_TGGACTCT-CCGTAAGA_S5_L002_R2_001.fastq
       rep: 1
       day: 5
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_47B1MUT_2
       path: FASTQ/RNAseq/47B1MUT_5D/rep2/
       paired: True
@@ -15,8 +17,10 @@ data_sets:
       readsfile2: 5D_47B1MUT_2_GTCGAAGA-CAATGTGG_S6_L002_R2_001.fastq
       rep: 2
       day: 5
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_47B1MUT_3
       path: FASTQ/RNAseq/47B1MUT_5D/rep3/
       paired: True
@@ -24,8 +28,10 @@ data_sets:
       readsfile2: 5D_47B1MUT_3_GTCATCGA-AGTGGATC_S7_L002_R2_001.fastq
       rep: 3
       day: 5
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88A47B2MUT_1
       path: FASTQ/RNAseq/88A47B2MUT_5D/rep1/
       paired: True
@@ -33,8 +39,10 @@ data_sets:
       readsfile2: 5D_88A47B2MUT_1_GATGTGTG-CATGGCTA_S8_L002_R2_001.fastq
       rep: 1
       day: 5
-      genotype: 88A47B2MUT
+      genotype: [47b2,88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88A47B2MUT_2
       path: FASTQ/RNAseq/88A47B2MUT_5D/rep2/
       paired: True
@@ -42,8 +50,10 @@ data_sets:
       readsfile2: 5D_88A47B2MUT_2_ACGACTTG-TCGCTGTT_S9_L002_R2_001.fastq
       rep: 2
       day: 5
-      genotype: 88A47B2MUT
+      genotype: [47b2,88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88A47B2MUT_3
       path: FASTQ/RNAseq/88A47B2MUT_5D/rep3/
       paired: True
@@ -51,8 +61,10 @@ data_sets:
       readsfile2: 5D_88A47B2MUT_3_TGCTTCCA-ATCGATCG_S10_L002_R2_001.fastq
       rep: 3
       day: 5
-      genotype: 88A47B2MUT
+      genotype: [47b2,88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88AMUT_1
       path: FASTQ/RNAseq/88AMUT_5D/rep1/
       paired: True
@@ -60,8 +72,10 @@ data_sets:
       readsfile2: 5D_88AMUT_1_ACCACGAT-TTGCAGAC_S11_L002_R2_001.fastq
       rep: 1
       day: 5
-      genotype: 88AMUT
+      genotype: [88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88AMUT_2
       path: FASTQ/RNAseq/88AMUT_5D/rep2/
       paired: True
@@ -69,8 +83,10 @@ data_sets:
       readsfile2: 5D_88AMUT_2_AGCACTTC-TTGGACGT_S12_L002_R2_001.fastq
       rep: 2
       day: 5
-      genotype: 88AMUT
+      genotype: [88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 5D_88AMUT_3
       path: FASTQ/RNAseq/88AMUT_5D/rep3/
       paired: True
@@ -78,8 +94,10 @@ data_sets:
       readsfile2: 5D_88AMUT_3_TTGCGAAG-AGCGTGTT_S13_L002_R2_001.fastq
       rep: 3
       day: 5
-      genotype: 88AMUT
+      genotype: [88a,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_47B1MUT_1
       path: FASTQ/RNAseq/47B1MUT_7D/rep1/
       paired: True
@@ -87,8 +105,10 @@ data_sets:
       readsfile2: 7D_47B1MUT_1_GTTGACCT-AAGCACTG_S14_L002_R2_001.fastq
       rep: 1
       day: 7
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_47B1MUT_2
       path: FASTQ/RNAseq/47B1MUT_7D/rep2/
       paired: True
@@ -96,8 +116,10 @@ data_sets:
       readsfile2: 7D_47B1MUT_2_CACCTGTT-GCTATCCT_S15_L002_R2_001.fastq
       rep: 2
       day: 7
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_47B1MUT_3
       path: FASTQ/RNAseq/47B1MUT_7D/rep3/
       paired: True
@@ -105,8 +127,10 @@ data_sets:
       readsfile2: 7D_47B1MUT_3_ACTCTCGA-TGGTACAG_S16_L002_R2_001.fastq
       rep: 3
       day: 7
-      genotype: 47B1MUT
+      genotype: [47b1,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_67DMUT_1
       path: FASTQ/RNAseq/67DMUT_7D/rep1/
       paired: True
@@ -114,8 +138,10 @@ data_sets:
       readsfile2: 7D_67DMUT_1_AGTTCGTC-GATCGAGT_S17_L002_R2_001.fastq
       rep: 1
       day: 7
-      genotype: 67DMUT
+      genotype: [67d,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_67DMUT_2
       path: FASTQ/RNAseq/67DMUT_7D/rep2/
       paired: True
@@ -123,8 +149,10 @@ data_sets:
       readsfile2: 7D_67DMUT_2_CGCAATCT-ATGCCTGT_S18_L002_R2_001.fastq
       rep: 2
       day: 7
-      genotype: 67DMUT
+      genotype: [67d,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_67DMUT_3
       path: FASTQ/RNAseq/67DMUT_7D/rep3/
       paired: True
@@ -132,8 +160,10 @@ data_sets:
       readsfile2: 7D_67DMUT_3_CGTGTGTA-TTCGTTGG_S19_L002_R2_001.fastq
       rep: 3
       day: 7
-      genotype: 67DMUT
+      genotype: [67d,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_GROUPHOUSE_1
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
       paired: True
@@ -141,8 +171,10 @@ data_sets:
       readsfile2: 7D_GROUPHOUSE_1_CTGATCGT-ATATGCGC_S20_L002_R2_001.fastq
       rep: 1
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
       paired: True
@@ -150,8 +182,10 @@ data_sets:
       readsfile2: 7D_GROUPHOUSE_2_TACGCTAC-ATCACACG_S21_L002_R2_001.fastq
       rep: 2
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
       paired: True
@@ -159,8 +193,10 @@ data_sets:
       readsfile2: 7D_GROUPHOUSE_3_CCTTGATC-ACTCCATC_S22_L002_R2_001.fastq
       rep: 3
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
       paired: True
@@ -168,8 +204,10 @@ data_sets:
       readsfile2: 7D_ISOLATED_1_TGTGACTG-GATAGGCT_S23_L002_R2_001.fastq
       rep: 1
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: isolated
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_ISOLATED_2
       path: FASTQ/RNAseq/ISOLATED_7D/rep2/
       paired: True
@@ -177,8 +215,10 @@ data_sets:
       readsfile2: 7D_ISOLATED_2_GAGCAGTA-ACAGCTCA_S24_L002_R2_001.fastq
       rep: 2
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: isolated
+      subgroups: [all,]
+      tissue: antennae
     - name: 7D_ISOLATED_3
       path: FASTQ/RNAseq/ISOLATED_7D/rep3/
       paired: True
@@ -186,43 +226,63 @@ data_sets:
       readsfile2: 7D_ISOLATED_3_TGGTAGCT-CAACACCT_S25_L002_R2_001.fastq
       rep: 3
       day: 7
-      genotype: wt
+      genotype: [wt,]
       housing: isolated
-    - name: FRULEXAFRU440_1_CTTCGACT-GCAAGATC
+      subgroups: [all,]
+      tissue: antennae
+    - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
       paired: True
       readsfile1: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R1_001.fastq
       readsfile2: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R2_001.fastq
       rep: 1
-      day: 666
-      genotype: FRULEXAFRU440
+      day: 7
+      genotype: [FruLexaFru440,]
       housing: group
-    - name: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC
+      subgroups: [all,]
+      tissue: antennae
+    - name: FRULEXAFRU440_2
       path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
       paired: True
       readsfile1: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC_S27_L002_R1_001.fastq
       readsfile2: FRULEXAFRU440_2_TGAGCTAG-AACCGTTC_S27_L002_R2_001.fastq
       rep: 2
-      day: 666
-      genotype: FRULEXAFRU440
+      day: 7
+      genotype: [FruLexaFru440,]
       housing: group
-    - name: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT
+      subgroups: [all,]
+      tissue: antennae
+    - name: FRULEXAFRU440_3
       path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
       paired: True
       readsfile1: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT_S28_L002_R1_001.fastq
       readsfile2: FRULEXAFRU440_3_AGAGTAGC-TACGCCTT_S28_L002_R2_001.fastq
       rep: 3
-      day: 666
-      genotype: FRULEXAFRU440
+      day: 7
+      genotype: [FruLexaFru440,]
       housing: group
+      subgroups: [all,]
+      tissue: antennae
 
 
 reference_genomes:
-    - name: dm6
+    - name: dm6v13
+      species: drosophila melanogaster
+      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta
+      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta.fai
+      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_bowtie/dmel-r6.13
+      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_split/
+      source: Flybase
+    - name: dm6main
       species: drosophila melanogaster
       path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa
       fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa.fai
+      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_bowtie/dm6.main
+      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_split/
       source: UCSC Genome Browser
+
+
+
 
 annotations:
     - name: dm6_genes
