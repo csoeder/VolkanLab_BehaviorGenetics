@@ -1,5 +1,5 @@
 configfile: 'config.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/3.5.0 rstudio/1.1.453 bowtie
+#	module load python/3.6.6 bedtools bedops samtools r/3.5.0 rstudio/1.1.453 bowtie sratoolkit
 
 #from itertools import combinations
 
@@ -26,6 +26,10 @@ for s in sample_by_name.keys():
 		else:
 			sampname_by_group[g] = [s]
 
+sra_by_fqpath = {}
+for s in sample_by_name.keys():
+	if "SRA" in sample_by_name[s].keys():
+		sra_by_fqpath[sample_by_name[s]["path"]] = sample_by_name[s]["SRA"]
 
 
 
@@ -65,6 +69,25 @@ rule all:
 		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').pdf """)
 		shell(""" tar cf results.$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
 
+
+rule summon_reads_SRA:
+	output: 
+		reads1='FASTQ/{path}/{prefix}_1.fastq',
+		reads2='FASTQ/{path}/{prefix}_2.fastq',
+	params:
+		runmem_gb=8,
+		runtime="3:00:00",
+		cores=1,
+	run:
+		print("%s%s" % tuple(["FASTQ/", wildcards.path]))
+		try:
+			sra = sra_by_fqpath["%s%s/" % tuple(["FASTQ/", wildcards.path])]
+			shell(""" mkdir -p FASTQ/{wildcards.path}/ """)
+			shell("""
+				fasterq-dump  --split-3 --outdir FASTQ/{wildcards.path}/ {sra}
+			""")
+		except KeyError:
+			raise KeyError("Sample is listed as empirical but no reads found and no SRA to download!" )      		
 
 rule mapsplice_builder:
 	output:
@@ -222,7 +245,7 @@ rule fastp_clean_sample_pe:
 		jason = "{pathprefix}/{samplename}.json"
 	params:
 		runmem_gb=8,
-		runtime="3:00:00",
+		runtime="6:00:00",
 		cores=1,
 		#--trim_front1 and -t, --trim_tail1
 		#--trim_front2 and -T, --trim_tail2. 
@@ -278,7 +301,7 @@ rule mapsplice2_align_raw:
 #		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
 		runmem_gb=32,
-		runtime="8:00:00",
+		runtime="16:00:00",
 		cores=8,
 	message:
 		"aligning reads from {wildcards.sample} to reference_genome {wildcards.ref_genome} .... "
@@ -321,7 +344,7 @@ rule mapsplice2_align_multi:
 	run:
 		shell(""" mkdir -p mapped_reads/mapspliceMulti/{wildcards.sample}/ summaries/BAMs/""")
 		shell(""" 
-			samtools sort -n {input.raw_bam} | samtools fixmate -m - - | samtools sort -| samtools markdup {params.dup_flg} - - | samtools view -bh {params.quality} > {output.multi_bam} ;
+			samtools sort -n {input.raw_bam} | samtools fixmate -m - - | samtools sort - | samtools markdup {params.dup_flg} - - | samtools view -bh {params.quality} > {output.multi_bam} ;
 			samtools index {output.multi_bam} 
 			""")
 
@@ -353,8 +376,8 @@ rule mapsplice2_align_rando:
 	output:
 		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
 	params:
-		runmem_gb=8,
-		runtime="1:00:00",
+		runmem_gb=16,
+		runtime="12:00:00",
 		cores=8,
 	message:
 		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
@@ -364,12 +387,12 @@ rule mapsplice2_align_rando:
 
 			samtools sort -n {input.multi_bam} | samtools view | grep -v "IH:i:[01]" > {output.rando_bam}.multi.unsampled
 
-			echo > {output.rando_bam}.multi.sampled
+			rm -f {output.rando_bam}.multi.sampled
 			for idx in $(cut -f 1 {output.rando_bam}.multi.unsampled | sort | uniq); do 
 				grep -w $idx {output.rando_bam}.multi.unsampled | sort  --random-sort | head -n 1 >> {output.rando_bam}.multi.sampled
 			done;
 
-			cat <( samtools view -h {input.uniq_bam} ) {output.rando_bam}.multi.sampled | samtools view -Sbh > {output.rando_bam};
+			cat <( samtools view -h {input.uniq_bam} ) {output.rando_bam}.multi.sampled | samtools view -Sbh | samtools sort - > {output.rando_bam};
 			samtools index {output.rando_bam}
 			rm {output.rando_bam}.multi.unsampled {output.rando_bam}.multi.sampled
 			""")

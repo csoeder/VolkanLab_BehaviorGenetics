@@ -125,7 +125,7 @@ The dm6.13 reference genome was used for read alignment:
 tbl_cnt <- tbl_cnt + 1
 
 refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Drosophila Melanogaster") %>%   fmt_number(columns = vars(dm6v13),suffixing = TRUE, decimals=0) %>% cols_label(measure = " ", dm6v13 = " ")
-
+	
 refGenomes_summary.gt
 
 write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
@@ -252,6 +252,10 @@ MT
 ```
 
 ## Sequenced Reads
+
+other antenna reads:PRJNA388757 [@Shiao2015]
+
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE  }
 data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
 data_sets.df$name <- as.factor(data_sets.df$name)
@@ -458,7 +462,7 @@ write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_c
 
 tbl_cnt <- tbl_cnt + 1
 
-percentMappingIndv.raw.gt <- vs_dm6.mapspliceRaw.meta.stats %>% select(-c("duplicate_reads", "properly_paired_count", "percent_duplicate", "percent_proper", "sample"))  %>% group_by(housing, genotype) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Mapping Rates", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(percent_mapped), decimals=1, ) %>% fmt_number(columns = c("total_mapped_count", "total_read_count"), decimals = 1, suffixing = T) %>% cols_label(total_mapped_count="reads mapped", total_read_count="total reads", percent_mapped = "percent mapped")  %>% cols_move(columns = c("total_mapped_count"), after="total_read_count")
+percentMappingIndv.raw.gt <- vs_dm6.mapspliceRaw.meta.stats %>% select(-c("duplicate_reads", "properly_paired_count", "percent_duplicate", "percent_proper", "sample", "SRA"))  %>% group_by(housing, genotype) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Mapping Rates", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(percent_mapped), decimals=1, ) %>% fmt_number(columns = c("total_mapped_count", "total_read_count"), decimals = 1, suffixing = T) %>% cols_label(total_mapped_count="reads mapped", total_read_count="total reads", percent_mapped = "percent mapped")  %>% cols_move(columns = c("total_mapped_count"), after="total_read_count")
 
 percentMappingIndv.raw.gt
 
@@ -492,7 +496,7 @@ write(percentDupe.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,
 
 fig_cnt <- fig_cnt + 1
 
-dupeStats.gg <- ggplot(vs_dm6.mapspliceRaw.meta.stats %>% mutate(percent = 100*percent_duplicate)) + geom_histogram(aes(x=percent, color=genotype), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (Raw Mapsplice Alignment)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
+dupeStats.gg <- ggplot(vs_dm6.mapspliceRaw.meta.stats %>% mutate(percent = 100*percent_duplicate)) + geom_histogram(aes(x=percent, fill=genotype), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (Raw Mapsplice Alignment)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
 
 dupeStats.gg
 png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
@@ -576,15 +580,211 @@ dev.off()
 
 From the raw MapSplice output, three filtered alignments were produced. The first, mapspliceMulti, has had duplicates marked and removed, and has been filtered to require proper pairing and a minimum mapping quality (SAM flags "-q 20 -F 0x0200 -F 0x04 -f 0x0002"; markdup flags "-rS"). Thus, mapspliceMulti is a filtered alignment that retains all locii for multimapped reads. 
 
-### Uniquely Mapped
 
-mapspliceUniq is derived from mapspliceMulti by further filtering out the multimapped reads and keeping only those which map uniquely. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.mapspliceMulti <- read_delim("summaries/alignments.vs_dm6main.mapspliceMulti.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(vs_dm6.mapspliceMulti)<- c("ref_genome","aligner","sample","measure","value")
+
+vs_dm6.mapspliceMulti <- vs_dm6.mapspliceMulti %>% mutate(ref_genome = as.factor(ref_genome), aligner = as.factor(aligner), sample = as.factor(sample), ref_genome = as.factor(ref_genome))
+
+all_alignments <- rbind(all_alignments, vs_dm6.mapspliceMulti)#, vs_dm6.bwaUniq)
+
+vs_dm6.mapspliceMulti.meta <- inner_join(vs_dm6.mapspliceMulti, data_sets.df.sparse.collapse, by = c("sample"="name")) 
+
+#all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+
+vs_dm6.mapspliceMulti.meta.stats <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"), vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi")) %>%  mutate(read_retention = total_read_count.multi/total_read_count.raw, mapped_retention = total_mapped_count.multi/total_mapped_count.raw, spanned_breadth_retention = spanned_breadth.multi/spanned_breadth.raw, split_breadth_retention = split_breadth.multi/split_breadth.raw) %>% select(c(sample, ref_genome, aligner, rep, day, genotype, housing, tissue, read_retention, mapped_retention, spanned_breadth_retention, split_breadth_retention))
+
+```
+
+The filtration process removed a total $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) %>% human_readable_croncher() `$  of $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) - sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_read_count") %>% select(value) )  %>% human_readable_croncher() `$ starting reads, an overall retention rate of
+$`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_read_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) `$ %. When only mapped reads are considered, the overall retention rate is $`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) ) `$ %
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+readRetentionRate.multi.gt <-  vs_dm6.mapspliceMulti.meta.stats  %>% select(c(read_retention, mapped_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Sample Read Retention Rate", sep = ""), subtitle="percent of reads retained when filtering raw alignment") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
+
+readRetentionRate.multi.gt
+
+write(readRetentionRate.multi.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readRetentionMulti.html", sep=""))
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+breadthRetentionRate.multi.gt <-  vs_dm6.mapspliceMulti.meta.stats  %>% select(c(spanned_breadth_retention, split_breadth_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Sample Coverage Retention Rate", sep = ""), subtitle="percent of coverage retained when filtering raw alignment") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
+
+breadthRetentionRate.multi.gt
+
+write(breadthRetentionRate.multi.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_covRetentionMulti.html", sep=""))
+
+```
+
+Although filtration removed some ($`r 100*(sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) -  sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) ) /sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) )  `$ %) of the multimapping reads, $`r sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) ) %>% human_readable_croncher() `$ remain ambiguously mapped. A given read mapped, on average, to _____ locations
+These will be kept as-is in mapspliceMulti, but will be further filtered in other alignments.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+mapping_uniqness.multi <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"),  vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi")) %>% select(c(avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi,nonunique_reads.raw, nonunique_reads.multi, total_mapped_count.raw, total_mapped_count.multi, uniquely_mapped.raw,uniquely_mapped.multi)) %>% mutate(uniq_frac.raw = uniquely_mapped.raw/total_mapped_count.raw, uniq_frac.multi = uniquely_mapped.multi/total_mapped_count.multi ) %>% select(c(uniq_frac.raw, uniq_frac.multi, avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi)) 
+
+
+tbl_cnt <- tbl_cnt + 1
+
+mapping_uniqness.multi.gt <- mapping_uniqness.multi %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Mapping Uniqueness & Multiplicity", sep = ""), subtitle="effect of filtering on multimapping reads") %>% fmt_percent(columns=vars(uniq_frac.raw,uniq_frac.multi), decimals=1, ) %>% fmt_number(columns = vars(avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi), decimals = 2) %>% cols_label(uniq_frac.raw = "raw", uniq_frac.multi = "multi", avg_mapping_multiplicity.raw = "raw", avg_mapping_multiplicity.multi = "multi", ) %>%  tab_spanner(label = "average per-read mapping multiplicity", columns = vars(avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi)) %>%  tab_spanner(label = "percent of reads uniquely mapping", columns = vars(uniq_frac.raw,uniq_frac.multi))
+
+mapping_uniqness.multi.gt
+
+write(mapping_uniqness.multi.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_mappingUniqMulti.html", sep=""))
+
+```
+
 
 ### Downsampled Multimapped
 
 mapspliceRando is a downsampled alignment constructed by selecting at random a single location for each multimapped read, then merging the unambiguously located reads with mapspliceUniq. 
 
 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.mapspliceRando <- read_delim("summaries/alignments.vs_dm6main.mapspliceRando.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(vs_dm6.mapspliceRando)<- c("ref_genome","aligner","sample","measure","value")
+
+vs_dm6.mapspliceRando <- vs_dm6.mapspliceRando %>% mutate(ref_genome = as.factor(ref_genome), aligner = as.factor(aligner), sample = as.factor(sample), ref_genome = as.factor(ref_genome))
+
+all_alignments <- rbind(all_alignments, vs_dm6.mapspliceRando)#, vs_dm6.bwaUniq)
+
+vs_dm6.mapspliceRando.meta <- inner_join(vs_dm6.mapspliceRando, data_sets.df.sparse.collapse, by = c("sample"="name")) 
+
+#all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+
+vs_dm6.mapspliceRando.meta.stats <- inner_join(vs_dm6.mapspliceMulti.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"), vs_dm6.mapspliceRando.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".multi",".rando")) %>%  mutate(mapped_retention = total_mapped_count.rando/total_mapped_count.multi, spanned_breadth_retention = spanned_breadth.rando/spanned_breadth.multi, split_breadth_retention = split_breadth.rando/split_breadth.multi) %>% select(c(sample, ref_genome, aligner, rep, day, genotype, housing, tissue,  mapped_retention, spanned_breadth_retention, split_breadth_retention))
+
+
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+readRetentionRate.rando.gt <-  vs_dm6.mapspliceRando.meta.stats  %>% select(c( mapped_retention, spanned_breadth_retention, split_breadth_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Downsampling Retention Rate", sep = ""), subtitle="percent of alignment retained when multimappers are downsampled") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
+
+readRetentionRate.rando.gt
+
+write(readRetentionRate.rando.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_retentionRando.html", sep=""))
+
+```
+
+
+
+
+### Uniquely Mapped
+
+mapspliceUniq is derived from mapspliceMulti by further filtering out the multimapped reads and keeping only those which map uniquely. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.mapspliceUniq <- read_delim("summaries/alignments.vs_dm6main.mapspliceUniq.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(vs_dm6.mapspliceUniq)<- c("ref_genome","aligner","sample","measure","value")
+
+vs_dm6.mapspliceUniq <- vs_dm6.mapspliceUniq %>% mutate(ref_genome = as.factor(ref_genome), aligner = as.factor(aligner), sample = as.factor(sample), ref_genome = as.factor(ref_genome))
+
+all_alignments <- rbind(all_alignments, vs_dm6.mapspliceUniq)#, vs_dm6.bwaUniq)
+
+vs_dm6.mapspliceUniq.meta <- inner_join(vs_dm6.mapspliceUniq, data_sets.df.sparse.collapse, by = c("sample"="name")) 
+
+#all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+
+vs_dm6.mapspliceUniq.meta.stats <- inner_join(vs_dm6.mapspliceMulti.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"), vs_dm6.mapspliceUniq.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".multi",".uniq")) %>%  mutate(mapped_retention = total_mapped_count.uniq/total_mapped_count.multi, spanned_breadth_retention = spanned_breadth.uniq/spanned_breadth.multi, split_breadth_retention = split_breadth.uniq/split_breadth.multi) %>% select(c(sample, ref_genome, aligner, rep, day, genotype, housing, tissue,  mapped_retention, spanned_breadth_retention, split_breadth_retention))
+
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+readRetentionRate.uniq.gt <-  vs_dm6.mapspliceUniq.meta.stats  %>% select(c( mapped_retention, spanned_breadth_retention, split_breadth_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Uniquely Mapped Retention Rate", sep = ""), subtitle="percent of alignment retained when multimappers are excluded") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
+
+readRetentionRate.uniq.gt
+
+write(readRetentionRate.uniq.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_retentionUniq.html", sep=""))
+
+```
+
+
+### Alignment Process Overview
+
+Read Count
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+read_count_progression <- rbind(vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count","total_mapped_count")) %>% mutate(measure=case_when(measure == "total_read_count" ~ "sequenced", measure == "total_mapped_count" ~ "raw")),vs_dm6.mapspliceRando.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="rando") , vs_dm6.mapspliceUniq.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="uniq"), vs_dm6.mapspliceMulti.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="multi") ) 
+
+read_count_progression$measure <- factor(read_count_progression$measure, levels = c("sequenced", "raw", "multi", "rando", "uniq") ) 
+
+fig_cnt <- fig_cnt + 1
+
+read_count_progression.gg <- ggplot(read_count_progression, aes(x= measure, y = value, color = genotype, group = sample)) + geom_line() + geom_point(aes(shape=day)) + labs(title=paste("Figure ",fig_cnt, ". Read-count Dropout During Alignment Process", sep = ""), x="alignment stage", y="# reads") + theme_bw()
+
+read_count_progression.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDropoutDuringAlignment.png", sep=""))
+read_count_progression.gg
+dev.off()
+
+```
+
+Breadth 
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+breadth_progression <- all_alignments %>% filter(measure %in% c("spanned_breadth","split_breadth")) %>% mutate(measure = as.factor(case_when(measure == "spanned_breadth" ~ "spanning",measure == "split_breadth" ~ "split")), aligner = as.factor(case_when(aligner == "mapspliceRaw" ~ "raw",aligner == "mapspliceMulti" ~ "multi",aligner == "mapspliceRando" ~ "rando",aligner == "mapspliceUniq" ~ "uniq"))) 
+
+breadth_progression$aligner <- factor(breadth_progression$aligner, levels = c("sequenced", "raw", "multi", "rando", "uniq") ) 
+
+breadth_progression <- inner_join(breadth_progression, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+fig_cnt <- fig_cnt + 1
+
+breadth_progression.gg <- ggplot(breadth_progression, aes(x= aligner, y = 100*value, color = genotype, group = sample)) + geom_line() + geom_point(aes(shape=day)) +facet_grid(measure~., scales = "free_y") + labs(title=paste("Figure ",fig_cnt, ". Coverage Loss During Alignment Process", sep = ""), x="alignment stage", y="% genome covered") + theme_bw()
+
+read_count_progression.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_coverageDropoutDuringAlignment.png", sep=""))
+read_count_progression.gg
+dev.off()
+
+```
+
+## Read counts and differential expression analysis. 
 
 # Results
 
