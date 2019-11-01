@@ -103,7 +103,7 @@ words words
 
 ```{r include=FALSE}
 
-trammel <- read_yaml("config.yaml")
+trammel <- read_yaml("config.cntrl.yaml")
 
 ```
 generic overview words
@@ -603,7 +603,7 @@ vs_dm6.mapspliceMulti.meta.stats <- inner_join(vs_dm6.mapspliceRaw.meta %>% sele
 
 ```
 
-The filtration process removed a total $`r (sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ - sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) ) )/2 %>% human_readable_croncher() `$ of $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_reads) ) %>% human_readable_croncher() `$ mapped reads, an overall mapped retention rate of $`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count )) `$ %. 
+The filtration process removed a total $`r (sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ - sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) ) ) %>% human_readable_croncher() `$ of $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_reads) ) %>% human_readable_croncher() `$ mapped reads, an overall mapped retention rate of $`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count )) `$ %. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
