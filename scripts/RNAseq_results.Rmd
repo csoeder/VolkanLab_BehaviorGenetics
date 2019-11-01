@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Behavioral Genetics RNA-Seq"
 author: "Charlie Soeder"
-date: "10/11/2019"
+date: "11/1/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -19,7 +19,7 @@ knitr::opts_knit$set(root.dir=peaDubDee)
 #install.packages("remotes")
 #remotes::install_github("rstudio/gt")
 
-#library("biomaRt")
+library("biomaRt")
 #library("org.Dm.eg.db")
 #devtools::install_github("haleyjeppson/ggmosaic")
 #library("ggmosaic")
@@ -29,10 +29,11 @@ library("readr")
 library("tidyverse")
 #library("ggnewscale")
 #library("scales")
+library("DESeq2")
+library("apeglm")
 
 library("gt")
-#library("GGally")
-
+library("GGally")
 ```
 
 
@@ -151,7 +152,7 @@ write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_
 
 ```
 
-
+## Gene Lists
 In addition to the full annotations, subsets containing prespecified genes of interest will also be used.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE }
@@ -251,10 +252,14 @@ Histone modification, DNA trans factor act, synapse org
 MT
 ```
 
+### Bryson's List
+
+(email, 29 Oct 2019)
+```
+Neverland: annotated as FBgn0259697, not FBgn0287185 
+```
+
 ## Sequenced Reads
-
-other antenna reads:PRJNA388757 [@Shiao2015]
-
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE  }
 data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
@@ -267,7 +272,7 @@ data_sets.df$housing<- as.factor(data_sets.df$housing)
 data_sets.df$genotype<- as.factor(data_sets.df$genotype)
 data_sets.df$tissue<- as.factor(data_sets.df$tissue)
 
-data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile1,readsfile2,paired)) %>% distinct() 
+data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile1,readsfile2,paired, SRA)) %>% distinct() 
 
 data_sets.df.sparse.collapse <- data_sets.df.sparse %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," ))  %>% distinct()
 data_sets.df.sparse.collapse$genotype <- as.factor(data_sets.df.sparse.collapse$genotype)
@@ -276,7 +281,7 @@ experimental_replicates.tbl  <- data_sets.df.sparse.collapse %>% group_by(genoty
 
 ```
 
-The sequence reads covered three replicates each of $`r ncol(experimental_replicates.tbl) `$ experimental conditions. The conditions included varying genotype, housing, and age (all RNA was collected from antenna tissue).
+The sequenced reads covered three replicates each of $`r ncol(experimental_replicates.tbl) `$ experimental conditions. The conditions included varying genotype, housing, and age (all RNA was collected from antenna tissue).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 tbl_cnt <- tbl_cnt + 1
@@ -294,7 +299,7 @@ These samples will allow direct comparison between wild-type flies reared under 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(day == 7) %>% spread(key=housing, value = replicate_count) %>%  gt() %>% cols_move_to_start(c("day", "tissue"))  %>%  tab_spanner(columns = c("group", "isolated"), label = "variable") %>%  tab_spanner(columns = c("day", "tissue"), label = md(" ")) %>% tab_header(title=paste("Table ",tbl_cnt, "a. Genotype & Housing Comparison", sep = ""), subtitle= md("(replicate count)"))
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(day == 7) %>% spread(key=housing, value = replicate_count, fill = 0) %>%  gt() %>% cols_move_to_start(c("day", "tissue"))  %>%  tab_spanner(columns = c("group", "isolated"), label = "variable") %>%  tab_spanner(columns = c("day", "tissue"), label = md(" ")) %>% tab_header(title=paste("Table ",tbl_cnt, "a. Genotype & Housing Comparison", sep = ""), subtitle= md("(replicate count)"))
 
 experimental_treatments.gt
 
@@ -307,7 +312,7 @@ These samples also allow for direct comparison between mutant genotypes (47b1, 8
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE }
 
-experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(genotype != "wt") %>% spread(key=genotype, value = replicate_count, fill =0) %>%  gt() %>%  tab_spanner(columns = c("47b1", "47b2,88a", "88a", "FruLexaFru440", "67d"), label = "mutant genotypes") %>%  tab_spanner(columns = c("housing", "tissue"), label = md("&nbsp")) %>% tab_header(title=paste("Table ",tbl_cnt, "b. Genotype & Time Comparison", sep = ""), subtitle= md("(replicate count)"))
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(genotype != "wt" & !is.na(day)) %>% spread(key=genotype, value = replicate_count, fill =0) %>%  gt() %>%  tab_spanner(columns = c("47b1", "47b2,88a", "88a", "FruLexaFru440", "67d"), label = "mutant genotypes") %>%  tab_spanner(columns = c("housing", "tissue"), label = " ") %>% tab_header(title=paste("Table ",tbl_cnt, "b. Genotype & Time Comparison", sep = ""), subtitle= md("(replicate count)"))
 
 experimental_treatments.gt
 
@@ -317,12 +322,7 @@ write(experimental_treatments.gt %>%  as_raw_html(), paste("results/tables/supp/
 
 Moreover, samples taken at the same timepoint in different genotypes allow the effect of one mutation (88a) to be studied in two different genomic backgrounds (with and without the 47b2 mutation).
 
-* are we sure that 47b2 isn't a typo for 47b1?
-* is FruLexa/Fru440 one or two distinct genotypes?
-
-
-
-
+In addition to the novel reads, RNA-Seq from drosophila melanogaster antennae were downloaded from NCBI (PRJNA388757; @Shiao2015), one annotated as male and the other as female. These will be compared to the unpublished samples to try to confirm the sex of the flies they came from. 
 
 ### Pre-Processing
 
@@ -358,7 +358,7 @@ retention_percent <- filtration_stats %>% filter(measure=='total_reads') %>% sel
 
 tbl_cnt <- tbl_cnt + 1
 
-read_retention_rate.gt <- rbind(pre_post_counts, retention_percent) %>% rename(" "=type) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Retention Rate during Preprocessing", sep = ""), subtitle= md("&nbsp;")) %>%  fmt_number(columns = vars(minimum, average,maximum),suffixing = TRUE, decimals=0)
+read_retention_rate.gt <- rbind(pre_post_counts, retention_percent)  %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Retention Rate during Preprocessing", sep = ""), subtitle= md("&nbsp;")) %>%  fmt_number(columns = vars(minimum, average,maximum),suffixing = TRUE, decimals=0) %>% cols_label(type=" ")
 
 read_retention_rate.gt
 
@@ -435,13 +435,16 @@ all_alignments <- rbind(vs_dm6.mapspliceRaw)#, vs_dm6.bwaUniq)
 
 vs_dm6.mapspliceRaw.meta <- inner_join(vs_dm6.mapspliceRaw, data_sets.df.sparse.collapse, by = c("sample"="name")) 
 
+
+vs_dm6.mapspliceRaw.meta <- rbind(vs_dm6.mapspliceRaw.meta,filtration_stats %>% filter(type == "postfiltered" & measure== "total_reads" ) %>% mutate(ref_genome="dm6main", aligner = "unmapped", sample=name) %>% select(c("ref_genome","aligner","sample","measure","value","rep","day" ,"genotype","housing","tissue" )))
+
 #all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
 
-vs_dm6.mapspliceRaw.meta.stats <- vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count","total_mapped_count","properly_paired_count", "duplicate_reads")) %>% select(-c("ref_genome", "tissue", "aligner")) %>% spread(key="measure", value="value") %>% mutate(percent_mapped=total_mapped_count/total_read_count, percent_proper = properly_paired_count/total_read_count, percent_duplicate = duplicate_reads/total_mapped_count)
+vs_dm6.mapspliceRaw.meta.stats <- vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_reads","total_mapped_count","properly_paired_count", "duplicate_reads")) %>% select(-c("ref_genome", "tissue", "aligner")) %>% spread(key="measure", value="value") %>% mutate(total_mapped_count = 2*total_mapped_count) %>% mutate(percent_mapped=total_mapped_count/total_reads, percent_proper = properly_paired_count/total_reads, percent_duplicate = duplicate_reads/total_mapped_count)
 
 ```
 
-Of the  $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) %>% human_readable_croncher() `$ reads, MapSplice was able to align  $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) ) %>% human_readable_croncher() `$ of them, for an overall mapping rate of  $`r 100*sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) `$ percent.
+Of the  $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_reads) ) %>% human_readable_croncher() `$ reads, MapSplice was able to align  $`r (sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )) %>% human_readable_croncher() `$ of them, for an overall mapping rate of  $`r 100*sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_reads) ) `$ %.
 
 Individual mapping rates were generally more than 98%.
 
@@ -462,7 +465,7 @@ write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_c
 
 tbl_cnt <- tbl_cnt + 1
 
-percentMappingIndv.raw.gt <- vs_dm6.mapspliceRaw.meta.stats %>% select(-c("duplicate_reads", "properly_paired_count", "percent_duplicate", "percent_proper", "sample", "SRA"))  %>% group_by(housing, genotype) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Mapping Rates", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(percent_mapped), decimals=1, ) %>% fmt_number(columns = c("total_mapped_count", "total_read_count"), decimals = 1, suffixing = T) %>% cols_label(total_mapped_count="reads mapped", total_read_count="total reads", percent_mapped = "percent mapped")  %>% cols_move(columns = c("total_mapped_count"), after="total_read_count")
+percentMappingIndv.raw.gt <- vs_dm6.mapspliceRaw.meta.stats %>% select(-c("duplicate_reads", "properly_paired_count", "percent_duplicate", "percent_proper", "sample"))  %>% group_by(housing, genotype) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Individual Mapping Rates", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(percent_mapped), decimals=1, ) %>% fmt_number(columns = c("total_mapped_count", "total_reads"), decimals = 1, suffixing = T) %>% cols_label(total_mapped_count="reads mapped", total_reads="total reads", percent_mapped = "percent mapped")  %>% cols_move(columns = c("total_mapped_count"), after="total_reads")
 
 percentMappingIndv.raw.gt
 
@@ -470,7 +473,6 @@ write(percentMappingIndv.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",t
 
 ```
 
-Duplicate reads have at this point been marked using the Samtools MarkDup utility [@Li2009] but not yet removed; duplication rates varied from ~15 to ~30%. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -506,13 +508,15 @@ dev.off()
 
 ```
 
-Although Samtools marks duplicates at a higher rate than FASTP, the estimates are correlated; in particular, both agree that FruLexa/Fru440 day 7 replicate 1 is a highly duplicated outlier:
+Although Samtools marks duplicates at a higher rate than FASTP, the estimates are correlated; in particular, both agree that FruLexa/Fru440 day 7 replicate 1 is a highly duplicated outlier. The NCBI reads are anomalous.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 fig_cnt <- fig_cnt + 1
 
-dupeStatsCompare.gg <- ggplot(inner_join(dupe_stats , vs_dm6.mapspliceRaw.meta.stats %>%  select(c("sample", "percent_duplicate")), by=c("name"="sample"))) + geom_point(aes(x=percent, y=100*percent_duplicate, color=genotype, shape = day)) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Duplication Rate Estimates", sep = ""), x="FASTP estimate (percent)", y="MarkDup estimate (percent)") + theme_bw()
+
+
+dupeStatsCompare.gg <- ggplot(inner_join(dupe_stats %>% mutate(day=as.factor(case_when(is.na(day)~"N/A", TRUE ~ as.character(day)))), vs_dm6.mapspliceRaw.meta.stats %>%  select(c("sample", "percent_duplicate")), by=c("name"="sample"))) + geom_point(aes(x=percent, y=100*percent_duplicate, color=genotype, shape = day)) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Duplication Rate Estimates", sep = ""), x="FASTP estimate (percent)", y="MarkDup estimate (percent)") + theme_bw()
 
 dupeStatsCompare.gg
 png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_DupeRateExtCompare.png", sep=""))
@@ -528,8 +532,7 @@ Genome-wide depth of coverage is not very meaningful here, in the case of RNA-Se
 
 fig_cnt <- fig_cnt + 1
 
-breadthStats.raw.gg <- ggplot(vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count", "total_mapped_count", "spanned_breadth", "split_breadth")) %>%  spread(key = measure, value = value) %>%  gather(spanned_breadth, split_breadth, key = "type", value = "breadth") %>% mutate(type=case_when(type == "spanned_breadth" ~ "locus", type =="split_breadth" ~"exon")) %>% mutate(type = as.factor(type))
-) + geom_point(aes(x=total_read_count, y=100*breadth, color=genotype, shape = day)) + facet_grid(type~., scales='free_y') + labs(title=paste("Figure ",fig_cnt, ". Breadth of Coverage of Raw Mapsplice Alignment Compared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Genome Covered") + theme_bw()
+breadthStats.raw.gg <- ggplot( vs_dm6.mapspliceRaw.meta %>% mutate(day=as.factor(case_when(is.na(day)~"N/A", TRUE ~ as.character(day)))) %>% filter(measure %in% c("total_reads", "total_mapped_count", "spanned_breadth", "split_breadth") & aligner == "mapspliceRaw") %>%  spread(key = measure, value = value) %>%  gather(spanned_breadth, split_breadth, key = "type", value = "breadth") %>% mutate(type=case_when(type == "spanned_breadth" ~ "locus", type =="split_breadth" ~"exon")) %>% mutate(type = as.factor(type)) %>% mutate(type = relevel(type, ref="locus")) )  + geom_point(aes(x=total_mapped_count, y=100*breadth, color=genotype, shape = day))  + facet_grid(type~., scales='free_y') + labs(title=paste("Figure ",fig_cnt, ". Breadth of Coverage of Raw Mapsplice Alignment\nCompared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Genome Covered") + theme_bw()
 
 breadthStats.raw.gg
 png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_breadthStatsRaw.png", sep=""))
@@ -539,7 +542,7 @@ dev.off()
 
 ```
 
-There appears to be a slight dependence of breadth upon sequencing depth (ie, the number of reads sequenced), meaning that sequencing depth of these samples is not so great that the breadth covered is saturated. When transcribed locii are considered, the breadth of the group-housed wildtype replicate 1 is unusually low given the sequencing depth.
+There appears to be a slight dependence of breadth upon sequencing depth (ie, the number of reads sequenced), meaning that sequencing depth of these samples is not so great that the breadth covered is saturated. The unusally deep sequencing of the NCBI reads indicates the asymptotic behavior of this measure. When transcribed locii are considered, the breadth of the group-housed wildtype replicate 1 is unusually low given the sequencing depth.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -554,19 +557,19 @@ for (samp in data_sets.df.sparse.collapse$name){
 }
 
 names(sexChrBrd) <- c("chrom", "cov", "val", "tot", "frac", "sample")
-sexChrBrd.aug <- inner_join(sexChrBrd %>%  filter(chrom %in% c("chrX", "chrY") ) %>%  filter(cov==1) %>% dplyr::select(c("chrom","frac","sample")), vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count", "total_mapped_count")) %>%  spread(key = measure, value = value) %>%  dplyr::select(-c("ref_genome", "tissue")), by = c("sample"="sample"))
+sexChrBrd.aug <- inner_join(sexChrBrd %>%  filter(chrom %in% c("chrX", "chrY") ) %>%  filter(cov==1) %>% select(c("chrom","frac","sample")), vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_reads", "total_mapped_count") & aligner=="mapspliceRaw") %>%  spread(key = measure, value = value) %>%  select(-c("ref_genome", "tissue")), by = c("sample"="sample")) %>%  mutate(rep=as.factor(case_when(is.na(rep)~"N/A", TRUE ~ as.character(rep))))
 
 
 
 ```
 
-We can also compare the breadth of coverage on the X and Y chromosomes to confirm that the flies sampled are all the same sex. The only outlier is the group-housed wildtype replicate 1, which is also anomalous genome-wide. 
+We can also compare the breadth of coverage on the X and Y chromosomes to confirm that the flies sampled are all the same sex. The only outlier is the group-housed wildtype replicate 1, which is also anomalous genome-wide. The two NCBI samples agree well on the X chromosome, which is not unexpected, and the female-annotated sample has lower coverage on the Y, as expected. However, the difference between the NCBI controls is well within the variation of the new sequences, so this doesn't work as a decisive diagnostic. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 fig_cnt <- fig_cnt + 1
 
-sexChrBrd.gg <- ggplot(sexChrBrd.aug) + geom_point(aes(x = total_read_count, y = 100*frac, color = genotype, shape = rep)) + facet_grid(chrom~., scales = "free_y")+ labs(title=paste("Figure ",fig_cnt, ". Fraction of Sex Chromosome Covered in Raw Mapsplice Alignments Compared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Chromosome Covered") + theme_bw()
+sexChrBrd.gg <- ggplot(sexChrBrd.aug) + geom_point(aes(x = total_mapped_count, y = 100*frac, color = genotype, shape = rep)) + facet_grid(chrom~., scales = "free_y")+ labs(title=paste("Figure ",fig_cnt, ". Fraction of Sex Chromosome Covered\nin Raw Mapsplice Alignments Compared to Read Count", sep = ""), x="Number Reads Mapped", y="Percent of Chromosome Covered") + theme_bw()
 
 sexChrBrd.gg
 png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_sexChromCoverage.png", sep=""))
@@ -596,19 +599,17 @@ vs_dm6.mapspliceMulti.meta <- inner_join(vs_dm6.mapspliceMulti, data_sets.df.spa
 #all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
 
 
-vs_dm6.mapspliceMulti.meta.stats <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"), vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi")) %>%  mutate(read_retention = total_read_count.multi/total_read_count.raw, mapped_retention = total_mapped_count.multi/total_mapped_count.raw, spanned_breadth_retention = spanned_breadth.multi/spanned_breadth.raw, split_breadth_retention = split_breadth.multi/split_breadth.raw) %>% select(c(sample, ref_genome, aligner, rep, day, genotype, housing, tissue, read_retention, mapped_retention, spanned_breadth_retention, split_breadth_retention))
+vs_dm6.mapspliceMulti.meta.stats <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"), vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi")) %>%  mutate( mapped_retention = total_mapped_count.multi/total_mapped_count.raw, spanned_breadth_retention = spanned_breadth.multi/spanned_breadth.raw, split_breadth_retention = split_breadth.multi/split_breadth.raw) %>% select(c(sample, ref_genome, aligner, rep, day, genotype, housing, tissue, mapped_retention, spanned_breadth_retention, split_breadth_retention))
 
 ```
 
-The filtration process removed a total $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) %>% human_readable_croncher() `$  of $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) - sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_read_count") %>% select(value) )  %>% human_readable_croncher() `$ starting reads, an overall retention rate of
-$`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_read_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_read_count) ) `$ %. When only mapped reads are considered, the overall retention rate is $`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) ) `$ %
-
+The filtration process removed a total $`r (sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count) )/ - sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) ) )/2 %>% human_readable_croncher() `$ of $`r sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_reads) ) %>% human_readable_croncher() `$ mapped reads, an overall mapped retention rate of $`r 100*sum( vs_dm6.mapspliceMulti %>% filter(measure == "total_mapped_count") %>% select(value) )/sum( vs_dm6.mapspliceRaw.meta.stats %>% select(total_mapped_count )) `$ %. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 tbl_cnt <- tbl_cnt + 1
 
-readRetentionRate.multi.gt <-  vs_dm6.mapspliceMulti.meta.stats  %>% select(c(read_retention, mapped_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Sample Read Retention Rate", sep = ""), subtitle="percent of reads retained when filtering raw alignment") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
+readRetentionRate.multi.gt <-  vs_dm6.mapspliceMulti.meta.stats  %>% select(c( mapped_retention)) %>% gather(key = key, value=value) %>% group_by(key) %>% summarise(mack = max(value), avg = mean(value), med = median(value), minn = min(value))%>% mutate(key=gsub("_"," ",key)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Sample Read Retention Rate", sep = ""), subtitle="percent of reads retained when filtering raw alignment") %>% fmt_percent(columns=vars(mack,minn,avg,med), decimals=1, ) %>% cols_label(minn="minimum", mack="maximum", avg="mean", med="median", key = " ") %>% cols_move(columns = c("minn"), after="med")
 
 readRetentionRate.multi.gt
 
@@ -633,12 +634,15 @@ write(breadthRetentionRate.multi.gt %>%  as_raw_html(), paste("results/tables/tb
 
 ```
 
-Although filtration removed some ($`r 100*(sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) -  sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) ) /sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) )  `$ %) of the multimapping reads, $`r sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) ) %>% human_readable_croncher() `$ remain ambiguously mapped. A given read mapped, on average, to _____ locations
+Although filtration removed some ($`r 100*(sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) -  sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) ) ) /sum( vs_dm6.mapspliceRaw.meta %>% filter(measure=="nonunique_reads") %>% select(value) )  `$ %) of the multimapping reads, $`r sum( vs_dm6.mapspliceMulti.meta %>% filter(measure=="nonunique_reads") %>% select(value) )  %>% human_readable_croncher() `$ remain ambiguously mapped. A given read mapped, on average, to $`r vs_dm6.mapspliceMulti.meta %>% filter(measure=="avg_mapping_multiplicity") %>% summarize(avg=mean(value)) %>% select(avg)  `$ locations
 These will be kept as-is in mapspliceMulti, but will be further filtered in other alignments.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-mapping_uniqness.multi <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"),  vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi")) %>% select(c(avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi,nonunique_reads.raw, nonunique_reads.multi, total_mapped_count.raw, total_mapped_count.multi, uniquely_mapped.raw,uniquely_mapped.multi)) %>% mutate(uniq_frac.raw = uniquely_mapped.raw/total_mapped_count.raw, uniq_frac.multi = uniquely_mapped.multi/total_mapped_count.multi ) %>% select(c(uniq_frac.raw, uniq_frac.multi, avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi)) 
+
+mapping_uniqness.multi <- inner_join(vs_dm6.mapspliceRaw.meta %>% select(c(sample, measure, value)) %>% spread(key="measure", value="value"),  vs_dm6.mapspliceMulti.meta %>% spread(key="measure", value="value"), by=c("sample"="sample"), suffix=c(".raw",".multi"))%>% select(c(rep, day, genotype, housing, avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi,nonunique_reads.raw, nonunique_reads.multi, total_mapped_count.raw, total_mapped_count.multi, uniquely_mapped.raw,uniquely_mapped.multi))%>% mutate(uniq_frac.raw = 0.5*uniquely_mapped.raw/total_mapped_count.raw, uniq_frac.multi = 0.5*uniquely_mapped.multi/total_mapped_count.multi ) %>% select(c(genotype, housing, day, rep, uniq_frac.raw, uniq_frac.multi, avg_mapping_multiplicity.raw,avg_mapping_multiplicity.multi)) %>% group_by(genotype,housing,day)
+
+
 
 
 tbl_cnt <- tbl_cnt + 1
@@ -650,6 +654,7 @@ mapping_uniqness.multi.gt
 write(mapping_uniqness.multi.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_mappingUniqMulti.html", sep=""))
 
 ```
+
 
 
 ### Downsampled Multimapped
@@ -739,18 +744,19 @@ write(readRetentionRate.uniq.gt %>%  as_raw_html(), paste("results/tables/tbl",t
 
 ### Alignment Process Overview
 
-Read Count
-
+Here are the number of reads per sample, from the intial sequencing to the most heavily filtered alignment:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-read_count_progression <- rbind(vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_read_count","total_mapped_count")) %>% mutate(measure=case_when(measure == "total_read_count" ~ "sequenced", measure == "total_mapped_count" ~ "raw")),vs_dm6.mapspliceRando.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="rando") , vs_dm6.mapspliceUniq.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="uniq"), vs_dm6.mapspliceMulti.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="multi") ) 
+read_count_progression <- rbind(
+
+	vs_dm6.mapspliceRaw.meta %>% filter(measure %in% c("total_reads","total_mapped_count")) %>% mutate(measure=case_when(measure == "total_reads" ~ "sequenced", measure == "total_mapped_count" ~ "raw")), vs_dm6.mapspliceRando.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="rando") , vs_dm6.mapspliceUniq.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="uniq"),vs_dm6.mapspliceMulti.meta %>% filter(measure == "total_mapped_count") %>% mutate(measure="multi") ) 
 
 read_count_progression$measure <- factor(read_count_progression$measure, levels = c("sequenced", "raw", "multi", "rando", "uniq") ) 
 
 fig_cnt <- fig_cnt + 1
 
-read_count_progression.gg <- ggplot(read_count_progression, aes(x= measure, y = value, color = genotype, group = sample)) + geom_line() + geom_point(aes(shape=day)) + labs(title=paste("Figure ",fig_cnt, ". Read-count Dropout During Alignment Process", sep = ""), x="alignment stage", y="# reads") + theme_bw()
+read_count_progression.gg <- ggplot(read_count_progression, aes(x= measure, y = value, color = genotype, group = sample)) + geom_line() + geom_point(aes(shape=day)) + labs(title=paste("Figure ",fig_cnt, ". Read-count Dropout During Alignment Process", sep = ""), x="alignment stage", y="# reads (log10)") + scale_y_log10()+ theme_bw()
 
 read_count_progression.gg
 
@@ -760,9 +766,8 @@ dev.off()
 
 ```
 
-Breadth 
 
-
+The coverage dropout during the alignment filtration can be similarly tracked:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -776,20 +781,606 @@ fig_cnt <- fig_cnt + 1
 
 breadth_progression.gg <- ggplot(breadth_progression, aes(x= aligner, y = 100*value, color = genotype, group = sample)) + geom_line() + geom_point(aes(shape=day)) +facet_grid(measure~., scales = "free_y") + labs(title=paste("Figure ",fig_cnt, ". Coverage Loss During Alignment Process", sep = ""), x="alignment stage", y="% genome covered") + theme_bw()
 
-read_count_progression.gg
+breadth_progression.gg
 
 png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_coverageDropoutDuringAlignment.png", sep=""))
-read_count_progression.gg
+breadth_progression.gg
 dev.off()
 
 ```
 
-## Read counts and differential expression analysis. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#sexChrBrd.raw <- sexChrBrd
+#sexChrBrd.raw$aligner <- as.factor("raw")
+
+sexChrBrd.raw <- as.data.frame(c())
+for (samp in data_sets.df.sparse.collapse$name){
+	
+	df.tmp <- read_delim(paste("mapped_reads/mapspliceRaw/",samp, "/", samp, ".vs_dm6main.mapspliceRaw.sort.bam.split.genomcov", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	df.tmp$sample <- samp
+
+	sexChrBrd.raw <- rbind(sexChrBrd.raw, df.tmp)
+	
+}
+names(sexChrBrd.raw) <- c("chrom", "cov", "val", "tot", "frac", "sample")
+sexChrBrd.raw$aligner <- as.factor("raw")
+
+
+sexChrBrd.multi <- as.data.frame(c())
+for (samp in data_sets.df.sparse.collapse$name){
+	
+	df.tmp <- read_delim(paste("mapped_reads/mapspliceMulti/",samp, "/", samp, ".vs_dm6main.mapspliceMulti.sort.bam.split.genomcov", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	df.tmp$sample <- samp
+
+	sexChrBrd.multi <- rbind(sexChrBrd.multi, df.tmp)
+	
+}
+names(sexChrBrd.multi) <- c("chrom", "cov", "val", "tot", "frac", "sample")
+sexChrBrd.multi$aligner <- as.factor("multi")
+
+sexChrBrd.rando <- as.data.frame(c())
+# for (samp in data_sets.df.sparse.collapse$name){
+# 	
+# 	df.tmp <- read_delim(paste("mapped_reads/mapspliceRando/",samp, "/", samp, ".vs_dm6main.mapspliceRando.sort.bam.split.genomcov", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+# 	df.tmp$sample <- samp
+# 
+# 	sexChrBrd.rando <- rbind(sexChrBrd.rando, df.tmp)
+# 	
+# }
+# names(sexChrBrd.rando) <- c("chrom", "cov", "val", "tot", "frac", "sample")
+# sexChrBrd.rando$aligner <- as.factor("rando")
+
+
+sexChrBrd.uniq <- as.data.frame(c())
+for (samp in data_sets.df.sparse.collapse$name){
+	
+	df.tmp <- read_delim(paste("mapped_reads/mapspliceUniq/",samp, "/", samp, ".vs_dm6main.mapspliceUniq.sort.bam.split.genomcov", sep=""), "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	df.tmp$sample <- samp
+
+	sexChrBrd.uniq <- rbind(sexChrBrd.uniq, df.tmp)
+	
+}
+names(sexChrBrd.uniq) <- c("chrom", "cov", "val", "tot", "frac", "sample")
+sexChrBrd.uniq$aligner <- as.factor("uniq")
+
+
+
+
+
+sexChrBrd.process <- rbind(sexChrBrd.raw,sexChrBrd.multi,sexChrBrd.rando,sexChrBrd.uniq) %>% filter(chrom %in% c("chrX","chrY") & cov == 1)%>% select(c("chrom","frac","sample","aligner"))
+
+sexChrBrd.process.aug <- inner_join(sexChrBrd.process,data_sets.df.sparse.collapse, by=c("sample"="name") )
+
+```
+When restricted to the sex chromosomes, the NCBI controls were almost indistinguishable, with the difference between them much smaller than the difference between experimental samples. So, accounting for multimapping reads also doesn't make this a useful diagnostic:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+sexChrBrd.process.gg <- ggplot(sexChrBrd.process.aug) + geom_line(data = . %>% filter(!(genotype %in% c("XX","XY"))),aes(x=aligner, y= frac, group = sample), alpha=0.5, color="black") + geom_line(data = . %>% filter(genotype %in% c("XX","XY")),aes(x=aligner, y= frac, group = sample, color=genotype))  + facet_grid(chrom~., scales = "free_y") + labs(title=paste("Figure ",fig_cnt, ". Fraction of Sex Chromosome Covered in Raw Mapsplice Alignments Compared to Read Count", sep = ""), x="Number Reads Mapped", y="Percent of Chromosome Covered") + theme_bw()
+
+sexChrBrd.process.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_sexChromCoverage_process.png", sep=""))
+sexChrBrd.process.gg
+dev.off()
+
+```
+
+
+
+
+## Assigning Reads to Annotated Features
+
+Mapped reads were assigned and counted using the featureCounts function from the SubRead package. [@Liao2014]. In particular, the reads were assigned to exons in the dm6_genes GTF annotation, and these were counted towards the genes containing the exons. The two ends of paired reads were counted as separate fragments. To be counted, both ends of the paired reads must map, and map to the same chromosome. Any multimapped reads are counted at all of their mapped locations. (Command line options: "-t exon -g gene_id -M  -J -p -B -C" ). By default, a read overlapping multiple genes is considered ambiguous and not counted. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.dm6genes.multi.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceMulti.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status")) 
+vs_dm6.dm6genes.multi.count.stats$aligner <- as.factor("multi")
+
+vs_dm6.dm6genes.rando.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceRando.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.dm6genes.rando.count.stats$aligner <- as.factor("rando")
+
+vs_dm6.dm6genes.uniq.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceUniq.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.dm6genes.uniq.count.stats$aligner<- as.factor("uniq")
+
+vs_dm6.dm6genes.count.stats <- rbind(vs_dm6.dm6genes.multi.count.stats, vs_dm6.dm6genes.rando.count.stats, vs_dm6.dm6genes.uniq.count.stats)
+
+vs_dm6.dm6genes.count.stats$Status <- as.factor(vs_dm6.dm6genes.count.stats$Status)
+vs_dm6.dm6genes.count.stats$sample <- as.factor(vs_dm6.dm6genes.count.stats$sample)
+vs_dm6.dm6genes.count.stats$group <- as.factor("all")
+vs_dm6.dm6genes.count.stats$ref_genome <- as.factor("dm6main")
+vs_dm6.dm6genes.count.stats$annotation <- as.factor("dm6_genes")
+
+vs_dm6.dm6genes.count.stats.meta <- inner_join(vs_dm6.dm6genes.count.stats %>% mutate(assigned=value), read_count_progression %>%  mutate(total=value), by=c("sample" = "sample", "aligner" = "measure", "ref_genome" = "ref_genome")) %>% mutate(percent_reads = assigned/total)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+tbl_cnt <- tbl_cnt + 1
+
+readAssignmentRate.gt <-  vs_dm6.dm6genes.count.stats.meta %>% filter(Status == "Assigned") %>%  select(c( aligner,  rep, day, genotype, housing, percent_reads)) %>% spread(aligner, percent_reads) %>% group_by(genotype,housing,day) %>% arrange(day) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage of Reads Assignable to Features in dm6_genes", sep = ""), subtitle="fraction of the reads which can be unambiguously counted under different alignment strategies")%>% fmt_percent(columns=vars(multi, rando, uniq), decimals=1, )  %>% tab_spanner(columns = vars(multi, rando, uniq), label = "mapping strategy")
+
+readAssignmentRate.gt
+
+write(readAssignmentRate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readAssignmentRate.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+readUnassignmentRate.gt <- vs_dm6.dm6genes.count.stats.meta %>% filter(Status != "Assigned") %>% group_by(Status, aligner) %>%  summarise( avg = mean(percent_reads)) %>%  spread(key = aligner, value = avg) %>% ungroup() %>% mutate(Status = case_when(Status == "Unassigned_NoFeatures" ~ "No Overlap", Status =="Unassigned_Ambiguity" ~"Ambiguous")) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Averaged Percentage of Reads Not Assignable to Features in dm6_genes", sep = ""), subtitle="average fraction of mapped reads which were unassigned") %>% fmt_percent(columns=vars(multi, rando, uniq), decimals=1, )  %>% tab_spanner(columns = vars(multi, rando, uniq), label = "mapping strategy") %>% cols_label(Status = " ")
+
+readUnassignmentRate.gt
+
+write(readUnassignmentRate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readAssignmentRate.html", sep=""))
+
+```
+
+The values for "multi" are inflated because each appearance of a multi-mapped read is counted, whereas the denominator is the actual read count (FIX THIS)
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+counts.vs_dm6main.dm6_genes.multi <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE) 
+counts.vs_dm6main.dm6_genes.multi.gath <- counts.vs_dm6main.dm6_genes.multi %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.dm6_genes.rando <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.rando.gath <- counts.vs_dm6main.dm6_genes.rando %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.dm6_genes.uniq <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.uniq.gath <- counts.vs_dm6main.dm6_genes.uniq %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+
+counts.vs_dm6main.dm6_genes <- inner_join(inner_join(counts.vs_dm6main.dm6_genes.multi.gath%>% rename(count="multi"),counts.vs_dm6main.dm6_genes.rando.gath%>% rename(count="rando"),by = c("Geneid"="Geneid","sample"="sample")),counts.vs_dm6main.dm6_genes.uniq.gath%>% rename(count="uniq"),by = c("Geneid"="Geneid","sample"="sample"))
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+read_count_hist.gg <- ggplot(counts.vs_dm6main.dm6_genes %>% gather(multi:uniq, key = "aligner", value = "count") %>% mutate(aligner=as.factor(aligner)) ) + geom_freqpoly(bins=50,aes(x=count,color=aligner, group = interaction(sample, aligner)), alpha=0.5) + scale_x_log10() + scale_y_log10() + labs(title=paste("Figure ",fig_cnt, ". Per-Gene Read Count Histogram (by aligner and sample)", sep = ""), x="# reads per gene", y="# genes") + theme_bw()
+
+read_count_hist.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readCountHistogram.png", sep=""))
+read_count_hist.gg
+dev.off()
+
+```
+
+One average, a gene had $`r counts.vs_dm6main.dm6_genes %>% gather(multi:uniq, key = "aligner", value = "count") %>% summarize(avg=mean(count)) %>% select(avg) `$ reads assigned to it, but most genes had relatively fewer, with more than a quarter having no reads assigned at all, almost half having fewer than 10 reads, and almost two thirds having fewer than 100. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+genes_by_count_cat <- counts.vs_dm6main.dm6_genes %>% gather(multi:uniq, key = "aligner", value = "count") %>% mutate(aligner=as.factor(aligner), zed = count==0, one = count ==1, lessThan10 = count<10, lessThan100 = count<100) %>% group_by(sample, aligner) %>% summarise(zed_frac = sum(zed)/n(),one_frac = sum(one)/n(),ten_frac = sum(lessThan10)/n(),hundo_frac = sum(lessThan100)/n()) %>% ungroup() %>% group_by(aligner) %>% summarise(zed_frac = mean(zed_frac),one_frac =mean(one_frac), ten_frac = mean(ten_frac),hundo_frac = mean(hundo_frac) )
+
+
+tbl_cnt <- tbl_cnt + 1
+
+genes_by_count_cat.gt <- genes_by_count_cat %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Averaged Percentage of Genes by Threshold Read Counts", sep = ""), subtitle="average fraction of genes with low number of reads") %>% fmt_percent(columns=vars(zed_frac, ten_frac, hundo_frac), decimals=1, )%>% tab_spanner(columns = vars(zed_frac, ten_frac, hundo_frac), label = "read count threshold") %>% cols_label( zed_frac="< 1", ten_frac="< 10", hundo_frac="< 100") %>% cols_hide(columns = vars(one_frac))
+
+genes_by_count_cat.gt
+
+write(genes_by_count_cat.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_genesByReadCountThresh.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+#https://github.com/ggobi/ggally/issues/250
+# log10_diagonal <- function(data, mapping, ...) {
+#   ggally_densityDiag(data, mapping, ...) + scale_x_log10()
+# }
+# log10_points <- function(data, mapping, ...) {
+#   ggally_points(data, mapping, ...) + scale_x_log10() + scale_y_log10()
+# }
+# log10_cor <- function(data, mapping, ...) {
+#   # preprocess the data for the correlation calculations
+#   data[[deparse(mapping$x)]] <- log10(data[[deparse(mapping$x)]])
+#   data[[deparse(mapping$y)]] <- log10(data[[deparse(mapping$y)]])
+#   
+#   ggally_cor(data, mapping, ...) + # grids will not match. hide them
+#     theme(
+#       panel.grid.major = element_blank(), 
+#       panel.border = element_rect(color = "black", fill = NA)
+#     )
+# }
+
+fig_cnt <- fig_cnt + 1
+
+align_strat_corr.gg <- ggpairs(counts.vs_dm6main.dm6_genes %>% sample_frac(0.1), columns = c("multi", "rando", "uniq"), aes(group=sample))  + labs(title=paste("Figure ",fig_cnt, ". Correlations between Read Count Assigned to Gene\nAcross Alignment Strategy (downsampled to 10%)", sep = "")) + theme(axis.text.x = element_text(angle = 45)) + theme_bw()
+
+align_strat_corr.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readCountStrategyCorrelation.png", sep=""))
+align_strat_corr.gg
+dev.off()
+
+
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+counts.vs_dm6main.dm6_genes.diff <- counts.vs_dm6main.dm6_genes %>% mutate(Geneid = as.factor(Geneid), m2r = multi-rando, m2u = multi-uniq, r2u = rando-uniq, m2r_per = m2r/multi, m2u_per = m2u/multi, r2u_per = r2u/rando) 
+```
+
+The three mapping strategies generally agreed well; for $`r counts.vs_dm6main.dm6_genes.diff %>% group_by(Geneid) %>% summarise(sum1=sum(m2r),sum2=sum(m2u),sum3=sum(r2u)) %>% ungroup() %>% mutate(some = (sum1 + sum2 + sum3)==0) %>% summarise(zed = 100*sum(some)/n()) %>% select(zed)  `$ % of genes, the same number of reads were assigned by all three strategies in all samples. (Restricted to genes with at least one nonzero count, the proportion was $`r counts.vs_dm6main.dm6_genes.diff %>% filter(multi+rando+uniq>0) %>% group_by(Geneid) %>% summarise(sum1=sum(m2r),sum2=sum(m2u),sum3=sum(r2u)) %>% ungroup() %>% mutate(some = (sum1 + sum2 + sum3)==0) %>% summarise(zed = 100*sum(some)/n()) %>% select(zed)`$ % )
+
+By construction, the read count assigned to a gene is supposed to decrease across strategy: multi >= rando >= uniq.
+It's not clear why but for a very small number of cases ($`r counts.vs_dm6main.dm6_genes.diff %>% mutate(anom = m2r < 0) %>% summarize(some = sum(anom)) %>% select(some) `$; $`r counts.vs_dm6main.dm6_genes.diff %>% mutate(anom = m2r < 0) %>% summarize(frack = 100*sum(anom)/n()) %>% select(frack) `$ %), rando > multi. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+counts.vs_dm6main.dm6_genes.diff.pct.gath <-counts.vs_dm6main.dm6_genes.diff %>% filter((multi!=rando | rando!=uniq)) %>% select(-c(multi,uniq,rando,m2r,r2u,m2u)) %>% gather(m2r_per:r2u_per, key = "comparison", value = "value") %>% mutate(percent=value*100, comparison = as.factor(case_when(comparison == "m2r_per" ~ "multi to rando", comparison == "r2u_per" ~ "rando to uniq", comparison == "m2u_per" ~ "multi to uniq"))) %>% mutate(comparison = factor(comparison, levels=c("multi to rando","rando to uniq","multi to uniq"))) %>% filter(percent>=0)
+
+fig_cnt <- fig_cnt + 1
+
+percentDiffAcrossStrat.gg <- ggplot(counts.vs_dm6main.dm6_genes.diff.pct.gath) + geom_freqpoly(aes(x=percent, group=sample)) + facet_grid(.~comparison) + labs(title=paste("Figure ",fig_cnt, ". Percent Loss in Assigned Read Count\nBetween Mapping Strategies (Discrepancies Only)", sep = ""), x="percentage of count lost", y="# genes") + theme_bw()
+
+percentDiffAcrossStrat.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_percentCountDiffAcrossStrategy.png", sep=""))
+percentDiffAcrossStrat.gg
+dev.off()
+
+```
+
+
+
+## Differential Expression Analysis. 
+
+DESeq2 [@Love2014] was used to detect changes in expression from read-count data, following the official vignette as a guide:
+
+http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+http://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html
+
+Counts filtered to remove genes with less than 10 reads combined across all samples. Effect-size shinkage is currently done using apeglm; other shrinkage estimators have not yet been explored. 
+
 
 # Results
 
 
-(we live in a society)
+## Wildtype: Group-housed vs. Isolated
+
+In the first contrast, wildtype flies with group-housed and isolated life histories are compared (experimental design: ~ housing ). Group-housing was used as a reference level; fold changes are reported relative to it. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.de.multi <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.multi$aligner <- as.factor("multi")
+
+wildTypeHousing.de.rando <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.rando$aligner <- as.factor("rando")
+
+wildTypeHousing.de.uniq <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.uniq$aligner <- as.factor("uniq")
+
+wildTypeHousing.de <- rbind(wildTypeHousing.de.multi, wildTypeHousing.de.rando, wildTypeHousing.de.uniq)
+
+
+wildTypeHousing.testedCount <- rbind(nrow(wildTypeHousing.de.multi), nrow(wildTypeHousing.de.rando), nrow(wildTypeHousing.de.uniq)) %>% as.data.frame()
+wildTypeHousing.testedCount <- cbind(wildTypeHousing.testedCount , c("multi","rando","uniq"))
+names(wildTypeHousing.testedCount) <- c("tested", "aligner")
+wildTypeHousing.testedCount$annot <- "dm6_genes"
+
+wildTypeHousing.testedCount<- inner_join(wildTypeHousing.testedCount, ref_ann.stats %>% filter(measure=="count" & type =="total"), by =c("annot"="annot")) %>% mutate(perc = tested/value, total = value) %>% select(annot, total, aligner, tested, perc) 
+
+```
+
+After filtering to remove genes with too few reads for analysis, about  $`r  human_readable_croncher((wildTypeHousing.testedCount %>% summarise(m = mean(tested) ) %>% as.numeric())[1]) `$ of $`r human_readable_croncher((wildTypeHousing.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())) `$ annotated genes ($`r (wildTypeHousing.testedCount %>% summarise(p = 100*mean(perc) ) %>% as.numeric())[1] `$ %) remain available for testing:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+wildTypeHousing.testedCount.gt <- wildTypeHousing.testedCount %>% select(c(aligner, tested, perc)) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Number Genes with Sufficient Read Count for Differential Expression Analysis", sep = ""), subtitle=paste("from ",(wildTypeHousing.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())," annotations in dm6_genes"))  %>% fmt_percent(columns=vars(perc), decimals=1, ) %>% fmt_number(columns=vars(tested), decimals=1, suffixing = T) %>% cols_label( aligner=" ", perc="percent")
+
+wildTypeHousing.testedCount.gt
+
+write(wildTypeHousing.testedCount.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_wildTypeHousing_testedCount.html", sep=""))
+
+```
+
+
+
+```{r include = FALSE}
+# """
+# " The text, condition treated vs untreated, tells you that the estimates are of the logarithmic fold change log2(treated/untreated).
+# 
+# "
+# Note that we could have specified the coefficient or contrast we want to build a results table for, using either of the following equivalent commands:
+# 
+# res <- results(dds, name="condition_treated_vs_untreated")
+# res <- results(dds, contrast=c("condition","treated","untreated"))
+# eg, housing_isolated_vs_group
+# """
+```
+
+
+
+
+
+### preshrunk comparison across alignment strategies
+
+The differential expression data were examined before shrinkage. The most discrepancy appeared between the mapspliceUniq alignement and the two which included multimappers, and in genes with small effect sizes. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+wildTypeHousing.lfcCorr.fresh.gg <- ggpairs(wildTypeHousing.de %>% select(c(geneid, log2FoldChange.fresh, aligner)) %>% spread(key = aligner, value=log2FoldChange.fresh ) %>% select(-c(geneid)) ) + labs(title=paste("Figure ",fig_cnt, ". Agreement on (unshrunk) Effect Size (log2 fold change)\nBetween Alignment Strategies (isolated vs group-housed wildtypes)", sep = "")) + theme_bw()
+
+wildTypeHousing.lfcCorr.fresh.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_unShrunkLFC_corr.png", sep=""))
+wildTypeHousing.lfcCorr.fresh.gg
+dev.off()
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#	this is redundant since sig doesn't changed with shrinkage
+
+# 
+# fig_cnt <- fig_cnt + 1
+# 
+# wildTypeHousing.pp.fresh.gg <- ggpairs(wildTypeHousing.de %>% mutate(sig = -log10(padj.fresh)) %>% select(c(geneid, sig, aligner)) %>% spread(key = aligner, value=sig ) %>% select(-c(geneid)) ) + labs(title=paste("Figure ",fig_cnt, ". Agreement on (unshrunk) Significance (-log10 adjusted p) Between Alignment Strategies", sep = "")) + theme_bw()
+# 
+# wildTypeHousing.pp.fresh.gg
+# 
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_unshrunkAdjustedSig_corr.png", sep=""))
+# wildTypeHousing.pp.fresh.gg
+# dev.off()
+
+```
+
+### effect size: preshrunk vs shrunk
+
+The shrinkage step attempts to correct for the large apparent effect sizes in genes with small read counts. As expected, the shrinkage narrows the distribution around zero.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.de.shronk <- wildTypeHousing.de %>% select(c(log2FoldChange.fresh,lfcSE.fresh,log2FoldChange.shrunk,lfcSE.shrunk, aligner)) %>% gather(key=key, value=value, -one_of("aligner")) %>% separate(key, into = c("param","proc")) %>% mutate(param = as.factor(param), proc = as.factor(proc))
+wildTypeHousing.de.shronk$proc <- relevel(wildTypeHousing.de.shronk$proc, ref = "shrunk")
+wildTypeHousing.de.shronk$param <- relevel(wildTypeHousing.de.shronk$param, ref = "log2FoldChange")
+
+fig_cnt <- fig_cnt + 1
+
+wildtypeHousing.shrinkage.gg <- ggplot(wildTypeHousing.de.shronk ) + geom_freqpoly(aes(x=value, color=aligner, linetype = proc)) + facet_grid(aligner~param, scales = "free_x") + scale_y_log10() + labs(title=paste("Figure ",fig_cnt, ". Log2 Fold Change and Standard Error\n(isolated vs group-housed wildtypes)", sep = ""), x="(unitless)", y="# genes") + theme_bw()
+
+wildtypeHousing.shrinkage.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_diffExp_wtHousing_shrinkage.png", sep=""))
+wildtypeHousing.shrinkage.gg
+dev.off()
+
+```
+
+### shrunk comparison across alignment strategies
+
+The shrunk effect sizes agree well between alignment strategies; the "cloud" around unshrunk data at low effect size has disappeared.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+wildTypeHousing.lfcCorr.shrunk.gg <- ggpairs(wildTypeHousing.de %>% select(c(geneid, log2FoldChange.shrunk, aligner)) %>% spread(key = aligner, value=log2FoldChange.shrunk ) %>% select(-c(geneid)) ) + labs(title=paste("Figure ",fig_cnt, ". Agreement on (shrunk) Effect Size (log2 fold change)\nBetween Alignment Strategies (isolated vs group-housed wildtypes)", sep = "")) + theme_bw()
+
+wildTypeHousing.lfcCorr.shrunk.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_shrunkLFC_corr.png", sep=""))
+wildTypeHousing.lfcCorr.shrunk.gg
+dev.off()
+
+```
+
+??what's up with the outliers??
+
+The alignment strategies also agree well when it comes to significance (shrinkage doesn't impact significance so this is the same before and after.)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+wildTypeHousing.pp.shrunk.gg <- ggpairs(wildTypeHousing.de %>% mutate(sig = -log10(padj.shrunk)) %>% select(c(geneid, sig, aligner)) %>% spread(key = aligner, value=sig ) %>% select(-c(geneid)) ) + labs(title=paste("Figure ",fig_cnt, ". Agreement on (shrunk) Significance (-log10 adjusted p)\nBetween Alignment Strategies (isolated vs group-housed wildtypes)", sep = "")) + theme_bw()
+
+wildTypeHousing.pp.shrunk.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_shrunkAdjustedSig_corr.png", sep=""))
+wildTypeHousing.pp.shrunk.gg
+dev.off()
+
+```
+
+### differential expression overview
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#library("org.Dm.eg.db")
+
+marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
+G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= marty) 
+# gene renaming
+
+wildTypeHousing.de.renamed <- left_join(wildTypeHousing.de,G_list, by = c("geneid"="flybase_gene_id")) # %>% mutate(expression = baseMean.shrunk/transcript_length)
+
+write.table(wildTypeHousing.de.renamed %>% filter(aligner == "multi") %>% select(external_gene_name, everything()) %>% select(-c(aligner)), "results/tables/supp/wildTypeHousing.multi.DESeq2.reformatted.tsv", sep = "\t", col.names = TRUE)
+
+write.table(wildTypeHousing.de.renamed %>% filter(aligner == "uniq") %>% select(external_gene_name, everything()) %>% select(-c(aligner)), "results/tables/supp/wildTypeHousing.uniq.DESeq2.reformatted.tsv", sep = "\t", col.names = TRUE)
+
+write.table(wildTypeHousing.de.renamed %>% filter(aligner == "multi") %>% select(external_gene_name, everything()) %>% select(-c(aligner)), "results/tables/supp/wildTypeHousing.rando.DESeq2.reformatted.tsv", sep = "\t", col.names = TRUE)
+
+
+wildTypeHousing.de.renamed.sig <- wildTypeHousing.de.renamed %>% filter(padj.shrunk <0.01)
+```
+
+Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.volcano.gg <- ggplot(wildTypeHousing.de.renamed)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.shrunk > 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="black", alpha=0.25, shape=1)  + geom_point(data = . %>% filter(padj.shrunk < 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(between isolated and group-housed wildtypes)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
+
+
+
+fig_cnt <- fig_cnt + 1
+wildTypeHousing.volcano.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_shrunkVolcano.png", sep=""))
+wildTypeHousing.volcano.gg
+dev.off()
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+
+wildTypeHousing.volcano.gg <- 
+	ggplot(wildTypeHousing.de.renamed %>% select(aligner, padj.shrunk, log2FoldChange.shrunk)) + geom_freqpoly(aes(x = log2FoldChange.shrunk, y = ..density..), color="black") + geom_freqpoly(data = . %>% filter(padj.shrunk < 0.01),aes(x = log2FoldChange.shrunk, y = ..density..), color="red") +geom_vline(xintercept = -1, color = "blue", linetype="dotted" ) +geom_vline(xintercept = 1, color = "blue", linetype="dotted" )+ facet_grid(aligner~.)  + labs(title=paste("Figure ",fig_cnt, ". histogram of fold change\nwithsignificant(padj<0.01) changes highlighted\n(between isolated and group-housed wildtypes)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
+
+
+
+fig_cnt <- fig_cnt + 1
+wildTypeHousing.volcano.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_wtHousing_shrunkVolcano.png", sep=""))
+wildTypeHousing.volcano.gg
+dev.off()
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.de.renamed.chonksters <- wildTypeHousing.de.renamed %>% filter(padj.shrunk < 0.01 & abs(log2FoldChange.shrunk)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.shrunk) -log10(padj.shrunk))  %>% select(aligner, external_gene_name, maggie, present) 
+
+
+```
+
+From the volcano plots, we can pull out genes with large (ie, a fold change greater than 2 or less than 1/2), significant (ie, padj < 0.01) changes. There were  $`r  wildTypeHousing.de.renamed.chonksters %>% select(external_gene_name) %>% unique() %>% nrow() `$ such genes, mostly shared across alignment strategy:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+wildTypeHousing.chonky.gt <-inner_join(wildTypeHousing.de.renamed.chonksters %>% group_by(external_gene_name) %>% summarise(maggie = max(maggie)) %>% arrange(-maggie) %>% select(external_gene_name), wildTypeHousing.de.renamed.chonksters %>% select(-c(maggie))%>% spread(key = aligner, value =present, fill = "no"), by = c("external_gene_name"="external_gene_name")) %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Genes with Large ( 2< fold change), Significant (padj < 0.01) Changes", sep = ""), subtitle="between isolated and group-housed wildtypes") %>% cols_label(external_gene_name = " ")
+
+wildTypeHousing.chonky.gt
+
+write(wildTypeHousing.chonky.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_wildTypeHousing_chonky.html", sep=""))
+
+```
+
+
+### Genes with top 10 most significant changes
+
+Ordered in decreasing significance, the alignemnt strategies agree on the top 10 most significant changes:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wildTypeHousing.de.renamed.sigRank <- wildTypeHousing.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, baseMean.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+
+wildTypeHousing.de.renamed.sigRank.gt <- wildTypeHousing.de.renamed.sigRank %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Most Significantly (padj<0.01) Differentially Expressed Genes", sep = ""), subtitle=paste("between isolated and group-housed wildtypes")) %>% fmt_scientific(columns=vars(multi_padj.shrunk,rando_padj.shrunk,uniq_padj.shrunk), decimals=2) %>% fmt_number(columns=vars(multi_log2FoldChange.shrunk,uniq_log2FoldChange.shrunk,rando_log2FoldChange.shrunk), decimals=3) %>% fmt_number(columns=vars(multi_baseMean.shrunk,uniq_baseMean.shrunk,rando_baseMean.shrunk), decimals=1, suffixing = T) %>% tab_spanner(label = "multi", columns = vars(multi_external_gene_name, multi_geneid,multi_baseMean.shrunk, multi_padj.shrunk, multi_log2FoldChange.shrunk)) %>% tab_spanner(label = "rando", columns = vars(rando_external_gene_name, rando_geneid, rando_baseMean.shrunk, rando_padj.shrunk, rando_log2FoldChange.shrunk)) %>% tab_spanner(label = "uniq", columns = vars(uniq_external_gene_name, uniq_geneid, uniq_baseMean.shrunk, uniq_padj.shrunk, uniq_log2FoldChange.shrunk)) %>% cols_label(multi_baseMean.shrunk="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.shrunk="log2 FoldChange",multi_padj.shrunk="adjusted p",)%>% cols_label(rando_baseMean.shrunk="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.shrunk="log2 FoldChange",rando_padj.shrunk="adjusted p",) %>% cols_label(uniq_baseMean.shrunk="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.shrunk="log2 FoldChange",uniq_padj.shrunk="adjusted p",) %>% cols_move(columns = c("multi_baseMean.shrunk"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_baseMean.shrunk"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_baseMean.shrunk"), after = c("uniq_geneid"))
+
+tbl_cnt <- tbl_cnt + 1
+wildTypeHousing.de.renamed.sigRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(wildTypeHousing.de.renamed.sigRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_wildTypeHousing_top10MostSig.html", sep=""))
+
+```
+
+### Top 10 genes with biggest (significant) effect sizes 
+
+The alignment strategies agree on the top 10 largest fold changes (though not completely on their order):
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.de.renamed.lfcRank <- wildTypeHousing.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,baseMean.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+
+wildTypeHousing.de.renamed.lfcRank.gt <- 
+	wildTypeHousing.de.renamed.lfcRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Largest Magnitude Fold Changes which were Significant (padj < 0.01)", sep = ""), subtitle=paste("between isolated and group-housed wildtypes"))  %>% fmt_scientific(columns=vars(multi_padj.shrunk,rando_padj.shrunk,uniq_padj.shrunk), decimals=2) %>% fmt_number(columns=vars(multi_baseMean.shrunk,uniq_baseMean.shrunk,rando_baseMean.shrunk), decimals=1, suffixing = T) %>%  fmt_number(columns=vars(multi_log2FoldChange.shrunk,uniq_log2FoldChange.shrunk,rando_log2FoldChange.shrunk), decimals=3) %>% tab_spanner(label = "multi", columns = vars(multi_external_gene_name, multi_baseMean.shrunk,multi_geneid, multi_padj.shrunk, multi_log2FoldChange.shrunk)) %>% tab_spanner(label = "rando", columns = vars(rando_external_gene_name, rando_baseMean.shrunk,rando_geneid, rando_padj.shrunk, rando_log2FoldChange.shrunk)) %>% tab_spanner(label = "uniq", columns = vars(uniq_external_gene_name,uniq_baseMean.shrunk, uniq_geneid,  uniq_padj.shrunk, uniq_log2FoldChange.shrunk)) %>%  cols_label(multi_baseMean.shrunk="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.shrunk="log2 FoldChange",multi_padj.shrunk="adjusted p",)%>% cols_label(rando_baseMean.shrunk="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.shrunk="log2 FoldChange",rando_padj.shrunk="adjusted p",) %>% cols_label(uniq_baseMean.shrunk="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.shrunk="log2 FoldChange",uniq_padj.shrunk="adjusted p",) %>% cols_move(columns = c("multi_baseMean.shrunk"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_baseMean.shrunk"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_baseMean.shrunk"), after = c("uniq_geneid"))
+
+
+tbl_cnt <- tbl_cnt + 1
+wildTypeHousing.de.renamed.lfcRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(wildTypeHousing.de.renamed.lfcRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_wildTypeHousing_top10lfc_andSig.html", sep=""))
+
+```
+
+### Top 10 highest expressed genes with significant change
+
+The "multi" and "rando" alignment strategies agree completely on the top 10 most expressed genes with significant changes. The "uniq" strategy differs in rank order and includes Gs2 and Msp300 instead of Calr and bun:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+wildTypeHousing.de.renamed.expRank <- wildTypeHousing.de.renamed.sig %>% arrange(-baseMean.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(-baseMean.shrunk, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, baseMean.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+
+wildTypeHousing.de.renamed.expRank.gt <- wildTypeHousing.de.renamed.expRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Highest Expressed Genes with Significant (padj < 0.01) Expression Difference", sep = ""), subtitle=paste("between isolated and group-housed wildtypes"))  %>% fmt_number(columns=vars(multi_baseMean.shrunk,uniq_baseMean.shrunk,rando_baseMean.shrunk), decimals=1, suffixing = T) %>% fmt_scientific(columns=vars(multi_padj.shrunk,rando_padj.shrunk,uniq_padj.shrunk), decimals=2) %>% fmt_number(columns=vars(multi_log2FoldChange.shrunk,uniq_log2FoldChange.shrunk,rando_log2FoldChange.shrunk), decimals=3) %>% tab_spanner(label = "multi", columns = vars(multi_external_gene_name, multi_geneid, multi_baseMean.shrunk, multi_padj.shrunk, multi_log2FoldChange.shrunk)) %>% tab_spanner(label = "rando", columns = vars(rando_external_gene_name, rando_geneid, rando_baseMean.shrunk, rando_padj.shrunk, rando_log2FoldChange.shrunk)) %>% tab_spanner(label = "uniq", columns = vars(uniq_external_gene_name, uniq_geneid, uniq_baseMean.shrunk, uniq_padj.shrunk, uniq_log2FoldChange.shrunk)) %>% cols_label(multi_baseMean.shrunk="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.shrunk="log2 FoldChange",multi_padj.shrunk="adjusted p",)%>% cols_label(rando_baseMean.shrunk="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.shrunk="log2 FoldChange",rando_padj.shrunk="adjusted p",) %>% cols_label(uniq_baseMean.shrunk="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.shrunk="log2 FoldChange",uniq_padj.shrunk="adjusted p",) %>% cols_move(columns = c("multi_baseMean.shrunk"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_baseMean.shrunk"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_baseMean.shrunk"), after = c("uniq_geneid"))
+
+tbl_cnt <- tbl_cnt + 1
+wildTypeHousing.de.renamed.expRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(wildTypeHousing.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_wildTypeHousing_top10exp_andSig.html", sep=""))
+
+```
+
+
+### rank-correllation between alignment strategies
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE }
+wildTypeHousing.de.renamed.rankt <- wildTypeHousing.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(lfc_rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"),sig_rank = rank(-abs(padj.shrunk), ties.method = "first"))
+wildTypeHousing.de.renamed.rankt.sprud <- wildTypeHousing.de.renamed.rankt %>% select(c("geneid","aligner", "lfc_rank")) %>% spread(key=aligner, value=lfc_rank)
+
+wildTypeHousing.de.renamed.sig.sprud <- wildTypeHousing.de.renamed.sig %>% select(c("geneid", "log2FoldChange.shrunk", "aligner")) %>% spread(key = aligner, value = log2FoldChange.shrunk)
+
+#cor.test(x=wildTypeHousing.de.renamed.sig.sprud$multi, y=wildTypeHousing.de.renamed.sig.sprud$uniq, method = 'spearman')
+
+library("naniar")
+ggplot(wildTypeHousing.de.renamed.rankt.sprud, aes(x=multi, y = rando)) + geom_miss_point()
+
+#ggplot(wildTypeHousing.de.renamed.sig.sprud) + geom_point(aes(x=multi, y=rando), color="blue") + geom_point(aes(x=multi, y=rando), color="red")
+
+#ggpairs(wildTypeHousing.de.renamed.rankt %>% select(c("geneid", "lfc_rank", "aligner")) %>% spread(key = aligner, value = lfc_rank), columns = c("multi","rando","uniq"))
+
+```
+
+
+### Compare to Gene Lists?
+
+### Gene Ontology?
+
+
+
+
+
+
+
+
+
+
 
 
 # Bibliography
@@ -797,6 +1388,10 @@ dev.off()
 
 #citation("topGO")
 citation("ggplot2")
+citation("apeglm")
+citation("DESeq2")
+citation("biomaRt")
+
 #citation("GGally")
 #citation("ggnewscale")
 

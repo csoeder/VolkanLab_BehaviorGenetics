@@ -471,6 +471,33 @@ write(readCountProcess.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt
 
 ```
 
+#### Depth & Breadth of Coverage
+
+
+```{r echo=FALSE}
+breadth_stats <- inner_join(all_alignments %>% filter(measure=="total_breadth") %>% rename("total_breadth"=value) %>% select(-c(aligner, reference, measure)), data_sets.df.sparse %>% select(-c(day)), by=c("sample"="name") )
+
+```
+
+Depth of coverage is not especially meaningful here, but breadth of coverage may give an indication of background genomic DNA. This explains why the input samples tend to have higher breadth values.
+
+```{r echo=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+breadthStats.gg <- ggplot(breadth_stats %>% mutate(x=0)) + geom_boxplot(aes(y=100*total_breadth, x=x)) + geom_jitter(aes(y=100*total_breadth, shape=experimental, color=rep=="input", x=x), size=3, height=0, width=0.1) + theme_bw() + labs(y="Total Breadth (% of Genome Mapped To)", title="Breadth of Coverage for Alignments")
+
+
+
+
+breadthStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_BreadthStats.png", sep=""))
+breadthStats.gg
+dev.off()
+
+
+```
+
 
 
 ## Peak Calling

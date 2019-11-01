@@ -1,6 +1,5 @@
 configfile: 'config.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
-#rstudio/1.2.1335 
+#	module load python/3.6.6 bedtools bedops samtools r/3.5.0 rstudio/1.1.453 bowtie sratoolkit subread
 
 #from itertools import combinations
 
@@ -8,7 +7,6 @@ sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
 annotation_by_name = { a['name'] : a for a in config['annotations']}
 genelist_by_name = { l['name'] : l for l in config['gene_queries']}
-contrasts_by_name = {c['name'] : c for c in config['contrasts']}
 #distance_categories = ["I","II","III","IV","V","VI","VII","VIII","IX","X"]
 #distance_breaks = { distance_categories[n] : [config["distance_divisions"][n]['distance'],config["distance_divisions"][n+1]['distance']] for n in range(0, len(config["distance_divisions"])-1) }
 # samplist_by_experimental = {c['experimental'] : [] for c in config['data_sets']}
@@ -68,8 +66,6 @@ rule all:
 		runtime="0:01:00",
 		cores=1,
 	run:
-		shell(""" for fig in results/figures/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').png; done """)
-		#shell(""" for fig in results/figures/supp/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').png; done """)
 		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').pdf """)
 		shell(""" tar cf results.$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
 
@@ -304,8 +300,8 @@ rule mapsplice2_align_raw:
 #		bam_out = "mapped_reads/mapsplice/{sample}/{sample}.vs_{ref_genome}.mapsplice.sort.bam",
 #		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
-		runmem_gb=16,
-		runtime="16:00:00",
+		runmem_gb=32,
+		runtime="64:00:00",
 		cores=8,
 	message:
 		"aligning reads from {wildcards.sample} to reference_genome {wildcards.ref_genome} .... "
@@ -339,7 +335,7 @@ rule mapsplice2_align_multi:
 #		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
 		runmem_gb=8,
-		runtime="1:00:00",
+		runtime="6:00:00",
 		cores=8,
 		dup_flg = "-rS ",#remove marked duplicates; remove secondary alignments of marked duplicates
 		quality="-q 20 -F 0x0200 -F 0x04 -f 0x0002", # no QC fails, no duplicates, proper pairs only, mapping qual >20
@@ -361,10 +357,10 @@ rule mapsplice2_align_uniq:
 		uniq_bam = "mapped_reads/mapspliceUniq/{sample}/{sample}.vs_{ref_genome}.mapspliceUniq.sort.bam",
 	params:
 		runmem_gb=8,
-		runtime="1:00:00",
+		runtime="6:00:00",
 		cores=8,
 	message:
-		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} to remove multimappers entirely.... "
+		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
 	run:
 		shell(""" mkdir -p mapped_reads/mapspliceUniq/{wildcards.sample}/ summaries/BAMs/""")
 		shell(""" 
@@ -381,10 +377,10 @@ rule mapsplice2_align_rando:
 		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
 	params:
 		runmem_gb=16,
-		runtime="12:00:00",
+		runtime="24:00:00",
 		cores=8,
 	message:
-		"Downsampling multimappers from {wildcards.sample} alignment to {wildcards.ref_genome}..."
+		"filtering raw {wildcards.sample} alignment to {wildcards.ref_genome} for quality, duplication.... "
 	run:
 		shell(""" mkdir -p mapped_reads/mapspliceRando/{wildcards.sample}/ summaries/BAMs/""")
 		shell(""" 
@@ -408,9 +404,9 @@ rule spliced_alignment_reporter:
 	output:
 		report_out = "summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary"
 	params:
-		runmem_gb=8,
-		runtime="4:00:00",
-		cores=1,
+		runmem_gb=16,
+		runtime="32:00:00",
+		cores=4,
 	message:
 		"Collecting metadata for the {wildcards.aligner} alignment of {wildcards.sample} to {wildcards.ref_genome}.... "
 	run:
@@ -506,28 +502,6 @@ rule summarize_feature_counts:
 			head -n 1 {input.sum_in} > {output.count_sum};
 			cat {input.sum_in} | grep -w "Assigned\|Unassigned_NoFeatures\|Unassigned_Ambiguity" >> {output.count_sum};
 			""")
-
-rule da_Seeker:
-	input:
-		fc_in = "counts/all.vs_{ref_genome}.{annot}.{aligner}.counts",#, group =["all"])
-	output:
-		deSq = "diff_expr/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.counts",
-	params:
-		runmem_gb=8,
-		runtime="1:00:00",
-		cores=8,
-	message:
-		"calculating differential expression in {wildcards.contrast} contrast ({wildcards.aligner} to {wildcards.ref_genome} overlapping {wildcards.annot}) .... "
-	run:
-		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
-		shell(""" mkdir -p diff_expr/{wildcards.contrast} """)
-		shell(""" Rscript scripts/deSeqer.R {input.fc_in} {output.deSq} {wildcards.contrast} """)
-		
-
-
-
-
-
 
 rule write_report:
 	input:

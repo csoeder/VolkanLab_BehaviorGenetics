@@ -173,7 +173,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
@@ -184,7 +184,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
@@ -195,7 +195,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
@@ -206,7 +206,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: 7D_ISOLATED_2
       path: FASTQ/RNAseq/ISOLATED_7D/rep2/
@@ -217,7 +217,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: 7D_ISOLATED_3
       path: FASTQ/RNAseq/ISOLATED_7D/rep3/
@@ -228,7 +228,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,]
       tissue: antennae
     - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
@@ -263,8 +263,26 @@ data_sets:
       housing: group
       subgroups: [all,]
       tissue: antennae
-      SRA: a
-
+    - name: male_test
+      path: FASTQ/RNAseq/NCBI/male/
+      paired: True
+      readsfile1: SRR5638358_1.fastq
+      readsfile2: SRR5638358_2.fastq
+      genotype: [XY,]
+      housing: group
+      subgroups: [all,aux]
+      tissue: antennae
+      SRA: SRR5638358
+    - name: fem_test
+      path: FASTQ/RNAseq/NCBI/female/
+      paired: True
+      readsfile1: SRR5638359_1.fastq
+      readsfile2: SRR5638359_2.fastq
+      genotype: [XX,]
+      housing: group
+      subgroups: [all,aux]
+      tissue: antennae
+      SRA: SRR5638359
 
 reference_genomes:
     - name: dm6v13
@@ -350,5 +368,7 @@ contrasts:
       design: ~ housing
       filt: wtHousing
       vars: [rep, housing]
+
+
 
 

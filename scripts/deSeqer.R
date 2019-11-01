@@ -1,0 +1,73 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+# 1: counts file in
+
+
+
+library("DESeq2")
+library("dplyr")
+library("yaml")
+library("readr")
+library("tidyr")
+
+counts_in <- args[1]
+dsq_out <- args[2]
+nombre <- args[3]
+
+#	build the sample DF
+trammel <- read_yaml("config.yaml")
+data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
+data_sets.df$name <- as.factor(data_sets.df$name)
+data_sets.df$day<- as.factor(data_sets.df$day)
+data_sets.df$subgroups<- as.factor(data_sets.df$subgroups)
+data_sets.df$rep<- as.factor(data_sets.df$rep)
+data_sets.df$housing<- as.factor(data_sets.df$housing)
+data_sets.df$genotype<- as.factor(data_sets.df$genotype)
+data_sets.df$tissue<- as.factor(data_sets.df$tissue)
+
+#	build the contrast experiment
+contrasts.df <- plyr::ldply(trammel$contrasts, data.frame) %>% filter(name == nombre )
+
+# prep the sample metadata
+sbgrp <- (contrasts.df %>% select(filt))[1,] %>% as.character
+coldata <- data_sets.df %>% as.data.frame() %>% ungroup()%>% filter(subgroups == sbgrp)
+rownames(coldata) <- coldata$name
+coldata <- coldata %>% select(contrasts.df$vars %>% as.character() )
+
+#load and format the count data
+counts.df <- read_delim(counts_in, "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.df.gath <- counts.df %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+counts.df.sprud <- counts.df.gath %>% spread(key = sample, value = count) %>% as.data.frame() 
+rownames(counts.df.sprud) <- counts.df.sprud$Geneid
+counts.df.sprud <- counts.df.sprud %>%  select(rownames(coldata))
+
+# convert counts, metadata, design into DESeq data object
+#counts.dds <- DESeqDataSetFromMatrix(countData = counts.df.sprud, colData = coldata, design = ~ housing) 
+counts.dds <- DESeqDataSetFromMatrix(countData = counts.df.sprud, colData = coldata, design = eval(parse(text=as.character(contrasts.df$design[1]))))
+
+#prefilter to remove low-count rows
+keep <- rowSums(counts(counts.dds)) >= 10
+counts.dds <- counts.dds[keep,]
+
+#relevel 
+#counts.dds$condition <- relevel(counts.dds$condition, ref = "untreated")
+
+#Run DESeq
+counts.dds.dsq <- DESeq(counts.dds)
+counts.dds.res <- results(counts.dds.dsq) %>% as.data.frame()
+counts.dds.res$geneid <- rownames(counts.dds.res)
+
+# Effect-size shrinkage
+coff <- resultsNames(counts.dds.dsq)[2]
+counts.dds.res.shrunk <- lfcShrink(counts.dds.dsq, coef=coff, type="apeglm") %>% as.data.frame()
+#explore shrinkage types??
+counts.dds.res.shrunk$geneid <- rownames(counts.dds.res.shrunk)
+
+#Write to TSV
+counts.dds.res.full <- inner_join(counts.dds.res %>%  as.data.frame(), counts.dds.res.shrunk %>%  as.data.frame(), by =c("geneid"="geneid"), suffix=c(".fresh",".shrunk")) %>% select(geneid, everything())
+write_delim(counts.dds.res.full, dsq_out, delim = "\t")
+
+
+
+
+
