@@ -107,7 +107,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_47B1MUT_2
       path: FASTQ/RNAseq/47B1MUT_7D/rep2/
@@ -118,7 +118,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_47B1MUT_3
       path: FASTQ/RNAseq/47B1MUT_7D/rep3/
@@ -129,7 +129,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_67DMUT_1
       path: FASTQ/RNAseq/67DMUT_7D/rep1/
@@ -140,7 +140,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_67DMUT_2
       path: FASTQ/RNAseq/67DMUT_7D/rep2/
@@ -151,7 +151,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_67DMUT_3
       path: FASTQ/RNAseq/67DMUT_7D/rep3/
@@ -162,7 +162,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_GROUPHOUSE_1
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
@@ -173,7 +173,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
@@ -184,7 +184,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
@@ -195,7 +195,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
@@ -206,7 +206,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,hausWtVsMut]
       tissue: antennae
     - name: 7D_ISOLATED_2
       path: FASTQ/RNAseq/ISOLATED_7D/rep2/
@@ -217,7 +217,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,hausWtVsMut]
       tissue: antennae
     - name: 7D_ISOLATED_3
       path: FASTQ/RNAseq/ISOLATED_7D/rep3/
@@ -228,7 +228,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,]
+      subgroups: [all,wtHousing,hausWtVsMut]
       tissue: antennae
     - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
@@ -239,7 +239,7 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: FRULEXAFRU440_2
       path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
@@ -250,7 +250,7 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
     - name: FRULEXAFRU440_3
       path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
@@ -261,7 +261,7 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut]
       tissue: antennae
       SRA: a
 
@@ -293,6 +293,10 @@ annotations:
     - name: dm6_repeats
       bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dm6.repeatMasker.main.bed
       derived: False
+    - name: fru_exons
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_ex.gtf
+      derived: False
     - name: ionotropic
       bed_path: utils/annotations/ionotropic.bed
       base: dm6_genes
@@ -317,6 +321,7 @@ annotations:
       bed_path: utils/annotations/brysonsList.bed
       base: dm6_genes
       derived: True
+
 
 gene_queries:
     - name: ionotropic
@@ -343,6 +348,11 @@ gene_queries:
       list_path: utils/geneLists/bryson_FBgn.clean.txt 
       base: dm6_genes
       bed_path: utils/annotations/brysonsList.bed
+    - name: brysonPriority
+      list_path: utils/geneLists/brysonRush_FBgn.clean.txt 
+      base: dm6_genes
+      bed_path: utils/annotations/brysonPriority.bed
+
 
 
 contrasts:
@@ -350,5 +360,26 @@ contrasts:
       design: ~ housing
       filt: wtHousing
       vars: [rep, housing]
+    - name: grpWtVs47b
+      design: ~ genotype
+      filt: grpWtVs47b
+      vars: [rep, genotype]
+    - name: grpWtVs67d
+      design: ~ genotype
+      filt: grpWtVs67d
+      vars: [rep, genotype]
+    - name: grpWtVsFru
+      design: ~ genotype
+      filt: grpWtVsFru
+      vars: [rep, genotype]
+    - name: grpWtVsMut
+      design: ~ genotype
+      filt: grpWtVsMut
+      vars: [rep, genotype]
+    - name: hausWtVsMut
+      design: ~ genotype + housing
+      filt: hausWtVsMut
+      vars: [rep, genotype, housing]
+
 
 

@@ -68,10 +68,14 @@ rule all:
 		runtime="0:01:00",
 		cores=1,
 	run:
-		shell(""" for fig in results/figures/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').png; done """)
-		#shell(""" for fig in results/figures/supp/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').png; done """)
-		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').pdf """)
-		shell(""" tar cf results.$(date | tr -s " " | cut -f 2,3,6 -d " " | awk '{{print$2"_"$1"_"$3}}').tar results/ """)
+		shell(""" mkdir -p results/figures/; touch results/figures/null.png; for fig in results/figures/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done;  rm results/figures/null.*.png; """)
+		shell(""" mkdir -p results/figures/supp/ ; touch results/figures/supp/null.png; for fig in results/figures/supp/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done; rm results/figures/supp/null.*.png; """)
+
+		shell(""" mkdir -p results/tables/ ; touch results/tables/null.tmp ; for phial in $(ls results/tables/ ); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/$phial results/tables/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/null.*.tmp; """)
+		shell(""" mkdir -p results/tables/supp/ ; touch results/tables/supp/null.tmp ; for phial in $(ls results/tables/supp/ ); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/supp/$phial results/tables/supp/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/supp/null.*.tmp; """)
+
+		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date +%d_%b_%Y).pdf """)
+		shell(""" tar cf results.$(date +%d_%b_%Y).tar results/ """)
 
 
 rule summon_reads_SRA:
