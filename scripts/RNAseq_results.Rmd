@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Behavioral Genetics RNA-Seq"
 author: "Charlie Soeder"
-date: "11/11/2019"
+date: "11/15/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -1158,6 +1158,8 @@ Currently, single-variable contrasts are being calculated, in which the axis of 
 
 Because the "baseMean" reported by DESeq2 is a replicate-normalized read count, an expression level was derived from it by scaling by feature length.
 
+Interpretation of "baseMean": 
+https://support.bioconductor.org/p/75244
 
 
 # Results
@@ -2549,29 +2551,6 @@ write(haus_and_Fru.change.cosig.disagreement.byLfc.gt %>%  as_raw_html(), paste(
 ```
 
 
-
-Notably, many genes which have significant, high-ranking similarities in both the housing contrast and the Fru contrast ... are points of significant, high-ranking differences between the housing contrast and the 47b or 67d contrasts. In particular: 
-
-```
-DIP-alpha
-CG13659
-Cpr49Ae
-Dscam4
-CG31288
-Pop2
-CG7272
-```
-
-As well, many genes which have significant, high-ranking difference in both the housing contrast and the Fru contrast ... are points of significant, high-ranking similarity between the housing contrast and the 47b or 67d contrasts. In particular:  
-
-```
-MtnB
-CG10050
-CG14400
-CG5895
-CG11852
-Spn47C
-```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 

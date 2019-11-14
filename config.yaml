@@ -360,26 +360,32 @@ contrasts:
       design: ~ housing
       filt: wtHousing
       vars: [rep, housing]
+      ref: ["1", "group" ]
     - name: grpWtVs47b
       design: ~ genotype
       filt: grpWtVs47b
       vars: [rep, genotype]
+      ref: ["1", "wt"]
     - name: grpWtVs67d
       design: ~ genotype
       filt: grpWtVs67d
       vars: [rep, genotype]
+      ref: ["1", "wt"]
     - name: grpWtVsFru
       design: ~ genotype
       filt: grpWtVsFru
       vars: [rep, genotype]
+      ref: ["1", "wt"]
     - name: grpWtVsMut
       design: ~ genotype
       filt: grpWtVsMut
       vars: [rep, genotype]
+      ref: ["1", "wt"]
     - name: hausWtVsMut
       design: ~ genotype + housing
       filt: hausWtVsMut
-      vars: [rep, genotype, housing]
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
 
 
 

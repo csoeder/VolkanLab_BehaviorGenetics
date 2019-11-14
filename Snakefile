@@ -71,8 +71,8 @@ rule all:
 		shell(""" mkdir -p results/figures/; touch results/figures/null.png; for fig in results/figures/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done;  rm results/figures/null.*.png; """)
 		shell(""" mkdir -p results/figures/supp/ ; touch results/figures/supp/null.png; for fig in results/figures/supp/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done; rm results/figures/supp/null.*.png; """)
 
-		shell(""" mkdir -p results/tables/ ; touch results/tables/null.tmp ; for phial in $(ls results/tables/ ); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/$phial results/tables/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/null.*.tmp; """)
-		shell(""" mkdir -p results/tables/supp/ ; touch results/tables/supp/null.tmp ; for phial in $(ls results/tables/supp/ ); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/supp/$phial results/tables/supp/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/supp/null.*.tmp; """)
+		shell(""" mkdir -p results/tables/ ; touch results/tables/null.tmp ; for phial in $(ls -p results/tables/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/$phial results/tables/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/null.*.tmp; """)
+		shell(""" mkdir -p results/tables/supp/ ; touch results/tables/supp/null.tmp ; for phial in $(ls -p results/tables/supp/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/supp/$phial results/tables/supp/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/supp/null.*.tmp; """)
 
 		shell(""" mv results/VolkanLab_BehaviorGenetics.pdf results/VolkanLab_BehaviorGenetics.$(date +%d_%b_%Y).pdf """)
 		shell(""" tar cf results.$(date +%d_%b_%Y).tar results/ """)
@@ -540,7 +540,8 @@ rule write_report:
 		gene_lists_summary = ["summaries/geneLists.stats"],
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
 		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
-		counting_summary = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.stat", group ="all", ref_genome = "dm6main", annot = "dm6_genes", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"])#"mapspliceRaw",
+		counting_summary = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.stat", group ="all", ref_genome = "dm6main", annot = "dm6_genes", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
+		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.counts", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], annot = ["dm6_genes","fru_exons"], contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"]),
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:
