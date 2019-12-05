@@ -466,17 +466,21 @@ rule count_features:
 	input:
 		alignments_in = lambda wildcards: expand("mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam", aligner = wildcards.aligner, sample=sampname_by_group[wildcards.group], ref_genome = wildcards.ref_genome  ),
 	output:
-		counted_features = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.counts",
-		count_stats = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.summary",
+		counted_features = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts",
+		count_stats = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts.summary",
 	params:
 		runmem_gb=8,
 		runtime="8:00:00",
 		cores=8,
-		fc_params = "-M  -J -p -B -C --verbose ",#count multimappers, record junctions, count paired-end fragments, well-mapped
+		fc_params = " -J --verbose ",#count multimappers, record junctions, count paired-end fragments, well-mapped   <- some of this is moved into the "flag" wildcard
 		#-O ? -f? 
 	message:
 		"counting reads from {wildcards.group} aligned to {wildcards.ref_genome} with {wildcards.aligner} overlapping {wildcards.annot} .... "
 	run:
+		flug_str = wildcards.flags
+		flug_lst = [ s for s in flug_str if s != "_"]
+		flug_str = " -%s "*len(flug_lst) % tuple(flug_lst)
+
 
 		sed_suff = ".vs_%s.%s.sort.bam" % tuple([wildcards.ref_genome, wildcards.aligner])		
 		sed_cmd =  " sed -e 's/mapped_reads\/[a-zA-Z0-9\/_]*\///g' | sed -e 's/%s//g' " % tuple([sed_suff])
@@ -484,21 +488,21 @@ rule count_features:
 		annot_gtf = annotation_by_name[wildcards.annot]["gtf_path"]
 		shell(""" mkdir -p counts summaries/counts/""")
 		shell("""
-			featureCounts {params.fc_params} -t exon -g gene_id -F GTF -a <(cat {annot_gtf} | awk '{{print"chr"$0}}') -o {output.counted_features}.tmp {input.alignments_in}
+			featureCounts {flug_str} {params.fc_params} -t exon -g gene_id -F GTF -a <(cat {annot_gtf} | awk '{{print"chr"$0}}') -o {output.counted_features}.tmp {input.alignments_in}
 			""")
 		shell("""
-			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.tmp | tail -n +2 | {sed_cmd} > {output.counted_features}
-			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.tmp.jcounts | {sed_cmd} > counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.jcounts
-			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.tmp.summary | {sed_cmd} > counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.summary
-			rm counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.counts.tmp* 
+			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp | tail -n +2 | {sed_cmd} > {output.counted_features}
+			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp.jcounts | {sed_cmd} > counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.jcounts
+			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp.summary | {sed_cmd} > counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.summary
+			rm counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp* 
 			""")
 
 
 rule summarize_feature_counts:
 	input:
-		sum_in = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.summary"
+		sum_in = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.summary"
 	output:
-		count_sum = "summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.stat",
+		count_sum = "summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat",
 	params:
 		runmem_gb=1,
 		runtime="15:00",
@@ -511,25 +515,57 @@ rule summarize_feature_counts:
 			cat {input.sum_in} | grep -w "Assigned\|Unassigned_NoFeatures\|Unassigned_Ambiguity" >> {output.count_sum};
 			""")
 
+
+rule measure_expression:
+	input:
+		counted_features = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts",
+		aln_rprt = "summaries/alignments.vs_{ref_genome}.{aligner}.summary",
+	output:
+		rpkm = "expression/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.rpkm",
+	params:
+		runmem_gb=1,
+		runtime="15:00",
+		cores=1,
+	message:
+		"converting counts of {wildcards.group} aligned to {wildcards.ref_genome} with {wildcards.aligner} overlapping {wildcards.annot} to expression values.... "
+	run:
+		shell(""" mkdir -p expression/ """)
+		shell(""" Rscript  scripts/expressionOmete.R {input.counted_features} {input.aln_rprt} {output.rpkm} """)
+
+
+rule summon_expression_measures:
+	input:
+		rpkm =  lambda wildcards: expand("expression/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.rpkm",group = wildcards.group, ref_genome = "dm6main", annot = ["dm6_genes","fru_exons"], aligner=["mapspliceMulti", "mapspliceUniq","mapspliceRando"], flags = ["MpBC","MpBCO"])
+	output:
+		expFlg = "utils/{group}.expression.flag",
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+	message:
+		"converting counts of {wildcards.group} aligned to (dm6main) with (aligner) overlapping (annot) to expression values.... "
+	run:
+		shell(""" mkdir -p utils/ """)
+		shell(""" touch {output.expFlg} """)
+## replace this with a data summary script?
+
+
 rule da_Seeker:
 	input:
-		fc_in = "counts/all.vs_{ref_genome}.{annot}.{aligner}.counts",#, group =["all"])
+		fc_in = "counts/all.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts",#, group =["all"])
 	output:
-		deSq = "diff_expr/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.counts",
+		deSq = "diff_expr/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.{flag}.de",
+		deSq_itemized = "diff_expr/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.{flag}.itemized.de",
 	params:
 		runmem_gb=8,
-		runtime="1:00:00",
+		runtime="30:00",
 		cores=8,
 	message:
 		"calculating differential expression in {wildcards.contrast} contrast ({wildcards.aligner} to {wildcards.ref_genome} overlapping {wildcards.annot}) .... "
 	run:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p diff_expr/{wildcards.contrast} """)
-		shell(""" Rscript scripts/deSeqer.R {input.fc_in} {output.deSq} {wildcards.contrast} """)
-		
-
-
-
+		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} """)
 
 
 
@@ -540,8 +576,10 @@ rule write_report:
 		gene_lists_summary = ["summaries/geneLists.stats"],
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
 		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
-		counting_summary = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.counts.stat", group ="all", ref_genome = "dm6main", annot = "dm6_genes", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
-		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.counts", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], annot = ["dm6_genes","fru_exons"], contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"]),
+		counting_summary_genes = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["dm6_genes","fru_exons"], flag=["MpBC","MpBCO"], aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
+#		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = "dm6_genes", flag="MpBC", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
+		expFlg = "utils/all.expression.flag",
+		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de","itemized.de"]),
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:

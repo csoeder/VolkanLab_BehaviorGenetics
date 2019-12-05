@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Behavioral Genetics RNA-Seq"
 author: "Charlie Soeder"
-date: "11/15/2019"
+date: "12/5/2019"
 output:
   pdf_document: 
     number_sections: yes
@@ -31,7 +31,7 @@ library("tidyverse")
 #library("scales")
 library("DESeq2")
 library("apeglm")
-
+library("magrittr")
 library("gt")
 library("GGally")
 ```
@@ -64,6 +64,10 @@ bam_summary_loader <- function(filename, aligner="mapsplice", reference='dm6'){
 
 fig_cnt <- 0
 tbl_cnt <- 0
+
+
+marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
+G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= marty) 
 ```
 
 
@@ -974,13 +978,13 @@ Mapped reads were assigned and counted using the featureCounts function from the
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-vs_dm6.dm6genes.multi.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceMulti.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status")) 
+vs_dm6.dm6genes.multi.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status")) 
 vs_dm6.dm6genes.multi.count.stats$aligner <- as.factor("multi")
 
-vs_dm6.dm6genes.rando.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceRando.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.dm6genes.rando.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceRando.MpBC.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
 vs_dm6.dm6genes.rando.count.stats$aligner <- as.factor("rando")
 
-vs_dm6.dm6genes.uniq.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceUniq.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.dm6genes.uniq.count.stats <- read_delim("summaries/all.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
 vs_dm6.dm6genes.uniq.count.stats$aligner<- as.factor("uniq")
 
 vs_dm6.dm6genes.count.stats <- rbind(vs_dm6.dm6genes.multi.count.stats, vs_dm6.dm6genes.rando.count.stats, vs_dm6.dm6genes.uniq.count.stats)
@@ -996,8 +1000,6 @@ vs_dm6.dm6genes.count.stats.meta <- inner_join(vs_dm6.dm6genes.count.stats %>% m
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -1026,17 +1028,19 @@ The values for "multi" are inflated because each appearance of a multi-mapped re
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-counts.vs_dm6main.dm6_genes.multi <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE) 
+counts.vs_dm6main.dm6_genes.multi <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.counts", "\t", escape_double = FALSE, trim_ws = TRUE) 
 counts.vs_dm6main.dm6_genes.multi.gath <- counts.vs_dm6main.dm6_genes.multi %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
 
-counts.vs_dm6main.dm6_genes.rando <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.rando <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceRando.MpBC.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
 counts.vs_dm6main.dm6_genes.rando.gath <- counts.vs_dm6main.dm6_genes.rando %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
 
-counts.vs_dm6main.dm6_genes.uniq <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.uniq <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
 counts.vs_dm6main.dm6_genes.uniq.gath <- counts.vs_dm6main.dm6_genes.uniq %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
 
 
 counts.vs_dm6main.dm6_genes <- inner_join(inner_join(counts.vs_dm6main.dm6_genes.multi.gath%>% rename(count="multi"),counts.vs_dm6main.dm6_genes.rando.gath%>% rename(count="rando"),by = c("Geneid"="Geneid","sample"="sample")),counts.vs_dm6main.dm6_genes.uniq.gath%>% rename(count="uniq"),by = c("Geneid"="Geneid","sample"="sample"))
+
+
 
 ```
 
@@ -1142,7 +1146,191 @@ dev.off()
 
 ### Fru by exon
 
-To study Fru on an exon-by-exon case, the existing GTF annotation was subsetted to isoforms of only this gene, and reformatted such that each exon was an individual feature to be counted. featureCounts was then run as usual on this new annotation. (May need to restructure this...... see 3.5 below)
+To study Fru on an exon-by-exon case, the existing GTF annotation was subsetted to isoforms of only this gene, and reformatted such that each exon was an individual feature to be counted. featureCounts was then run as usual on this new annotation. With many genes to study on a per-exon basis, the featureCounts -f flag might be more useful.  
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_dm6.fruExon.multi.count.stats <- read_delim("summaries/all.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.fruExon.multi.count.stats$aligner <- as.factor("multi")
+
+vs_dm6.fruExon.rando.count.stats <- read_delim("summaries/all.vs_dm6main.fru_exons.mapspliceRando.MpBCO.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.fruExon.rando.count.stats$aligner <- as.factor("rando")
+
+vs_dm6.fruExon.uniq.count.stats <- read_delim("summaries/all.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.counts.stat", "\t", escape_double = FALSE, col_names = TRUE, trim_ws = TRUE) %>%  gather(key = "sample", value = "value", -one_of("Status"))
+vs_dm6.fruExon.uniq.count.stats$aligner<- as.factor("uniq")
+
+vs_dm6.fruExon.count.stats <- rbind(vs_dm6.fruExon.multi.count.stats, vs_dm6.fruExon.rando.count.stats, vs_dm6.fruExon.uniq.count.stats)
+
+vs_dm6.fruExon.count.stats$Status <- as.factor(vs_dm6.fruExon.count.stats$Status)
+vs_dm6.fruExon.count.stats$sample <- as.factor(vs_dm6.fruExon.count.stats$sample)
+vs_dm6.fruExon.count.stats$group <- as.factor("all")
+vs_dm6.fruExon.count.stats$ref_genome <- as.factor("dm6main")
+vs_dm6.fruExon.count.stats$annotation <- as.factor("fru_exons")
+
+vs_dm6.fruExon.count.stats.meta <- inner_join(vs_dm6.fruExon.count.stats %>% mutate(assigned=value), read_count_progression %>%  mutate(total=value), by=c("sample" = "sample", "aligner" = "measure", "ref_genome" = "ref_genome")) %>% mutate(percent_reads = assigned/total)
+
+```
+
+(Counts are so small compared to total that percentages aren't informative here)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+readAssignmentCount.Fru.gt <-  vs_dm6.fruExon.count.stats.meta %>% filter(Status == "Assigned") %>%  select(c( aligner,  rep, day, genotype, housing, value.x)) %>% spread(aligner, value.x) %>% group_by(genotype,housing,day) %>% arrange(day) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of Reads Assignable to Features in fru_exons", sep = ""), subtitle="number of the reads which can be counted under different alignment strategies")%>% fmt_number(columns=vars(multi, rando, uniq), decimals=0 )  %>% tab_spanner(columns = vars(multi, rando, uniq), label = "mapping strategy")
+
+readAssignmentCount.Fru.gt
+
+write(readAssignmentCount.Fru.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_readAssignmentCount_Fru.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+counts.vs_dm6main.fru_exons.multi <- read_delim("counts/all.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE) 
+counts.vs_dm6main.fru_exons.multi.gath <- counts.vs_dm6main.fru_exons.multi %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.fru_exons.rando <- read_delim("counts/all.vs_dm6main.fru_exons.mapspliceRando.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.fru_exons.rando.gath <- counts.vs_dm6main.fru_exons.rando %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.fru_exons.uniq <- read_delim("counts/all.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.fru_exons.uniq.gath <- counts.vs_dm6main.fru_exons.uniq %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+
+counts.vs_dm6main.fru_exons <- inner_join(inner_join(counts.vs_dm6main.fru_exons.multi.gath%>% rename(count="multi"),counts.vs_dm6main.fru_exons.rando.gath%>% rename(count="rando"),by = c("Geneid"="Geneid","sample"="sample")),counts.vs_dm6main.fru_exons.uniq.gath%>% rename(count="uniq"),by = c("Geneid"="Geneid","sample"="sample"))
+
+```
+
+
+One average, a exon had $`r counts.vs_dm6main.fru_exons %>% gather(multi:uniq, key = "aligner", value = "count") %>% summarize(avg=mean(count)) %>% select(avg) `$ reads assigned to it, but most exons had relatively fewer, with almost a quarter having no reads assigned at all, more than a third having fewer than 10 reads, and almost two thirds having fewer than 50. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+genes_by_count_cat.fru <- counts.vs_dm6main.fru_exons %>% gather(multi:uniq, key = "aligner", value = "count") %>% mutate(aligner=as.factor(aligner), zed = count==0, one = count ==1, lessThan10 = count<10, lessThan50 = count<50) %>% group_by(sample, aligner) %>% summarise(zed_frac = sum(zed)/n(),one_frac = sum(one)/n(),ten_frac = sum(lessThan10)/n(),fifty_frac = sum(lessThan50)/n()) %>% ungroup() %>% group_by(aligner) %>% summarise(zed_frac = mean(zed_frac),one_frac =mean(one_frac), ten_frac = mean(ten_frac),fifty_frac = mean(fifty_frac) )
+
+
+tbl_cnt <- tbl_cnt + 1
+
+genes_by_count_cat.fru.gt <- genes_by_count_cat.fru %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Averaged Percentage of Exons by Threshold Read Counts (Fruitless)", sep = ""), subtitle="average fraction of genes with low number of reads") %>% fmt_percent(columns=vars(zed_frac, ten_frac, fifty_frac), decimals=1, )%>% tab_spanner(columns = vars(zed_frac, ten_frac, fifty_frac), label = "read count threshold") %>% cols_label( zed_frac="< 1", ten_frac="< 10", fifty_frac="< 50") %>% cols_hide(columns = vars(one_frac))
+
+genes_by_count_cat.fru.gt
+
+write(genes_by_count_cat.fru.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_genesByReadCountThresh_Fruitless.html", sep=""))
+
+```
+
+
+
+There is VERY little difference between alignment strategies when it comes to read count here. total overplot in count histogram; no point in showing other comparisons...
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+read_count_hist.fru.gg <- ggplot(counts.vs_dm6main.fru_exons %>% gather(multi:uniq, key = "aligner", value = "count") %>% mutate(aligner=as.factor(aligner)) ) + geom_freqpoly(bins=16,aes(x=count,color=aligner, group = interaction(sample, aligner)))  + labs(title=paste("Figure ",fig_cnt, ". Per-Exon Read Count Histogram (by aligner and sample) for Fruitless", sep = ""), x="# reads per gene", y="# genes") + theme_bw()
+
+read_count_hist.fru.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readCountHistogram_fruitlessExons.png", sep=""))
+read_count_hist.fru.gg
+dev.off()
+
+```
+
+
+### Ambiguous Assignment Strategy Comparison
+
+The whole gene annotation and the Fruitless exons are currently having readcounts assigned with slightly different strategies. When all genes are considered, ambiguously assigned reads (those which overlap multiple features) are simply discarded; we will call this the "None" strategy. When the exons of Fru are considered, ambiguously assigned reads count towards the tally of every exon they overylap we'll call this "all").
+
+There is a big difference between these strategies at the exon level; how well do they agree on the enitre dm6_genes annotation?
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+counts.vs_dm6main.dm6_genes.multi.all <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceMulti.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE) 
+counts.vs_dm6main.dm6_genes.multi.all.gath <- counts.vs_dm6main.dm6_genes.multi.all %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.dm6_genes.rando.all <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceRando.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.rando.all.gath <- counts.vs_dm6main.dm6_genes.rando.all %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+counts.vs_dm6main.dm6_genes.uniq.all <- read_delim("counts/all.vs_dm6main.dm6_genes.mapspliceUniq.MpBCO.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+counts.vs_dm6main.dm6_genes.uniq.all.gath <- counts.vs_dm6main.dm6_genes.uniq.all %>% select(-c(Chr, Start, End, Strand, Length)) %>% gather(key = "sample", value = "count", -one_of("Geneid"))
+
+
+counts.vs_dm6main.dm6_genes.all <- inner_join(inner_join(counts.vs_dm6main.dm6_genes.multi.all.gath%>% rename(count="multi"),counts.vs_dm6main.dm6_genes.rando.all.gath%>% rename(count="rando"),by = c("Geneid"="Geneid","sample"="sample")),counts.vs_dm6main.dm6_genes.uniq.all.gath%>% rename(count="uniq"),by = c("Geneid"="Geneid","sample"="sample"))
+
+
+counts.vs_dm6main.dm6_genes.all_vs_none <- inner_join(inner_join(counts.vs_dm6main.dm6_genes, data_sets.df.sparse.collapse %>% filter(genotype =="wt") %>% select(c("name","rep","housing")), by = c("sample"="name")),inner_join(counts.vs_dm6main.dm6_genes.all, data_sets.df.sparse.collapse %>% filter(genotype =="wt") %>% select(c("name")), by = c("sample"="name")),by=c("Geneid"="Geneid", "sample"="sample"), suffix = c(".none", ".all")) %>% gather(multi.none, rando.none, uniq.none, multi.all, rando.all, uniq.all, key="type", value="count") %>% separate(type, into=c("aligner", "ambig")) %>% spread(key=ambig, value=count)
+
+counts.vs_dm6main.dm6_genes.all_vs_none$diff <- counts.vs_dm6main.dm6_genes.all_vs_none$all - counts.vs_dm6main.dm6_genes.all_vs_none$none
+
+#ggplot(counts.vs_dm6main.dm6_genes.all_vs_none ) + geom_point(aes(x=none, y=all, color=housing, shape=rep)) + facet_grid(.~aligner) + theme_bw()
+
+#ggplot(counts.vs_dm6main.dm6_genes.all_vs_none) + geom_freqpoly(aes(x=diff, y=..density.., color=housing))+ facet_grid(.~aligner) + theme_bw()
+
+summary(counts.vs_dm6main.dm6_genes.all_vs_none$diff)
+
+```
+
+
+
+## Expression
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+all_vs_dm6main_dm6_genes_mapspliceMulti_MpBC <- read_delim("expression/all.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.rpkm","\t", escape_double = FALSE, trim_ws = TRUE)
+all_vs_dm6main_dm6_genes_mapspliceMulti_MpBC$counting <- as.factor("MpBC")
+all_vs_dm6main_dm6_genes_mapspliceMulti_MpBC$aligner <- as.factor("multi")
+
+all_vs_dm6main_dm6_genes_mapspliceRando_MpBC <- read_delim("expression/all.vs_dm6main.dm6_genes.mapspliceRando.MpBC.rpkm","\t", escape_double = FALSE, trim_ws = TRUE)
+all_vs_dm6main_dm6_genes_mapspliceRando_MpBC$counting <- as.factor("MpBC")
+all_vs_dm6main_dm6_genes_mapspliceRando_MpBC$aligner <- as.factor("rando")
+
+all_vs_dm6main_dm6_genes_mapspliceUniq_MpBC <- read_delim("expression/all.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.rpkm","\t", escape_double = FALSE, trim_ws = TRUE)
+all_vs_dm6main_dm6_genes_mapspliceUniq_MpBC$counting <- as.factor("MpBC")
+all_vs_dm6main_dm6_genes_mapspliceUniq_MpBC$aligner <- as.factor("uniq")
+
+
+rpkm_vs_dm6main_dm6_genes <- rbind(all_vs_dm6main_dm6_genes_mapspliceMulti_MpBC, all_vs_dm6main_dm6_genes_mapspliceRando_MpBC, all_vs_dm6main_dm6_genes_mapspliceUniq_MpBC)
+
+rpkm_vs_dm6main_dm6_genes <- inner_join( rpkm_vs_dm6main_dm6_genes, G_list, by=c("Geneid"="flybase_gene_id"))
+
+
+
+rpkm_vs_dm6main_dm6_genes.smol <- rpkm_vs_dm6main_dm6_genes %>% filter(Geneid %in% c("FBgn0036080","FBgn0026385","FBgn0004652","FBgn0003275","FBgn0015316"))
+
+#67d	:	FBgn0036080
+#47b	:	FBgn0026385   
+#Fru	:	FBgn0004652  
+#RpII18	:	FBgn0003275
+#Trypsin 29F	:	FBgn0015316
+
+rpkm_vs_dm6main_dm6_genes.smol.gath <- rpkm_vs_dm6main_dm6_genes.smol %>% gather(-c(Geneid, external_gene_name, aligner), key = "sample", value = "expr") 
+
+rpkm_vs_dm6main_dm6_genes.smol.gath <- inner_join(rpkm_vs_dm6main_dm6_genes.smol.gath, data_sets.df.sparse.collapse , by=c("sample"="name") ) %>% mutate(expr = as.numeric(expr))
+
+
+```
+
+
+Using the per-gene read counts, the per-alignment total mapped counts, and the gene lengths, the gene expression was calculated as reads per kilobase per million mapped (RPKM). In particular, these can confirm that the knock-outs are not being expressed. This appears to be the case in the 47b and 67d mutants. The Fru440FruLexa mutants do not show any obvious reduction in expression of Fruitless (not knockouts - is expression expected though?) For context, a positive control (RNA polymerase) and a negative control (trypsin) have also been included. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+keyGeneExpression.gg <- ggplot(rpkm_vs_dm6main_dm6_genes.smol.gath %>% group_by(genotype)) + geom_point(aes(x= genotype, y=expr, color=genotype, shape = rep)) + facet_grid(aligner~external_gene_name) + scale_y_log10() + theme_bw() + labs(title = "Expression Levels for Key Genes, by Genotype ", x = "genotype", y = "expression (RPKM)")+ theme(axis.text.x = element_text(angle = 90, vjust =0.5 ))
+
+
+keyGeneExpression.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_keyGeneExpression.png", sep=""))
+keyGeneExpression.gg
+dev.off()
+
+```
 
 ## Differential Expression Analysis. 
 
@@ -1161,6 +1349,33 @@ Because the "baseMean" reported by DESeq2 is a replicate-normalized read count, 
 Interpretation of "baseMean": 
 https://support.bioconductor.org/p/75244
 
+https://support.bioconductor.org/p/63567/
+
+	
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#genes_by_count_cat <- counts.vs_dm6main.dm6_genes %>% gather(multi:uniq, key = "aligner", value = "count") %>% mutate(aligner=as.factor(aligner), zed = count==0, one = count ==1, lessThan10 = count<10, lessThan100 = count<100) %>% group_by(sample, aligner) %>% summarise(zed_frac = sum(zed)/n(),one_frac = sum(one)/n(),ten_frac = sum(lessThan10)/n(),hundo_frac = sum(lessThan100)/n()) %>% ungroup() %>% group_by(aligner) %>% summarise(zed_frac = mean(zed_frac),one_frac =mean(one_frac), ten_frac = mean(ten_frac),hundo_frac = mean(hundo_frac) )
+
+
+contrast_meta.df <- plyr::ldply(trammel$contrasts, data.frame)
+
+
+
+tbl_cnt <- tbl_cnt + 1
+
+de_contrast_summary.gt <- contrast_meta.df %>% filter(vars != "rep") %>% select(-c( filt)) %>% unite(ref_lev,c(vars, ref), sep = ": ") %>% group_by(name, design) %>% summarise(ruf = paste0(ref_lev, collapse=", ")) %>% ungroup() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Differential Expression Contrasts", sep = ""), subtitle="with model and reference levels")  %>% cols_label( name=" ", design="fit model", ruf="reference levels") 
+
+de_contrast_summary.gt
+
+write(de_contrast_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_differentialExpression_contrastSummary.html", sep=""))
+
+```
+
+
+
+
+
 
 # Results
 
@@ -1171,13 +1386,13 @@ In the first contrast, wildtype flies with group-housed and isolated life histor
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-wildTypeHousing.de.multi <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.multi <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 wildTypeHousing.de.multi$aligner <- as.factor("multi")
 
-wildTypeHousing.de.rando <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.rando <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceRando.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 wildTypeHousing.de.rando$aligner <- as.factor("rando")
 
-wildTypeHousing.de.uniq <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+wildTypeHousing.de.uniq <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 wildTypeHousing.de.uniq$aligner <- as.factor("uniq")
 
 wildTypeHousing.de <- rbind(wildTypeHousing.de.multi, wildTypeHousing.de.rando, wildTypeHousing.de.uniq)
@@ -1305,13 +1520,6 @@ dev.off()
 ### differential expression overview
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#library("org.Dm.eg.db")
-
-marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
-G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= marty) 
-# gene renaming
-```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -1346,7 +1554,7 @@ dev.off()
 ```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
 fig_cnt <- fig_cnt + 1
 
-wildTypeHousing.lfcHist.gg <- ggplot(wildTypeHousing.de.renamed %>% select(aligner, padj.shrunk, log2FoldChange.shrunk)) + geom_freqpoly(aes(x = log2FoldChange.shrunk, y = ..density..), color="black") + geom_freqpoly(data = . %>% filter(padj.shrunk < 0.01),aes(x = log2FoldChange.shrunk, y = ..density..), color="red") +geom_vline(xintercept = -1, color = "blue", linetype="dotted" ) +geom_vline(xintercept = 1, color = "blue", linetype="dotted" )+ facet_grid(aligner~.)  + labs(title=paste("Figure ",fig_cnt, ". histogram of fold change\nwithsignificant(padj<0.01) changes highlighted\n(between isolated and group-housed wildtypes)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
+wildTypeHousing.lfcHist.gg <- ggplot(wildTypeHousing.de.renamed %>% select(aligner, padj.shrunk, log2FoldChange.shrunk)) + geom_freqpoly(aes(x = log2FoldChange.shrunk, y = ..density..), color="black") + geom_freqpoly(data = . %>% filter(padj.shrunk < 0.01),aes(x = log2FoldChange.shrunk, y = ..density..), color="red") +geom_vline(xintercept = -1, color = "blue", linetype="dotted" ) +geom_vline(xintercept = 1, color = "blue", linetype="dotted" )+ facet_grid(aligner~.)  + labs(title=paste("Figure ",fig_cnt, ". histogram of fold change\nwithsignificant(padj<0.01) changes highlighted in red\n(between isolated and group-housed wildtypes)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
 
 wildTypeHousing.lfcHist.gg
 
@@ -1559,7 +1767,7 @@ write(wildTypeHousing.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/t
 
 ### rank-correllation between alignment strategies
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE }
+```{r echo=FALSE, message=FALSE, warning=FALSE }
 wildTypeHousing.de.renamed.rankt <- wildTypeHousing.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(lfc_rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"),sig_rank = rank(-abs(padj.shrunk), ties.method = "first"))
 wildTypeHousing.de.renamed.rankt.sprud <- wildTypeHousing.de.renamed.rankt %>% select(c("geneid","aligner", "lfc_rank")) %>% spread(key=aligner, value=lfc_rank)
 
@@ -1587,13 +1795,13 @@ ggplot(wildTypeHousing.de.renamed.rankt.sprud, aes(x=multi, y = rando)) + geom_m
 ### wt vs OR47b
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-grpWtVs47b.de.multi <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs47b.de.multi <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs47b.de.multi$aligner <- as.factor("multi")
 
-grpWtVs47b.de.rando <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs47b.de.rando <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceRando.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs47b.de.rando$aligner <- as.factor("rando")
 
-grpWtVs47b.de.uniq <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs47b.de.uniq <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs47b.de.uniq$aligner <- as.factor("uniq")
 
 grpWtVs47b.de <- rbind(grpWtVs47b.de.multi, grpWtVs47b.de.rando, grpWtVs47b.de.uniq)
@@ -1783,13 +1991,13 @@ write(grpWtVs47b.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-grpWtVs67d.de.multi <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs67d.de.multi <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs67d.de.multi$aligner <- as.factor("multi")
 
-grpWtVs67d.de.rando <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs67d.de.rando <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceRando.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs67d.de.rando$aligner <- as.factor("rando")
 
-grpWtVs67d.de.uniq <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVs67d.de.uniq <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs67d.de.uniq$aligner <- as.factor("uniq")
 
 grpWtVs67d.de <- rbind(grpWtVs67d.de.multi, grpWtVs67d.de.rando, grpWtVs67d.de.uniq)
@@ -1974,13 +2182,13 @@ write(grpWtVs67d.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-grpWtVsFru.de.multi <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVsFru.de.multi <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVsFru.de.multi$aligner <- as.factor("multi")
 
-grpWtVsFru.de.rando <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVsFru.de.rando <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceRando.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVsFru.de.rando$aligner <- as.factor("rando")
 
-grpWtVsFru.de.uniq <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+grpWtVsFru.de.uniq <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVsFru.de.uniq$aligner <- as.factor("uniq")
 
 grpWtVsFru.de <- rbind(grpWtVsFru.de.multi, grpWtVsFru.de.rando, grpWtVsFru.de.uniq)
@@ -2159,9 +2367,182 @@ write(grpWtVsFru.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables
 
 ```
 
+
+## Simultaneously Modelling Housing & Genotype. 
+
+gives us eye-to-eye results for all treatments
+
+These data are in the file "results/tables/supp/hausWtVsMut.allAligners.DESeq2.MpBC.reformatted.tsv"; columns are defined as follows:
+
+```
+external_gene_name :
+	human-readable gene symbol
+
+geneid :
+	flybase gene ID
+
+baseMean.(factor).(level) :
+	the normalized mean read count for all samples in (level) of contrast (factor).
+	Example: baseMean.genotype.wt is the normalized mean read count for wild types
+	(of any housing status).
+
+expression.(factor).(level) :
+	expression level, calculated as baseMean.(factor).(level)/gene length in bp
+
+baseMean.(factor).vs_(level).apeglm 
+log2FoldChange.(factor).vs_(level).apeglm
+lfcSE.(factor).vs_(level).apeglm
+pvalue.(factor).vs_(level).apeglm
+padj.(factor).vs_(level).apeglm
+expression.(factor).vs_(level).apeglm :
+	equivalent to the "shrunk" data in the single-factor contrast
+	for (level) compared to reference
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+hausWtVsMut.dm6_genes.multi.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut.dm6_genes.multi.MpBC.itemized$aligner <- as.factor("multi")
+
+hausWtVsMut.dm6_genes.rando.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.dm6_genes.mapspliceRando.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut.dm6_genes.rando.MpBC.itemized$aligner <- as.factor("rando")
+
+hausWtVsMut.dm6_genes.uniq.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut.dm6_genes.uniq.MpBC.itemized$aligner <- as.factor("uniq")
+
+hausWtVsMut.dm6_genes.MpBC.itemized <- rbind(hausWtVsMut.dm6_genes.multi.MpBC.itemized,hausWtVsMut.dm6_genes.rando.MpBC.itemized,hausWtVsMut.dm6_genes.uniq.MpBC.itemized)
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+
+
+write.table(inner_join(hausWtVsMut.dm6_genes.MpBC.itemized, G_list, by=c("geneid"="flybase_gene_id")) %>% select("external_gene_name", everything()), "results/tables/supp/hausWtVsMut.allAligners.DESeq2.MpBC.reformatted.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
+
+```
+
+
+### compare wildTypeHousing results to housing results from hausWtVsMut
+
+To examine consistency with single-factor models, the two-factor model results are subsetted to the housing comparison.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus <-hausWtVsMut.dm6_genes.MpBC.itemized %>% select(c(geneid, ends_with("vs_isolated.apeglm"), aligner))
+
+wildTypeHousing.de.shrnk <- wildTypeHousing.de %>% select(c(geneid, ends_with("shrunk"), aligner))
+
+hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus.compare <- inner_join(hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus,wildTypeHousing.de.shrnk, by=c("geneid"="geneid", "aligner"="aligner") ) 
+
+
+
+
+
+
+#ggplot(hausWtVsMut.dm6_genes.multi.MpBC.itemized.wtHaus.compare) + geom_point(aes(y=expression.housing.vs_isolated.apeglm, x = expression.shrunk))
+
+
+```
+
+Normalized mean read counts are different between the two models (which is not unexpected) but are correlated:
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+
+numVariableCompare.baseMean.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus.compare) + geom_point(aes(y=baseMean.housing.vs_isolated.apeglm, x = baseMean.shrunk, color=aligner))  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of per-gene normalized mean counts in full- vs. single-factor models\nfor group vs isolated housing treatment", sep = ""), x = "single-factor (~ housing) baseMean ", y = "two-factor (~ housing + genotype ) baseMean") + theme_bw()
+
+numVariableCompare.baseMean.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_housing_oneVsTwoFactor_baseMean.png", sep=""))
+numVariableCompare.baseMean.gg
+dev.off()
+
+
+```
+
+Effect-size estimates from the two models either agree very well, or not at all. I have not had an opportunity to investigate this discrepancy. 
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+numVariableCompare.l2fc.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus.compare) + geom_point(aes(y=log2FoldChange.housing.vs_isolated.apeglm, x = log2FoldChange.shrunk, color=aligner))+ labs(title=paste("Figure ",fig_cnt, ". Scatterplot of per-gene expression difference in full- vs. single-factor models\nfor group vs isolated housing treatment", sep = ""), x = "single-factor (~ housing) log2FoldChange ", y = "two-factor (~ housing + genotype ) log2FoldChange") + theme_bw()
+
+numVariableCompare.l2fc.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_housing_oneVsTwoFactor_l2fc.png", sep=""))
+numVariableCompare.l2fc.gg
+dev.off()
+
+
+```
+
+Significance of differenctial expression estimates agree relatively well:
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+
+numVariableCompare.sig.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.wtHaus.compare) + geom_point(aes(y=-log10(padj.housing.vs_isolated.apeglm), x = -log10(padj.shrunk), color=aligner))+ labs(title=paste("Figure ",fig_cnt, ". Scatterplot of per-gene DE significance in full- vs. single-factor models\nfor group vs isolated housing treatment", sep = ""), x = "single-factor (~ housing) significance (pp) ", y = "two-factor (~ housing + genotype ) significance (pp)") + theme_bw()
+
+numVariableCompare.sig.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_housing_oneVsTwoFactor_l2fc.png", sep=""))
+
+numVariableCompare.sig.gg
+
+dev.off()
+
+```
+
+
+
+### compare RPKM to baseMean expression
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+
+avg_wt_bmExpr <- hausWtVsMut.dm6_genes.MpBC.itemized %>% select(c(geneid, aligner, expression.housing.group, expression.housing.isolated))
+names(avg_wt_bmExpr) <- c("geneid", "aligner", "group", "isolated")
+avg_wt_bmExpr %<>% gather(group, isolated, key= "housing", value = "baseMean_expr")
+
+avg_wt_rpkm <- inner_join(rpkm_vs_dm6main_dm6_genes %>% gather(-c(Geneid, external_gene_name, aligner), key = "sample", value = "expr") %>% group_by(Geneid, sample, aligner) ,data_sets.df.sparse.collapse  %>% filter(genotype == "wt") , by=c("sample"="name")) %>% mutate(expr = as.numeric(expr))%>% group_by(Geneid, aligner, housing) %>% summarise(mean_RPKM = mean(expr))
+#avg_wt_rpkm %<>% spread(housing, expression) 
+
+
+avg_wt_expr.bm_vs_rpkm <- inner_join(avg_wt_rpkm,avg_wt_bmExpr, by=c("Geneid"="geneid", "aligner"="aligner", "housing"="housing"))
+
+
+```
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+
+rpkm_vs_bm_expr.gg<- ggplot(avg_wt_expr.bm_vs_rpkm) + geom_point(aes(x=baseMean_expr, y=mean_RPKM, color=aligner)) + facet_grid(.~housing) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Expression as Inferred by Direct Read Counting vs. DESeq2 Normalization", sep = ""), x = "expression (baseMean per bp)", y = "expression (average RPKM)") + theme_bw()
+
+rpkm_vs_bm_expr.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_expressionEstimateComparison.png", sep=""))
+
+rpkm_vs_bm_expr.gg
+
+dev.off()
+
+```
+
+
 ## Comparing Expression Changes from Housing with Expression Changes from Genotype
 
-We want to see if the difference in life history creates similar changes in expression as various mutations. To do this, the differenctial expression data from DESeq2 are joined across pairs of contrasts. For example, the statistics from the wt-group vs wt-isolation contrast are joined by gene with the statistics from the wt-group vs 67d-group contrast. The p-values were readjusted with a Bonferroni correction using n=2 to reflect this new comparison. Candidate genes of interest are then collected by filtering this joint comparison for genes which show a significant change in both contrasts. These candidates are further classified as to whether the expression changes are in the same direction (ie, both upregulated or both downregulated) or not (ie, one upregulated and the other down).
+We want to see if the difference in life history creates similar changes in expression as various mutations. This was done using the differential expression data from the genotype & housing simultaneous model. This circumvents the joining step in earlier versions.
+The p-values were readjusted with a Bonferroni correction using n=2 to reflect this new comparison. Candidate genes of interest are then collected by filtering this joint comparison for genes which show a significant change in both contrasts. These candidates are further classified as to whether the expression changes are in the same direction (ie, both upregulated or both downregulated) or not (ie, one upregulated and the other down).
 
 Average significance for gene is currently computed as exp((ln(p1)+ln(p2))/2).  (Better to apply stouffer's?)
 
@@ -2169,9 +2550,32 @@ look at NAs in fulljoin (gene dropout may be interesting...)
 
 ### Housing & OR47b
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
+
+#single factor model comparison!!!!
 
 haus_and_or47b.change <- full_join(wildTypeHousing.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)),grpWtVs47b.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)), by = c("geneid"="geneid","aligner"="aligner"),suffix=c(".haus", ".mut"))
+
+haus_and_or47b.change$padj.mut.bf <- map(haus_and_or47b.change$padj.mut, p.adjust,method="bonferroni", n=2) %>% as.numeric()
+haus_and_or47b.change$padj.haus.bf <- map(haus_and_or47b.change$padj.haus, p.adjust,method="bonferroni", n=2)%>% as.numeric()
+
+haus_and_or47b.change <- haus_and_or47b.change %>% mutate(concur = (log2FoldChange.haus*log2FoldChange.mut>0), avg.exp = (expression.haus+expression.mut)/2, avg.p = exp((log(padj.mut.bf)+log(padj.haus.bf))/2), avg.l2fc = (log2FoldChange.haus+log2FoldChange.mut)/2, diff.l2fc = log2FoldChange.haus-log2FoldChange.mut)
+
+
+haus_and_or47b.change.cosig <- haus_and_or47b.change %>% filter(padj.haus.bf < 0.01 & padj.mut.bf < 0.01)
+
+
+
+haus_and_or47b.change.cosig.renamed <- left_join(haus_and_or47b.change.cosig,G_list, by = c("geneid"="flybase_gene_id"))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+haus_and_or47b.change <- hausWtVsMut.dm6_genes.MpBC.itemized %>% select(c(geneid, ends_with(".housing.vs_isolated.apeglm"), ends_with(".genotype.vs_47b1.apeglm"), "aligner" ))
+
+names(haus_and_or47b.change) %<>% str_replace(".genotype.vs_47b1.apeglm",".mut") %>% str_replace(".housing.vs_isolated.apeglm",".haus")
+
 
 haus_and_or47b.change$padj.mut.bf <- map(haus_and_or47b.change$padj.mut, p.adjust,method="bonferroni", n=2) %>% as.numeric()
 haus_and_or47b.change$padj.haus.bf <- map(haus_and_or47b.change$padj.haus, p.adjust,method="bonferroni", n=2)%>% as.numeric()
@@ -2202,7 +2606,7 @@ dev.off()
 
 ```
 
-Of the mututally significant genes, slightly more have the same direction of change than not:
+Of the mututally significant genes, fewer have the same direction of change than not:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -2216,7 +2620,7 @@ write(haus_and_or47b.change.cosig.agreeNums.gt %>%  as_raw_html(), paste("result
 
 ```
 
-Of those mutually significant genes with the same direction of change, the top 10 most significant agree well across alignment strategy:
+Of those mutually significant genes with the same direction of change, the top 10 most significant agree well across alignment strategy: (PGRP-LB is the third gene, which is significant in Uniq. Check results/tables/ for full charts that haven't been truncated by the crappy LaTeX rendering)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -2248,8 +2652,7 @@ write(haus_and_or47b.change.cosig.agreement.byLfc.gt %>%  as_raw_html(), paste("
 ```
 
 
-Of those mutually significant genes with different directions of change, the top 10 most significant agree well across alignment strategy. ("NA" is trol, "terribly reduced optic lobes", FBgn0267911/FBgn0284408)
-
+Of those mutually significant genes with different directions of change, the top 10 most significant agree well across alignment strategy.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -2265,7 +2668,7 @@ write(haus_and_or47b.change.cosig.disagreement.bySig.gt %>%  as_raw_html(), past
 ```
 
 
-When mutually significant genes with different directions of change are ranked by the magnitude of their difference in log2FoldChange, the top 10 genes agree well across alignment strategy, with minor disagreements about their order:
+When mutually significant genes with different directions of change are ranked by the magnitude of their difference in log2FoldChange, the top 10 genes agree well across alignment strategy:
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -2300,13 +2703,15 @@ write.table(haus_and_or47b.change %>% filter(aligner == "uniq") %>% select(genei
 
 The full joined comparisons can be found in the tables folder:
 $`r  housingContrast_and_47bContrast.multi.fileName `$
+
 $`r  housingContrast_and_47bContrast.rando.fileName `$
+
 $`r  housingContrast_and_47bContrast.uniq.fileName `$
 
 
 ### Housing & 67d
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval = F}
 
 haus_and_67d.change <- full_join(wildTypeHousing.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)),grpWtVs67d.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)), by = c("geneid"="geneid","aligner"="aligner"),suffix=c(".haus", ".mut"))
 
@@ -2321,6 +2726,29 @@ haus_and_67d.change.cosig <- haus_and_67d.change %>% filter(padj.haus.bf < 0.01 
 haus_and_67d.change.cosig.renamed <- left_join(haus_and_67d.change.cosig, G_list, by = c("geneid"="flybase_gene_id"))
 
 ```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+haus_and_67d.change <- hausWtVsMut.dm6_genes.MpBC.itemized %>% select(c(geneid, ends_with(".housing.vs_isolated.apeglm"), ends_with(".genotype.vs_67d.apeglm"), aligner ))
+
+names(haus_and_67d.change) %<>% str_replace(".genotype.vs_67d.apeglm",".mut") %>% str_replace(".housing.vs_isolated.apeglm",".haus")
+
+
+haus_and_67d.change$padj.mut.bf <- map(haus_and_67d.change$padj.mut, p.adjust,method="bonferroni", n=2) %>% as.numeric()
+haus_and_67d.change$padj.haus.bf <- map(haus_and_67d.change$padj.haus, p.adjust,method="bonferroni", n=2)%>% as.numeric()
+
+haus_and_67d.change <- haus_and_67d.change %>% mutate(concur = (log2FoldChange.haus*log2FoldChange.mut>0), avg.exp = (expression.haus+expression.mut)/2, avg.p = exp((log(padj.mut.bf)+log(padj.haus.bf))/2), avg.l2fc = (log2FoldChange.haus+log2FoldChange.mut)/2, diff.l2fc = log2FoldChange.haus-log2FoldChange.mut)
+
+
+haus_and_67d.change.cosig <- haus_and_67d.change %>% filter(padj.haus.bf < 0.01 & padj.mut.bf < 0.01)
+
+
+
+haus_and_67d.change.cosig.renamed <- left_join(haus_and_67d.change.cosig,G_list, by = c("geneid"="flybase_gene_id"))
+
+```
+
 
 Here is a scatterplot of the log2 fold change of the 67d & wt contast vs the housing contrast (wt group & wt isolated). The upper right quadrant contains genes which are upregulated in both cases; the lower left contains genes which are downregulated in both cases. The other two quadrants contain mismatches between expression patterns. Significant changes are highlighted accordingly. 
 
@@ -2443,7 +2871,7 @@ $`r  housingContrast_and_67dContrast.uniq.fileName `$
 
 ### Housing & Fru
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval = F}
 
 haus_and_Fru.change <- full_join(wildTypeHousing.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)),grpWtVsFru.de %>% mutate(baseMean = baseMean.shrunk, log2FoldChange = log2FoldChange.shrunk, padj = padj.shrunk, expression = expression.shrunk) %>% select(c(geneid, baseMean, log2FoldChange, padj, expression, aligner)), by = c("geneid"="geneid","aligner"="aligner"),suffix=c(".haus", ".mut"))
 
@@ -2457,6 +2885,30 @@ haus_and_Fru.change.cosig <- haus_and_Fru.change %>% filter(padj.haus.bf < 0.01 
 haus_and_Fru.change.cosig.renamed <- left_join(haus_and_Fru.change.cosig, G_list, by = c("geneid"="flybase_gene_id"))
 
 ```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+haus_and_Fru.change <- hausWtVsMut.dm6_genes.MpBC.itemized %>% select(c(geneid, ends_with(".housing.vs_isolated.apeglm"), ends_with(".genotype.vs_FruLexaFru440.apeglm"), aligner ))
+
+names(haus_and_Fru.change) %<>% str_replace(".genotype.vs_FruLexaFru440.apeglm",".mut") %>% str_replace(".housing.vs_isolated.apeglm",".haus")
+
+
+haus_and_Fru.change$padj.mut.bf <- map(haus_and_Fru.change$padj.mut, p.adjust,method="bonferroni", n=2) %>% as.numeric()
+haus_and_Fru.change$padj.haus.bf <- map(haus_and_Fru.change$padj.haus, p.adjust,method="bonferroni", n=2)%>% as.numeric()
+
+haus_and_Fru.change <- haus_and_Fru.change %>% mutate(concur = (log2FoldChange.haus*log2FoldChange.mut>0), avg.exp = (expression.haus+expression.mut)/2, avg.p = exp((log(padj.mut.bf)+log(padj.haus.bf))/2), avg.l2fc = (log2FoldChange.haus+log2FoldChange.mut)/2, diff.l2fc = log2FoldChange.haus-log2FoldChange.mut)
+
+
+haus_and_Fru.change.cosig <- haus_and_Fru.change %>% filter(padj.haus.bf < 0.01 & padj.mut.bf < 0.01)
+
+
+
+haus_and_Fru.change.cosig.renamed <- left_join(haus_and_Fru.change.cosig,G_list, by = c("geneid"="flybase_gene_id"))
+
+```
+
 
 Here is a scatterplot of the log2 fold change of the Fru & wt contast vs the housing contrast (wt group & wt isolated). The upper right quadrant contains genes which are upregulated in both cases; the lower left contains genes which are downregulated in both cases. The other two quadrants contain mismatches between expression patterns. Significant changes are highlighted accordingly. 
 
@@ -2590,27 +3042,27 @@ do this
 
 The behavior of fruitless is of special interest, and feature counting/differential expression testing was performed on an annotation which considers all available exons separately. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
 
-fruExons.wildTypeHousing.multi <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.wildTypeHousing.multi <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.wildTypeHousing.multi$aligner <- as.factor("multi")
 
-fruExons.wildTypeHousing.rando <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.wildTypeHousing.rando <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceRando.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.wildTypeHousing.rando$aligner <- as.factor("rando")
 
-fruExons.wildTypeHousing.uniq <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.wildTypeHousing.uniq <-  read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.wildTypeHousing.uniq$aligner <- as.factor("uniq")
 
 fruExons.wildTypeHousing.de <- rbind(fruExons.wildTypeHousing.multi, fruExons.wildTypeHousing.rando, fruExons.wildTypeHousing.uniq)
 fruExons.wildTypeHousing.de$contrast <- as.factor("SH")
 
-fruExons.grpWtVs47b.multi <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs47b.multi <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs47b.multi$aligner <- as.factor("multi")
 
-fruExons.grpWtVs47b.rando <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs47b.rando <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceRando.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs47b.rando$aligner <- as.factor("rando")
 
-fruExons.grpWtVs47b.uniq <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs47b.uniq <-  read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs47b.uniq$aligner <- as.factor("uniq")
 
 fruExons.grpWtVs47b.de <- rbind(fruExons.grpWtVs47b.multi, fruExons.grpWtVs47b.rando, fruExons.grpWtVs47b.uniq)
@@ -2618,13 +3070,13 @@ fruExons.grpWtVs47b.de$contrast <- as.factor("OR47b")
 
 
 
-fruExons.grpWtVs67d.multi <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs67d.multi <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs67d.multi$aligner <- as.factor("multi")
 
-fruExons.grpWtVs67d.rando <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs67d.rando <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceRando.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs67d.rando$aligner <- as.factor("rando")
 
-fruExons.grpWtVs67d.uniq <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVs67d.uniq <-  read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVs67d.uniq$aligner <- as.factor("uniq")
 
 fruExons.grpWtVs67d.de <- rbind(fruExons.grpWtVs67d.multi, fruExons.grpWtVs67d.rando, fruExons.grpWtVs67d.uniq)
@@ -2634,13 +3086,13 @@ fruExons.grpWtVs67d.de$contrast <- as.factor("67d")
 
 
 
-fruExons.grpWtVsFru.multi <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceMulti.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVsFru.multi <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVsFru.multi$aligner <- as.factor("multi")
 
-fruExons.grpWtVsFru.rando <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceRando.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVsFru.rando <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceRando.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVsFru.rando$aligner <- as.factor("rando")
 
-fruExons.grpWtVsFru.uniq <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceUniq.counts", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.grpWtVsFru.uniq <-  read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 fruExons.grpWtVsFru.uniq$aligner <- as.factor("uniq")
 
 fruExons.grpWtVsFru.de <- rbind(fruExons.grpWtVsFru.multi, fruExons.grpWtVsFru.rando, fruExons.grpWtVsFru.uniq)
@@ -2651,25 +3103,54 @@ fruExons.de<- rbind(fruExons.grpWtVsFru.de,fruExons.grpWtVs67d.de,fruExons.grpWt
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#grpWtVs67d.testedCount <- rbind(nrow(grpWtVs67d.de.multi), nrow(grpWtVs67d.de.rando), nrow(grpWtVs67d.de.uniq)) %>% as.data.frame()
-#grpWtVs67d.testedCount <- cbind(grpWtVs67d.testedCount , c("multi","rando","uniq"))
-#names(grpWtVs67d.testedCount) <- c("tested", "aligner")
-#grpWtVs67d.testedCount$annot <- "dm6_genes"
 
-#grpWtVs67d.testedCount<- 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+
+fruExons.hausWtVsMut.multi <-  read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.fru_exons.mapspliceMulti.MpBCO.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.hausWtVsMut.multi$aligner <- as.factor("multi")
+
+fruExons.hausWtVsMut.rando <-  read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.fru_exons.mapspliceRando.MpBCO.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.hausWtVsMut.rando$aligner <- as.factor("rando")
+
+fruExons.hausWtVsMut.uniq <-  read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.fru_exons.mapspliceUniq.MpBCO.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fruExons.hausWtVsMut.uniq$aligner <- as.factor("uniq")
+
+
+
+
+fruExons.de<- rbind(fruExons.hausWtVsMut.multi,fruExons.hausWtVsMut.rando,fruExons.hausWtVsMut.uniq)
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
+
 fruExons.de.fj <-full_join(fruExons.de , fru.bed %>% as.data.frame() %>% select(c(name)), by =c("geneid"="name")) 
 
 fruExons.de.fj.counted <- fruExons.de.fj %>% filter(!is.na(baseMean.shrunk)) %>% select(c(geneid, aligner, contrast)) %>% group_by(aligner, contrast) %>% summarise(count = n())
 fruExons.de.fj.counted <- fruExons.de.fj.counted %>% mutate(frac = count/(ref_ann.stats %>% filter(annot=="fru_exons" & measure == "count" & type == "total"))$value)
 
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fruExons.de.fj <-full_join(fruExons.de , fru.bed %>% as.data.frame() %>% select(c(name)), by =c("geneid"="name")) 
+
+fruExons.de.fj.counted <- fruExons.de.fj %>% filter(!is.na(aligner)) %>% select(c(geneid, aligner)) %>% group_by(aligner) %>% summarise(count = n())
+
+
+fruExons.de.fj.counted <- fruExons.de.fj.counted %>% mutate(total =(ref_ann.stats %>% filter(annot=="fru_exons" & measure == "count" & type == "total"))$value, frac = count/total) %>% select(c(aligner, count, frac, total))
 
 ```
+
 
 The current featureCounts settings ignore ambiguously assigned reads. Because some exons overlap and because junction-spanning reads will be considered ambuiguous in this context, some relevant reads might be being ignored and deflating the power in these tests. Several exons were filtered out entirely based on low read count number. (Fix this?)
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
 
 tbl_cnt <- tbl_cnt + 1
 fruExons.de.fj.counted.gt <- fruExons.de.fj.counted %>% gather(key = key, value=value, count, frac) %>% unite(col = measure, contrast,key,sep="_") %>% spread(key=measure, value=value) %>%  ungroup() %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of Fru Exons Available For Analysis", sep = ""), subtitle= "(by contrast & aligner)" ) %>% tab_spanner(label = "47b", columns = c("OR47b_count", "OR47b_frac")) %>% tab_spanner(label = "67d", columns = c("67d_count", "67d_frac")) %>% tab_spanner(label = "Fru", columns = c("Fru_count", "Fru_frac")) %>% tab_spanner(label = "SH", columns = c("SH_count", "SH_frac")) %>% cols_label( OR47b_count = "count", OR47b_frac = "frac",`67d_count`= "count", `67d_frac`= "frac", Fru_count= "count", Fru_frac= "frac",SH_count= "count", SH_frac= "frac",aligner=" ") %>% fmt_number(columns = c("OR47b_count", "67d_count", "Fru_count", "SH_count"), decimals = 2, drop_trailing_zeros = T) %>%fmt_percent(columns=c( "OR47b_frac" ,"67d_frac", "Fru_frac", "SH_frac"), decimals=1)
@@ -2681,10 +3162,25 @@ write(fruExons.de.fj.counted.gt %>%  as_raw_html(), paste("results/tables/tbl",t
 
 ```
 
-The only exon with even marginally significant differential expression was exon_5:
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+fruExons.de.fj.counted.gt <- fruExons.de.fj.counted %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of Fru Exons Available For Analysis", sep = ""), subtitle= "(by aligner)" ) %>% fmt_number(columns = c("count", "total"), decimals = 2, drop_trailing_zeros = T) %>%fmt_percent(columns=c( "frac"), decimals=1)
+
+
+fruExons.de.fj.counted.gt
+
+write(fruExons.de.fj.counted.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_fruExonDE_Available.html", sep=""))
+
+```
+
+
+The only exon with even marginally significant differential expression was exon_5:
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval = F}
 
 tbl_cnt <- tbl_cnt + 1
 fruExons.de.gt <- fruExons.de %>%  filter(padj.shrunk < 0.05 & aligner == "multi") %>% select(c(geneid, log2FoldChange.shrunk, padj.shrunk, contrast)) %>% gather(log2FoldChange.shrunk, padj.shrunk, key="measure", value="value") %>% unite(contrast, measure, col="megameasure", sep="_") %>% spread(key = megameasure, value= value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Fru exons with Significant (p<0.05) Differences, by Contrast", sep = ""), subtitle= "(Multi only)" ) %>% tab_spanner(label = "47b", columns = c("OR47b_log2FoldChange.shrunk", "OR47b_padj.shrunk")) %>% tab_spanner(label = "67d", columns = c("67d_log2FoldChange.shrunk", "67d_padj.shrunk")) %>% tab_spanner(label = "Fru", columns = c("Fru_log2FoldChange.shrunk", "Fru_padj.shrunk")) %>% cols_label( OR47b_log2FoldChange.shrunk= "log2FoldChange", OR47b_padj.shrunk = "adjusted p",`67d_log2FoldChange.shrunk`= "log2FoldChange", `67d_padj.shrunk` = "adjusted p",Fru_log2FoldChange.shrunk= "log2FoldChange", Fru_padj.shrunk = "adjusted p", geneid=" ")%>% fmt_number(columns = c("OR47b_log2FoldChange.shrunk","67d_log2FoldChange.shrunk","Fru_log2FoldChange.shrunk"), decimals = 2, drop_trailing_zeros = T) %>%fmt_scientific(columns=c( "OR47b_padj.shrunk", "67d_padj.shrunk","Fru_padj.shrunk"), decimals=2)
@@ -2700,6 +3196,72 @@ write(fruExons.de.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_fr
 ```
 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+fruExons.de.gt <- fruExons.de %>% filter(aligner == "multi") %>% select(c("geneid", starts_with("log2FoldChange"), starts_with("padj"))) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Differential Expression in Fru exons, by Contrast", sep = ""), subtitle= "(Multi only)" ) %>% tab_spanner(label = "47b", columns = ends_with("47b1.apeglm")) %>% tab_spanner(label = "67d", columns = ends_with("67d.apeglm"))%>% tab_spanner(label = "Fru", columns = ends_with("FruLexaFru440.apeglm")) %>% tab_spanner(label = "wt isolation", columns = ends_with("isolated.apeglm")) %>% cols_label( log2FoldChange.genotype.vs_47b1.apeglm = "log2FoldChange", padj.genotype.vs_47b1.apeglm = "adjusted p",log2FoldChange.genotype.vs_67d.apeglm = "log2FoldChange", padj.genotype.vs_67d.apeglm = "adjusted p", log2FoldChange.genotype.vs_FruLexaFru440.apeglm = "log2FoldChange", padj.genotype.vs_FruLexaFru440.apeglm = "adjusted p", log2FoldChange.housing.vs_isolated.apeglm = "log2FoldChange",  padj.housing.vs_isolated.apeglm = "adjusted p", geneid=" ") %>% fmt_number(columns = starts_with("padj"), decimals = 2, drop_trailing_zeros = T) %>% fmt_scientific( columns = starts_with("log2FoldChange"), decimals=2)
+
+
+fruExons.de.gt
+
+write(fruExons.de.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_fruExonDifferentialExpression.html", sep=""))
+
+
+
+
+
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+fruExons.de.sig.gt <- fruExons.de %>% select(c("geneid", starts_with("log2FoldChange"), starts_with("padj")), "aligner") %>% gather(-c(geneid, aligner), key = "measure", value = "value") %>% separate(measure, into =c("measure", "null1", "null2", "alt_lev", "null3")) %>% select(-starts_with("null")) %>% spread("measure","value")  %>% filter(padj < 0.05)%>% group_by(geneid) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ".  Fru exons with significant (padj<0.05) differential expression", sep = ""), subtitle= "(by aligner)" ) %>% tab_spanner(label = "Fru", columns = c("log2FoldChange", "padj")) %>% cols_label(padj = "adjusted p")%>% fmt_number(columns = starts_with("padj"), decimals = 3, drop_trailing_zeros = T) %>% fmt_number( columns = starts_with("log2FoldChange"), decimals=2) %>% cols_hide(columns = c("alt_lev"))
+
+
+fruExons.de.sig.gt
+
+write(fruExons.de.sig.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_fruExonSignificantDifferentialExpression.html", sep=""))
+
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE , eval = F}
+
+
+
+
+all.gtf <- rtracklayer::import.gff("/proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.gtf")
+all.gtf.gr <- as(all.gtf,"GRanges")
+
+fru.model.gtf <- all.gtf.gr[all.gtf.gr@elementMetadata$gene_symbol == "fru"]
+fru.model.exons.gtf <- fru.model.gtf[fru.model.gtf$type == "exon"]
+fru.model.exons.lookdown <- fru.model.exons.gtf$score %>% as.data.frame
+names(fru.model.exons.lookdown) <- c("dummy")
+fru.model.exons.lookdown$start <- fru.model.exons.gtf@ranges@start
+fru.model.exons.lookdown$stop <- fru.model.exons.gtf@ranges@width + fru.model.exons.lookdown$start
+
+fru.bed <- rtracklayer::import.bed("utils/annotations/fru_ex.bed")
+fru.exon.lookup <- fru.bed$name %>% as.data.frame()
+names(fru.exon.lookup) <- c("name")
+fru.exon.lookup$start <- fru.bed@ranges@start -1
+fru.exon.lookup$stop <- fru.bed@ranges@width + fru.bed@ranges@start
+
+fru.model.exons.gtf$exon_name <- left_join(fru.model.exons.lookdown, fru.exon.lookup, by=c("start"="start", "stop"="stop"))$name 
+
+fru.model.exons.gtf$exon_type <- (fru.model.exons.gtf %>% as.data.frame()%>% mutate(exon_type=case_when(exon_name %in% (fruExons.de.fj %>% filter(is.na(aligner)))$geneid ~ "NO DATA",exon_name %in% (fruExons.de.fj %>% filter(!is.na(aligner) & padj.shrunk <0.05))$geneid ~ "padj <0.05" ,TRUE~"INSIG"))  )$exon_type %>% as.factor()
+
+
+fru_model_label_exons.exon5.gr <- ggplot() + geom_alignment(fru.model.exons.gtf, aes(type=model, fill =exon_type, color =exon_type)) + scale_fill_manual(values = c("black","grey","red")) + scale_color_manual(values = c("black","grey","red"))
+
+fru_model_label_exons.exon5.zoom.gr <- fru_model_label_exons.exon5.gr + xlim(c(18425338,18436500))
+
+
+```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE }
 
@@ -2724,27 +3286,31 @@ fru.exon.lookup$stop <- fru.bed@ranges@width + fru.bed@ranges@start
 
 fru.model.exons.gtf$exon_name <- left_join(fru.model.exons.lookdown, fru.exon.lookup, by=c("start"="start", "stop"="stop"))$name 
 
-fru.model.exons.gtf$exon_type <- (fru.model.exons.gtf %>% as.data.frame()%>% mutate(exon_type=case_when(exon_name %in% (fruExons.de.fj %>% filter(is.na(padj.shrunk)))$geneid ~ "NO DATA",exon_name %in% (fruExons.de.fj %>% filter(!is.na(padj.shrunk) & padj.shrunk <0.05))$geneid ~ "padj <0.05" ,TRUE~"INSIG"))  )$exon_type %>% as.factor()
+fru.model.exons.gtf$exon_type <- (fru.model.exons.gtf %>% as.data.frame()%>% mutate(exon_type=case_when(exon_name %in% (fruExons.de.fj %>% filter(is.na(aligner)))$geneid ~ "NO DATA",exon_name %in% (fruExons.de.fj %>% filter(!is.na(aligner)) %>% filter_at(vars(starts_with("padj")), any_vars( . < 0.05) ))$geneid ~ "padj <0.05" ,TRUE~"INSIG"))  )$exon_type %>% as.factor()
 
+fru_model_label_exons.siggy.gr <- ggplot() + geom_alignment(fru.model.exons.gtf, aes(type=model, fill =exon_type, color =exon_type)) + scale_fill_manual(values = c("black","grey","red")) + scale_color_manual(values = c("black","grey","red"))
 
-fru_model_label_exons.exon5.gr <- ggplot() + geom_alignment(fru.model.exons.gtf, aes(type=model, fill =exon_type, color =exon_type)) + scale_fill_manual(values = c("black","grey","red")) + scale_color_manual(values = c("black","grey","red"))
-
-fru_model_label_exons.exon5.zoom.gr <- fru_model_label_exons.exon5.gr + xlim(c(18425338,18436500))
+fru_model_label_exons.siggy.zoom.gr <- fru_model_label_exons.siggy.gr + xlim(c(18425338,18436500))
 
 
 ```
 
 
 
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 fig_cnt <- fig_cnt + 1
 
-fru_model_label_exons.exon5.gg<-fru_model_label_exons.exon5.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model, exon5 highlighted", sep = "")) + theme_bw()
+#fru_model_label_exons.exon5.gg<-fru_model_label_exons.exon5.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model, exon5 highlighted", sep = "")) + theme_bw()
+fru_model_label_exons.siggy.gg <- fru_model_label_exons.siggy.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model: exons with significant DE\nin any instance highlighted", sep = "")) + theme_bw()
 
-fru_model_label_exons.exon5.gg
+#fru_model_label_exons.exon5.gg
+fru_model_label_exons.siggy.gg
 
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_fruGeneModel_exon5.png", sep=""))
-fru_model_label_exons.exon5.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_fruGeneModel_signifcantExons.png", sep=""))
+#fru_model_label_exons.exon5.gg
+fru_model_label_exons.siggy.gg
 dev.off()
 ```
 
@@ -2753,12 +3319,15 @@ dev.off()
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 fig_cnt <- fig_cnt + 1
 
-fru_model_label_exons.exon5.zoom.gg<-fru_model_label_exons.exon5.zoom.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model (detail) ", sep = "")) + theme_bw()
+#fru_model_label_exons.exon5.zoom.gg<-fru_model_label_exons.exon5.zoom.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model (detail) ", sep = "")) + theme_bw()
+fru_model_label_exons.siggy.zoom.gg<-fru_model_label_exons.siggy.zoom.gr + labs(x = "3R coordinate", title=paste("Figure ",fig_cnt, ". Fru gene model: exons with significant DE\nin any instance highlighted (3' detail) ", sep = "")) + theme_bw()
 
-fru_model_label_exons.exon5.zoom.gg
+#fru_model_label_exons.exon5.zoom.gg
+fru_model_label_exons.siggy.zoom.gg
 
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_fruGeneModelZoom_exon5.png", sep=""))
-fru_model_label_exons.exon5.zoom.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_fruGeneModel_signifcantExons.zoom.png", sep=""))
+#fru_model_label_exons.exon5.zoom.gg
+fru_model_label_exons.siggy.zoom.gg
 dev.off()
 ```
 
