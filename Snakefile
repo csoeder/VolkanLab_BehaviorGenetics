@@ -95,7 +95,7 @@ rule summon_reads_SRA:
 				fasterq-dump  --split-3 --outdir FASTQ/{wildcards.path}/ {sra}
 			""")
 		except KeyError:
-			raise KeyError("Sample is listed as empirical but no reads found and no SRA to download!" )      		
+			raise KeyError("Sample is listed as empirical but no reads found and no SRA to download!" )
 
 rule mapsplice_builder:
 	output:
@@ -406,6 +406,30 @@ rule mapsplice2_align_rando:
 			""")
 
 
+rule alignmentSpliceExtractor:
+	input:
+		in_bam = "mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam",
+	output:
+		out_bam = "mapped_reads/{aligner}_SpliceOnly/{sample}/{sample}.vs_{ref_genome}.{aligner}_SpliceOnly.sort.bam",
+	params:
+		runmem_gb=8,
+		runtime="6:00:00",
+		cores=8,
+	message:
+		"Downsampling multimappers from {wildcards.sample} alignment to {wildcards.ref_genome}..."
+	run:
+		shell(""" mkdir -p mapped_reads/{wildcards.aligner}_SpliceOnly/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+			cat <(samtools view -H {input.in_bam}) <(samtools view {input.in_bam}| awk '($6 ~ /N/)' | less) | samtools view -hbS > {output.out_bam}.tmp;
+			samtools index {output.out_bam}.tmp;
+			python scripts/read_Hollower.py -i {output.out_bam}.tmp -o {output.out_bam}.tmp.sam;
+			cat {output.out_bam}.tmp.sam |  sed -e 's/\tN\t/\t*\t/g' | samtools view -hbS > {output.out_bam};
+			samtools index {output.out_bam};
+			rm {output.out_bam}.tmp {output.out_bam}.tmp.sam;
+			""")
+
+
+
 rule spliced_alignment_reporter:
 	input:
 		bam_in = "mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam",
@@ -569,6 +593,26 @@ rule da_Seeker:
 
 
 
+
+rule de_GOntologer:
+	input:
+		deSq_itemized = "diff_expr/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.{flag}.itemized.de",
+	output:
+		deSq_go = "gene_ont/{contrast}/{contrast}.vs_{ref_genome}.{annot}.{aligner}.{flag}.go",
+	params:
+		runmem_gb=8,
+		runtime="30:00",
+		cores=8,
+	message:
+		"calculating differential expression in {wildcards.contrast} contrast ({wildcards.aligner} to {wildcards.ref_genome} overlapping {wildcards.annot}) .... "
+	run:
+		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
+		shell(""" mkdir -p gene_ont/{wildcards.contrast}/ """)
+		shell(""" Rscript scripts/geneOntologe.R {input.deSq_itemized} {wildcards.contrast} {output.deSq_go} """)
+
+
+
+
 rule write_report:
 	input:
 		reference_genome_summary = ["summaries/reference_genomes.summary"],
@@ -577,9 +621,12 @@ rule write_report:
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
 		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
 		counting_summary_genes = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["dm6_genes","fru_exons"], flag=["MpBC","MpBCO"], aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
-#		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = "dm6_genes", flag="MpBC", aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
+		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["fru_junct", "fru_intron"], flag="MpBC", aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"]),#"mapspliceRaw",
 		expFlg = "utils/all.expression.flag",
-		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de","itemized.de"]),
+		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"]),#,"itemized.de"]),
+		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut"], annot = ["fru_junct", "fru_intron"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
+		gene_onts = expand("gene_ont/hausWtVsMut/hausWtVsMut.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"]),
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:

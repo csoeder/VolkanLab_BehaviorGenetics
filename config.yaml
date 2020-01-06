@@ -297,6 +297,14 @@ annotations:
       bed_path: utils/annotations/fru_ex.bed
       gtf_path: utils/annotations/fru_ex.gtf
       derived: False
+    - name: fru_junct
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_exonJunctions.gtf
+      derived: False
+    - name: fru_intron
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_introns.gtf
+      derived: False
     - name: ionotropic
       bed_path: utils/annotations/ionotropic.bed
       base: dm6_genes

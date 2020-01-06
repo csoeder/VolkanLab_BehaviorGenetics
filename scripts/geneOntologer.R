@@ -27,6 +27,8 @@ gene_list <- factor(as.integer( G_list.unq$flybase_gene_id %in% query_genes.list
 names(gene_list) <- G_list.unq$flybase_gene_id
 
 
+
+
 jeanOnt.df <- as.data.frame(c())
 
 for (ont in c("MF","BP","CC") ){

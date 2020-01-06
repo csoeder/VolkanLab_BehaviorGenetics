@@ -60,15 +60,8 @@ for (i in seq(nrow(contrasts.df))){
 	counts.dds[[var]] <- relevel(counts.dds[[var]], ref = ruf)
 }
 
-
-
-
-
 #Run DESeq
 counts.dds.dsq <- DESeq(counts.dds)
-
-
-
 
 # run the vanilla DE
 counts.dds.res <- results(counts.dds.dsq) %>% as.data.frame()
@@ -104,8 +97,6 @@ basic.df <- results(counts.dds.dsq, contrast=c(fact, as.character(ref_lev), alt_
 basic.df$geneid <- rownames(basic.df)
 basic.df <- select(basic.df, c("geneid", "baseMean"))
 
-
-
 #for each factor in factors....
 
 dds.dsq.byFactor.df <- select(basic.df, c("geneid") )
@@ -124,7 +115,6 @@ for (fact in desgn.splt){
 	#	# gather baseMeans for each level in factor.levels:
 	factor.baseMeanPerLvl <- sapply( levels(counts.dds.dsq[[fact]]), function(lvl) rowMeans( counts(counts.dds.dsq,normalized=TRUE)[,counts.dds.dsq[[fact]] == lvl, drop=F] ) ) %>% as.data.frame()
 
-
 	names(factor.baseMeanPerLvl ) <- paste0(paste("baseMean.",fact,".", sep=""), names(factor.baseMeanPerLvl))
 	factor.baseMeanPerLvl$geneid <- rownames(factor.baseMeanPerLvl)
 	factor.baseMeanPerLvl <-inner_join(factor.baseMeanPerLvl, counts.df%>% select(Geneid, Length), by=c("geneid"="Geneid"))
@@ -136,14 +126,11 @@ for (fact in desgn.splt){
 
 	}
 
-
 	factor.baseMeanPerLvl <- factor.baseMeanPerLvl %>% select(-c("x", "Length"))
 
 	dds.dsq.byFactor.df <- full_join(dds.dsq.byFactor.df, factor.baseMeanPerLvl, by = c("geneid"="geneid"))
 
-
 #	#for each alt_level in factor.levels:
-
 	for (aLev in alt_levs){
 
 		#dds.res_factor_level <- results(counts.dds.dsq, contrast=c(fact, ref_lev, aLev))
@@ -156,46 +143,16 @@ for (fact in desgn.splt){
 		names(dds.res_factor_level.shrunk ) <- paste0(names(dds.res_factor_level.shrunk),paste(".",fact,".vs_",aLev,".apeglm", sep=""))
 		dds.res_factor_level.shrunk$geneid <- rownames(dds.res_factor_level.shrunk)
 
-
 		dds.dsq.byFactor.df <- full_join(dds.dsq.byFactor.df, dds.res_factor_level.shrunk, by = c("geneid"="geneid"))
-		
-
-
 #		counts.dds.res_factor_level <- results(counts.dds.dsq, contrast=c(factor1, ref_level, alt_level1)) 
 #		counts.dds.res_factor_level$geneid <- rownames(counts.dds.res_factor_level)
 
 	}
 
-
-
-
-
 }
-
 
 #Write to TSV
 dds.dsq.byFactor.df <- dds.dsq.byFactor.df %>% select(geneid, everything())
 write_delim(dds.dsq.byFactor.df, paste(dsq_pre, "itemized.de", sep="."), delim = "\t")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
