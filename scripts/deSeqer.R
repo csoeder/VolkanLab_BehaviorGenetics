@@ -32,7 +32,10 @@ contrasts.df <- plyr::ldply(trammel$contrasts, data.frame) %>% filter(name == no
 
 # prep the sample metadata
 sbgrp <- (contrasts.df %>% select(filt))[1,] %>% as.character
-coldata <- data_sets.df %>% as.data.frame() %>% ungroup()%>% filter(subgroups == sbgrp)
+#coldata <- data_sets.df %>% as.data.frame() %>% ungroup()%>% filter(subgroups == sbgrp)
+#coldata <- data_sets.df %>% ungroup() %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," ))  %>% filter(subgroups == sbgrp)
+coldata <- data_sets.df%>% group_by(name) %>%  mutate(genotype = paste0(unique(as.character(genotype)), collapse = "." )) %>% ungroup()  %>% filter(subgroups == sbgrp)  %>% as.data.frame() 
+
 rownames(coldata) <- coldata$name
 coldata <- coldata %>% select(contrasts.df$vars %>% as.character() )
 

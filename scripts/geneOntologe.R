@@ -59,9 +59,14 @@ for (fact in desgn.splt){
 	#all_levs<-levels(counts.dds.dsq[[fact]])
 
 	#subset the DE data to the factor
-	DESeq.itemized.factor <- DESeq.itemized[,!is.na(str_locate(names(DESeq.itemized), paste(fact,".vs_" ,sep=""))[,1])]
+#	DESeq.itemized.factor <- DESeq.itemized[,!is.na(str_locate(names(DESeq.itemized), paste(fact,".vs_" ,sep=""))[,1])]
+	DESeq.itemized.factor <- DESeq.itemized[,!is.na(str_match(names(DESeq.itemized), paste(fact,".vs_(.*?).apeglm" ,sep=""))[,1])]
+
 	#pull out the alt levels from the data
-	alt_levs<- (str_split_fixed(names(DESeq.itemized.factor), paste(fact,".vs_", sep=""), n=2)[,2] %>% str_split_fixed("\\.", n=2))[,1] %>% unique()
+#	alt_levs<- (str_split_fixed(names(DESeq.itemized.factor), paste(fact,".vs_", sep=""), n=2)[,2] %>% str_split_fixed("\\.", n=2))[,1] %>% unique()
+
+	noms <- str_match(names(DESeq.itemized), paste(fact,".vs_(.*?).apeglm" ,sep=""))[,2]
+	alt_levs <- unique(noms[!is.na(noms)])
 	DESeq.itemized.factor$geneid <- DESeq.itemized$geneid
 
 	#	#for each alt_level in factor.levels:
