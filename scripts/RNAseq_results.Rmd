@@ -1,7 +1,7 @@
 ---
 title: "Volkan Lab Behavioral Genetics RNA-Seq"
 author: "Charlie Soeder"
-date: "1/6/2020"
+date: "2/3/2020"
 output:
   pdf_document: 
     number_sections: yes
@@ -16,8 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/VolkanLab_BehaviorGenetics/')
 #knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/VolkanLab_BehaviorGenetics/')
 knitr::opts_knit$set(root.dir=peaDubDee)
-#install.packages("remotes")
-#remotes::install_github("rstudio/gt")
+
 library("ggbio")
 library("biomaRt")
 #library("org.Dm.eg.db")
@@ -569,7 +568,9 @@ data_sets.df$housing<- as.factor(data_sets.df$housing)
 data_sets.df$genotype<- as.factor(data_sets.df$genotype)
 data_sets.df$tissue<- as.factor(data_sets.df$tissue)
 
-data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile1,readsfile2,paired, SRA)) %>% distinct() 
+#data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>% select(-c(subgroups,path,readsfile1,readsfile2,paired, SRA)) %>% distinct() 
+
+data_sets.df.sparse <- data_sets.df %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," )) %>% filter(subgroups=='all')  %>% separate_rows(genotype)  %>% select(-c(subgroups,path,readsfile1,readsfile2,paired, SRA)) %>% distinct() 
 
 data_sets.df.sparse.collapse <- data_sets.df.sparse %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," ))  %>% distinct()
 data_sets.df.sparse.collapse$genotype <- as.factor(data_sets.df.sparse.collapse$genotype)
@@ -583,7 +584,7 @@ The sequenced reads covered three replicates each of $`r ncol(experimental_repli
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 tbl_cnt <- tbl_cnt + 1
 
-experimental_replicates.gt<- experimental_replicates.tbl %>% ungroup()%>% gt() %>% cols_label(replicate_count = "# replicates", day = "age (days)") %>% tab_header(title=paste("Table ",tbl_cnt, ". Experimental Conditions and Replicates", sep = ""), subtitle= md("&nbsp"))
+experimental_replicates.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(replicate_count >0) %>% gt() %>% cols_label(replicate_count = "# replicates", day = "age (days)") %>% tab_header(title=paste("Table ",tbl_cnt, ". Experimental Conditions and Replicates", sep = ""), subtitle= md("&nbsp"))
 
 experimental_replicates.gt
 
@@ -596,7 +597,7 @@ These samples will allow direct comparison between wild-type flies reared under 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(day == 7) %>% spread(key=housing, value = replicate_count, fill = 0) %>%  gt() %>% cols_move_to_start(c("day", "tissue"))  %>%  tab_spanner(columns = c("group", "isolated"), label = "variable") %>%  tab_spanner(columns = c("day", "tissue"), label = md(" ")) %>% tab_header(title=paste("Table ",tbl_cnt, "a. Genotype & Housing Comparison", sep = ""), subtitle= md("(replicate count)"))
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(day == 7) %>% spread(key=housing, value = replicate_count, fill = 0) %>% filter(group+isolated>0) %>%  gt() %>% cols_move_to_start(c("day", "tissue"))  %>%  tab_spanner(columns = c("group", "isolated"), label = "variable") %>%  tab_spanner(columns = c("day", "tissue"), label = md(" ")) %>% tab_header(title=paste("Table ",tbl_cnt, "a. Genotype & Housing Comparison", sep = ""), subtitle= md("(replicate count)"))
 
 experimental_treatments.gt
 
@@ -609,7 +610,7 @@ These samples also allow for direct comparison between mutant genotypes (47b1, 8
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE }
 
-experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(genotype != "wt" & !is.na(day)) %>% spread(key=genotype, value = replicate_count, fill =0) %>%  gt() %>%  tab_spanner(columns = c("47b1", "47b2,88a", "88a", "FruLexaFru440", "67d"), label = "mutant genotypes") %>%  tab_spanner(columns = c("housing", "tissue"), label = " ") %>% tab_header(title=paste("Table ",tbl_cnt, "b. Genotype & Time Comparison", sep = ""), subtitle= md("(replicate count)"))
+experimental_treatments.gt<- experimental_replicates.tbl %>% ungroup() %>% filter(genotype != "wt" & !is.na(day)) %>% spread(key=genotype, value = replicate_count, fill =0) %>% filter(`47b1`+`47b2,88a`+`88a`+`67d`+FruLexaFru440 > 0 ) %>%  gt() %>%  tab_spanner(columns = c("47b1", "47b2,88a", "88a", "FruLexaFru440", "67d"), label = "mutant genotypes") %>%  tab_spanner(columns = c("housing", "tissue"), label = " ") %>% tab_header(title=paste("Table ",tbl_cnt, "b. Genotype & Time Comparison", sep = ""), subtitle= md("(replicate count)"))
 
 experimental_treatments.gt
 
@@ -1716,7 +1717,7 @@ Earlier results were based upon the 1-factor models; these results are largely h
 
 In the first contrast, wildtype flies with group-housed and isolated life histories are compared (experimental design: ~ housing ). Group-housing was used as a reference level; fold changes are reported relative to it. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.multi <- read_delim("diff_expr/wildTypeHousing/wildTypeHousing.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 wildTypeHousing.de.multi$aligner <- as.factor("multi")
@@ -1741,7 +1742,7 @@ wildTypeHousing.testedCount<- inner_join(wildTypeHousing.testedCount, ref_ann.st
 
 After filtering to remove genes with too few reads for analysis, about  $`r  human_readable_croncher((wildTypeHousing.testedCount %>% summarise(m = mean(tested) ) %>% as.numeric())[1]) `$ of $`r human_readable_croncher((wildTypeHousing.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())) `$ annotated genes ($`r (wildTypeHousing.testedCount %>% summarise(p = 100*mean(perc) ) %>% as.numeric())[1] `$ %) remain available for testing:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -1777,7 +1778,7 @@ write(wildTypeHousing.testedCount.gt %>%  as_raw_html(), paste("results/tables/s
 The differential expression data were examined before shrinkage. The most discrepancy appeared between the mapspliceUniq alignement and the two which included multimappers, and in genes with small effect sizes. 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -1795,7 +1796,7 @@ dev.off()
 
 The shrinkage step attempts to correct for the large apparent effect sizes in genes with small read counts. As expected, the shrinkage narrows the distribution around zero.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.shronk <- wildTypeHousing.de %>% select(c(log2FoldChange.fresh,lfcSE.fresh,log2FoldChange.shrunk,lfcSE.shrunk, aligner)) %>% gather(key=key, value=value, -one_of("aligner")) %>% separate(key, into = c("param","proc")) %>% mutate(param = as.factor(param), proc = as.factor(proc))
 wildTypeHousing.de.shronk$proc <- relevel(wildTypeHousing.de.shronk$proc, ref = "shrunk")
@@ -1817,7 +1818,7 @@ dev.off()
 
 The shrunk effect sizes agree well between alignment strategies; the "cloud" around unshrunk data at low effect size has disappeared.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -1835,7 +1836,7 @@ dev.off()
 
 The alignment strategies also agree well when it comes to significance (shrinkage doesn't impact significance so this is the same before and after.)
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -1852,7 +1853,7 @@ dev.off()
 ### differential expression overview
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.renamed <- left_join(wildTypeHousing.de,G_list, by = c("geneid"="flybase_gene_id")) # %>% mutate(expression = baseMean.shrunk/transcript_length)
 
@@ -1868,7 +1869,7 @@ wildTypeHousing.de.renamed.sig <- wildTypeHousing.de.renamed %>% filter(padj.shr
 
 Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 fig_cnt <- fig_cnt + 1
 
 wildTypeHousing.volcano.gg <- ggplot(wildTypeHousing.de.renamed)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.shrunk > 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="black", alpha=0.25, shape=1)  + geom_point(data = . %>% filter(padj.shrunk < 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(between isolated and group-housed wildtypes)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
@@ -1896,7 +1897,7 @@ dev.off()
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.renamed.chonksters <- wildTypeHousing.de.renamed %>% filter(padj.shrunk < 0.01 & abs(log2FoldChange.shrunk)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.shrunk) -log10(padj.shrunk))  %>% select(aligner, external_gene_name, maggie, present) 
 
@@ -1905,7 +1906,7 @@ wildTypeHousing.de.renamed.chonksters <- wildTypeHousing.de.renamed %>% filter(p
 
 From the volcano plots, we can pull out genes with large (ie, a fold change greater than 2 or less than 1/2), significant (ie, padj < 0.01) changes. There were  $`r  wildTypeHousing.de.renamed.chonksters %>% select(external_gene_name) %>% unique() %>% nrow() `$ such genes, mostly shared across alignment strategy:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -1955,7 +1956,7 @@ write(wildTypeHousing.de.renamed.brysonPriority.list.miss.gt %>%  as_raw_html(),
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 wildTypeHousing.de.renamed.brysonPriority.list.gg <- ggplot(wildTypeHousing.de.renamed %>% filter(!is.na(padj.shrunk)))+ geom_hline(yintercept = fcThresh, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -fcThresh, color = "blue", linetype="dotted" ) + geom_point( aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk, alpha = as.factor(padj.shrunk < sigThresh),shape = as.factor(padj.shrunk < sigThresh)), color="black") + scale_alpha_discrete(range=c(0.25,1), name = "padj < 0.005") + scale_shape_manual(values=c(1,16), name = "padj < 0.005") + geom_point(data=wildTypeHousing.de.renamed.brysonPriority.list,  aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk, alpha = as.factor(padj.shrunk < sigThresh),shape = as.factor(padj.shrunk < sigThresh)), color="red") + geom_text( data = wildTypeHousing.de.renamed.brysonPriority.list %>% filter(padj.shrunk < sigThresh & abs(log2FoldChange.shrunk) > fcThresh),  aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk, label=external_gene_name), color="red", size=5, check_overlap =TRUE, hjust = 0, nudge_x = 0.05) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(between isolated and group-housed wildtypes)\nGenes of Greatest Interest; abs(lfc)<0.5 & adjusted p < 0.005 highlighted", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
 
 #fig_cnt <- fig_cnt + 1
@@ -1968,7 +1969,7 @@ dev.off()
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 
 
@@ -1985,7 +1986,7 @@ dev.off()
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 
 #	eventually base this on the config.yaml
@@ -2010,7 +2011,7 @@ wildTypeHousing.de.renamed.main.list.miss <- inner_join( wildTypeHousing.de.rena
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2025,7 +2026,7 @@ dev.off()
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 fig_cnt <- fig_cnt + 1
 
 wildTypeHousing.de.renamed.main.list.sig.gg <- ggplot(wildTypeHousing.de.renamed %>% filter(!is.na(padj.shrunk))) + geom_freqpoly(aes(x=-log10(padj.shrunk), y=..density..), color="black", ) +geom_freqpoly(data=wildTypeHousing.de.renamed.main.list,aes(x=-log10(padj.shrunk), y=..density.., color=list))+ geom_vline(xintercept = -log10(sigThresh), color = "blue", linetype="dotted" ) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". p-value Distribution: Distribution of Fold-Change Significance\nin General and in Genes of Greatest inTerest\n(between isolated and group-housed wildtypes)\nadjusted p < 0.005 highlighted", sep = ""), x = "significance (pp)", y = "density") + theme_bw()
@@ -2041,7 +2042,7 @@ dev.off()
 
 Ordered in decreasing significance, the alignemnt strategies agree on the top 10 most significant changes:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 #wildTypeHousing.de.renamed.sigRank <- wildTypeHousing.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, baseMean.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 wildTypeHousing.de.renamed.sigRank <- wildTypeHousing.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2059,7 +2060,7 @@ write(wildTypeHousing.de.renamed.sigRank.gt %>%  as_raw_html(), paste("results/t
 
 The alignment strategies agree on the top 10 largest fold changes (though not completely on their order):
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.renamed.lfcRank <- wildTypeHousing.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2079,7 +2080,7 @@ write(wildTypeHousing.de.renamed.lfcRank.gt %>%  as_raw_html(), paste("results/t
 
 The "multi" and "rando" alignment strategies agree completely on the top 10 most expressed genes with significant changes. The "uniq" strategy differs in rank order and includes Gs2 and Msp300 instead of Calr and bun:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 wildTypeHousing.de.renamed.expRank <- wildTypeHousing.de.renamed.sig %>% arrange(-expression.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.shrunk, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2096,7 +2097,7 @@ write(wildTypeHousing.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/t
 
 ### rank-correllation between alignment strategies
 
-```{r echo=FALSE, message=FALSE, warning=FALSE }
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F }
 wildTypeHousing.de.renamed.rankt <- wildTypeHousing.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(lfc_rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"),sig_rank = rank(-abs(padj.shrunk), ties.method = "first"))
 wildTypeHousing.de.renamed.rankt.sprud <- wildTypeHousing.de.renamed.rankt %>% select(c("geneid","aligner", "lfc_rank")) %>% spread(key=aligner, value=lfc_rank)
 
@@ -2118,7 +2119,7 @@ ggplot(wildTypeHousing.de.renamed.rankt.sprud, aes(x=multi, y = rando)) + geom_m
 ## Group Housed: Wildtype vs Mutants
 
 ### wt vs OR47b
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.multi <- read_delim("diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs47b.de.multi$aligner <- as.factor("multi")
@@ -2143,7 +2144,7 @@ grpWtVs47b.testedCount<- inner_join(grpWtVs47b.testedCount, ref_ann.stats %>% fi
 
 After filtering to remove genes with too few reads for analysis, about  $`r  human_readable_croncher((grpWtVs47b.testedCount %>% summarise(m = mean(tested) ) %>% as.numeric())[1]) `$ of $`r human_readable_croncher((grpWtVs47b.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())) `$ annotated genes ($`r (grpWtVs47b.testedCount %>% summarise(p = 100*mean(perc) ) %>% as.numeric())[1] `$ %) remain available for testing:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -2159,7 +2160,7 @@ write(grpWtVs47b.testedCount.gt %>%  as_raw_html(), paste("results/tables/supp/s
 #### preshrunk comparison across alignment strategies
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2174,7 +2175,7 @@ dev.off()
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2191,7 +2192,7 @@ dev.off()
 
 #### differential expression overview
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.renamed <- left_join(grpWtVs47b.de,G_list, by = c("geneid"="flybase_gene_id")) 
 
@@ -2208,8 +2209,7 @@ grpWtVs47b.de.renamed.sig <- grpWtVs47b.de.renamed %>% filter(padj.shrunk <0.01)
 
 Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2227,14 +2227,14 @@ dev.off()
 Some of the effect sizes and p values are outrageous!!
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.renamed.chonksters <- grpWtVs47b.de.renamed %>% filter(padj.shrunk < 0.01 & abs(log2FoldChange.shrunk)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.shrunk) -log10(padj.shrunk))  %>% select(aligner, external_gene_name, maggie, present) 
 
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE }
+```{r echo=FALSE, message=FALSE, warning=FALSE , include=F}
 
 grpWtVs47b_chonkFile <- "results/tables/supp/grpWtVs47b_chonky.html"
 #tbl_cnt <- tbl_cnt + 1
@@ -2254,7 +2254,7 @@ From the volcano plots, we can pull out genes with large (ie, a fold change grea
 
 Ordered in decreasing significance, the alignemnt strategies agree on the top 10 most significant changes:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.renamed.sigRank <- grpWtVs47b.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2274,7 +2274,7 @@ rando and uniq alignment strategies agree very well; in multi, the gene "Unc-115
 
 The alignment strategies agree well for the top 4, and disagree on order and content lower:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.renamed.lfcRank <- grpWtVs47b.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2295,7 +2295,7 @@ write(grpWtVs47b.de.renamed.lfcRank.gt %>%  as_raw_html(), paste("results/tables
 
 The three alignment strategies agree well on the top 10 highest expressed genes with significant change:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs47b.de.renamed.expRank <- grpWtVs47b.de.renamed.sig %>% arrange(-expression.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.shrunk, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2314,7 +2314,7 @@ write(grpWtVs47b.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables
 ### wt vs 67d
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.multi <- read_delim("diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVs67d.de.multi$aligner <- as.factor("multi")
@@ -2341,7 +2341,7 @@ grpWtVs67d.testedCount<- inner_join(grpWtVs67d.testedCount, ref_ann.stats %>% fi
 After filtering to remove genes with too few reads for analysis, about  $`r  human_readable_croncher((grpWtVs67d.testedCount %>% summarise(m = mean(tested) ) %>% as.numeric())[1]) `$ of $`r human_readable_croncher((grpWtVs67d.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())) `$ annotated genes ($`r (grpWtVs67d.testedCount %>% summarise(p = 100*mean(perc) ) %>% as.numeric())[1] `$ %) remain available for testing:
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -2355,7 +2355,7 @@ write(grpWtVs67d.testedCount.gt %>%  as_raw_html(), paste("results/tables/supp/s
 
 #### preshrunk comparison across alignment strategies
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2369,7 +2369,7 @@ dev.off()
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2386,7 +2386,7 @@ dev.off()
 
 #### differential expression overview
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.renamed <- left_join(grpWtVs67d.de,G_list, by = c("geneid"="flybase_gene_id")) 
 
@@ -2404,7 +2404,7 @@ Here is a volcano plot for the three alignment strategies, with significance on 
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 fig_cnt <- fig_cnt + 1
 
 grpWtVs67d.volcano.gg <- ggplot(grpWtVs67d.de.renamed)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.shrunk > 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="black", alpha=0.25, shape=1)  + geom_point(data = . %>% filter(padj.shrunk < 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(between group-housed wildtypes and 67d mutants)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
@@ -2417,13 +2417,13 @@ dev.off()
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.renamed.chonksters <- grpWtVs67d.de.renamed %>% filter(padj.shrunk < 0.01 & abs(log2FoldChange.shrunk)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.shrunk) -log10(padj.shrunk))  %>% select(aligner, external_gene_name, maggie, present) 
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 #tbl_cnt <- tbl_cnt + 1
 
@@ -2442,7 +2442,7 @@ From the volcano plots, we can pull out genes with large (ie, a fold change grea
 
 Ordered in decreasing significance, the alignemnt strategies agree on the top 4 most significant changes, but disagree on the order & content after that.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.renamed.sigRank <- grpWtVs67d.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2461,7 +2461,7 @@ write(grpWtVs67d.de.renamed.sigRank.gt %>%  as_raw_html(), paste("results/tables
 
 The alignment strategies agree relatively well on the genes with the top 10 largest (significant) fold changes (though not on their order):
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.renamed.lfcRank <- grpWtVs67d.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2483,7 +2483,7 @@ write(grpWtVs67d.de.renamed.lfcRank.gt %>%  as_raw_html(), paste("results/tables
 
 The alignment strategies agree well on the top 10 highest expressed genes with significant changes (though not on their order):
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVs67d.de.renamed.expRank <- grpWtVs67d.de.renamed.sig %>% arrange(-expression.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.shrunk, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2502,7 +2502,7 @@ write(grpWtVs67d.de.renamed.expRank.gt %>%  as_raw_html(), paste("results/tables
 
 ### wt vs FruLexaFru440
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.multi <- read_delim("diff_expr/grpWtVsFru/grpWtVsFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 grpWtVsFru.de.multi$aligner <- as.factor("multi")
@@ -2528,7 +2528,7 @@ grpWtVsFru.testedCount<- inner_join(grpWtVsFru.testedCount, ref_ann.stats %>% fi
 After filtering to remove genes with too few reads for analysis, about  $`r  human_readable_croncher((grpWtVsFru.testedCount %>% summarise(m = mean(tested) ) %>% as.numeric())[1]) `$ of $`r human_readable_croncher((grpWtVsFru.testedCount %>% select(total) %>% head(n=1) %>% as.numeric())) `$ annotated genes ($`r (grpWtVsFru.testedCount %>% summarise(p = 100*mean(perc) ) %>% as.numeric())[1] `$ %) remain available for testing:
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 tbl_cnt <- tbl_cnt + 1
 
@@ -2544,7 +2544,7 @@ write(grpWtVsFru.testedCount.gt %>%  as_raw_html(), paste("results/tables/supp/s
 
 #### preshrunk comparison across alignment strategies
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2559,7 +2559,7 @@ dev.off()
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 
@@ -2576,7 +2576,7 @@ dev.off()
 
 #### differential expression overview
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.renamed <- left_join(grpWtVsFru.de,G_list, by = c("geneid"="flybase_gene_id")) 
 
@@ -2592,7 +2592,7 @@ grpWtVsFru.de.renamed.sig <- grpWtVsFru.de.renamed %>% filter(padj.shrunk <0.01)
 
 Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 fig_cnt <- fig_cnt + 1
 grpWtVsFru.volcano.gg <- ggplot(grpWtVsFru.de.renamed)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.shrunk > 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="black", alpha=0.25, shape=1)  + geom_point(data = . %>% filter(padj.shrunk < 0.01), aes(x=-log10(padj.shrunk), y = log2FoldChange.shrunk), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(between group-housed wildtypes and 67d mutants)", sep = ""), x = "significance (pp)", y = "log2FoldChange (shrunk)") + theme_bw()
@@ -2606,14 +2606,14 @@ dev.off()
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.renamed.chonksters <- grpWtVsFru.de.renamed %>% filter(padj.shrunk < 0.01 & abs(log2FoldChange.shrunk)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.shrunk) -log10(padj.shrunk))  %>% select(aligner, external_gene_name, maggie, present) 
 
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 #tbl_cnt <- tbl_cnt + 1
 
@@ -2633,7 +2633,7 @@ From the volcano plots, we can pull out genes with large (ie, a fold change grea
 
 Ordered in decreasing significance, the alignment strategies agree very well on the top 10 most significant changes:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.renamed.sigRank <- grpWtVsFru.de.renamed.sig %>% arrange(-padj.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(padj.shrunk, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2652,7 +2652,7 @@ write(grpWtVsFru.de.renamed.sigRank.gt %>%  as_raw_html(), paste("results/tables
 
 The alignment strategies agree on the genes with the top 5 largest fold changes, less so for the next 5:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.renamed.lfcRank <- grpWtVsFru.de.renamed.sig %>% arrange(-abs(log2FoldChange.shrunk))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.shrunk), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -2674,7 +2674,7 @@ write(grpWtVsFru.de.renamed.lfcRank.gt %>%  as_raw_html(), paste("results/tables
 
 The alignment strategies agree on the top 10 highest expressed genes with significant changes. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=F}
 
 grpWtVsFru.de.renamed.expRank <- grpWtVsFru.de.renamed.sig %>% arrange(-expression.shrunk)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.shrunk, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.shrunk, log2FoldChange.shrunk,padj.shrunk,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
 
@@ -3467,13 +3467,13 @@ Ordered in decreasing significance, the alignemnt strategies agree on the top 10
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 hausWtVsMut.FruLexa440.simultaneous.de.sigRank <- hausWtVsMut.FruLexa440.simultaneous.de.sig %>% arrange(-padj.genotype.vs_FruLexaFru440.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(padj.genotype.vs_FruLexaFru440.apeglm, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.genotype.vs_FruLexaFru440.apeglm, log2FoldChange.genotype.vs_FruLexaFru440.apeglm,padj.genotype.vs_FruLexaFru440.apeglm ,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+tbl_cnt <- tbl_cnt + 1
 
 
 
 hausWtVsMut.FruLexa440.simultaneous.de.sigRank.gt <- hausWtVsMut.FruLexa440.simultaneous.de.sigRank %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Most Significantly (padj<0.01) Differentially Expressed Genes", sep = ""), subtitle=paste("between isolated and group-housed wildtypes")) %>% fmt_scientific(columns=vars(multi_padj.genotype.vs_FruLexaFru440.apeglm,rando_padj.genotype.vs_FruLexaFru440.apeglm,uniq_padj.genotype.vs_FruLexaFru440.apeglm), decimals=2) %>% fmt_number(columns=vars(multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm,uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm,rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm), decimals=3) %>% fmt_number(columns=vars(multi_expression.genotype.vs_FruLexaFru440.apeglm, uniq_expression.genotype.vs_FruLexaFru440.apeglm, rando_expression.genotype.vs_FruLexaFru440.apeglm), decimals=2) %>% tab_spanner(label = "multi", columns = vars(multi_external_gene_name, multi_geneid,multi_expression.genotype.vs_FruLexaFru440.apeglm, multi_padj.genotype.vs_FruLexaFru440.apeglm, multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% tab_spanner(label = "rando", columns = vars(rando_external_gene_name, rando_geneid, rando_expression.genotype.vs_FruLexaFru440.apeglm, rando_padj.genotype.vs_FruLexaFru440.apeglm, rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% tab_spanner(label = "uniq", columns = vars(uniq_external_gene_name, uniq_geneid, uniq_expression.genotype.vs_FruLexaFru440.apeglm, uniq_padj.genotype.vs_FruLexaFru440.apeglm, uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% cols_label(multi_expression.genotype.vs_FruLexaFru440.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",multi_padj.genotype.vs_FruLexaFru440.apeglm="adjusted p",)%>% cols_label(rando_expression.genotype.vs_FruLexaFru440.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",rando_padj.genotype.vs_FruLexaFru440.apeglm ="adjusted p",) %>% cols_label(uniq_expression.genotype.vs_FruLexaFru440.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",uniq_padj.genotype.vs_FruLexaFru440.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("uniq_geneid"))
 
 
-tbl_cnt <- tbl_cnt + 1
 hausWtVsMut.FruLexa440.simultaneous.de.sigRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
 
 write(hausWtVsMut.FruLexa440.simultaneous.de.sigRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_genotypeFruLexa440_top10MostSig.html", sep=""))
@@ -3508,10 +3508,10 @@ Top 10 highest expressed genes with significant change
 
 
 hausWtVsMut.FruLexa440.simultaneous.expRank <- hausWtVsMut.FruLexa440.simultaneous.de.sig %>% arrange(-expression.genotype.vs_FruLexaFru440.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.genotype.vs_FruLexaFru440.apeglm, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.genotype.vs_FruLexaFru440.apeglm, log2FoldChange.genotype.vs_FruLexaFru440.apeglm,padj.genotype.vs_FruLexaFru440.apeglm,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+tbl_cnt <- tbl_cnt + 1
 
 hausWtVsMut.FruLexa440.simultaneous.expRank.gt <- hausWtVsMut.FruLexa440.simultaneous.expRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Highest Expressed Genes with Significant (padj < 0.01) Expression Difference", sep = ""), subtitle=paste("between isolated and group-housed wildtypes"))%>% fmt_scientific(columns=vars(multi_padj.genotype.vs_FruLexaFru440.apeglm,rando_padj.genotype.vs_FruLexaFru440.apeglm,uniq_padj.genotype.vs_FruLexaFru440.apeglm), decimals=2) %>% fmt_number(columns=vars(multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm,uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm,rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm), decimals=3) %>% fmt_number(columns=vars(multi_expression.genotype.vs_FruLexaFru440.apeglm,uniq_expression.genotype.vs_FruLexaFru440.apeglm,rando_expression.genotype.vs_FruLexaFru440.apeglm), decimals=2) %>% tab_spanner(label = "multi", columns = vars(multi_external_gene_name, multi_geneid,multi_expression.genotype.vs_FruLexaFru440.apeglm, multi_padj.genotype.vs_FruLexaFru440.apeglm, multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% tab_spanner(label = "rando", columns = vars(rando_external_gene_name, rando_geneid, rando_expression.genotype.vs_FruLexaFru440.apeglm, rando_padj.genotype.vs_FruLexaFru440.apeglm, rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% tab_spanner(label = "uniq", columns = vars(uniq_external_gene_name, uniq_geneid, uniq_expression.genotype.vs_FruLexaFru440.apeglm, uniq_padj.genotype.vs_FruLexaFru440.apeglm, uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm)) %>% cols_label(multi_expression.genotype.vs_FruLexaFru440.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",multi_padj.genotype.vs_FruLexaFru440.apeglm="adjusted p",)%>% cols_label(rando_expression.genotype.vs_FruLexaFru440.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",rando_padj.genotype.vs_FruLexaFru440.apeglm="adjusted p",) %>% cols_label(uniq_expression.genotype.vs_FruLexaFru440.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.genotype.vs_FruLexaFru440.apeglm="log2 FoldChange",uniq_padj.genotype.vs_FruLexaFru440.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.genotype.vs_FruLexaFru440.apeglm"), after = c("uniq_geneid"))
 
-tbl_cnt <- tbl_cnt + 1
 hausWtVsMut.FruLexa440.simultaneous.expRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
 
 write(hausWtVsMut.FruLexa440.simultaneous.expRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_genotypeFruLexa440_top10exp_andSig.html", sep=""))
@@ -3557,16 +3557,15 @@ obsolete plasma membrane part (GO:0044459)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-#hausWtVsMut.67b.go  %>% filter(classicFisher < 0.01 & classicKS < 0.01) 
-
 
 hausWtVsMut.FruLexa440.go.sig <- hausWtVsMut.FruLexa440.go   %>% filter(classicFisher < 0.01 & classicKS < 0.01) %>% select(c("GO.ID","go_name", "classicFisher", "classicKS", "ontology", "aligner")) 
+tbl_cnt <- tbl_cnt + 1
+
 
 hausWtVsMut.FruLexa440.go.sig.gt <- hausWtVsMut.FruLexa440.go.sig %>% filter(aligner == "multi") %>% group_by(ontology)  %>% mutate(rank = rank(classicFisher, ties.method = "last")) %>% filter(rank<11) %>% select(-c("aligner", "rank")) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Enriched GO Terms among Significantly Differentially Expressed Genes", sep = ""), subtitle=paste("simultaneous FruLexa440 contrast; multi only; top 10 most significant per category")) %>% tab_spanner(label="p-value", columns = c("classicFisher", "classicKS"))%>% fmt_scientific(columns=vars(classicFisher,classicKS), decimals=2) %>% cols_label( GO.ID="GO Term", go_name="Description", classicFisher ="Fisher", classicKS = "K-S") 
 
 
 
-tbl_cnt <- tbl_cnt + 1
 hausWtVsMut.FruLexa440.go.sig.gt
 write(hausWtVsMut.FruLexa440.go.sig.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_FruLexa440_geneOnt.html", sep=""))
 
@@ -3579,6 +3578,335 @@ write(hausWtVsMut.FruLexa440.go.sig.gt %>%  as_raw_html(), paste("results/tables
 write.table(hausWtVsMut.FruLexa440.go, "results/tables/supp/hausWtVsMut.FruLexa440.go.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
 ```
 
+
+
+### Fruitless-less
+
+Out of data quality concerns, the contrast was rerun with the FruLexa/Fru440 samples excluded. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+hausWtVsMut_noFru.dm6_genes.multi.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut_noFru/hausWtVsMut_noFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut_noFru.dm6_genes.multi.MpBC.itemized$aligner <- as.factor("multi")
+
+hausWtVsMut_noFru.dm6_genes.rando.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut_noFru/hausWtVsMut_noFru.vs_dm6main.dm6_genes.mapspliceRando.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut_noFru.dm6_genes.rando.MpBC.itemized$aligner <- as.factor("rando")
+
+hausWtVsMut_noFru.dm6_genes.uniq.MpBC.itemized <- read_delim("diff_expr/hausWtVsMut_noFru/hausWtVsMut_noFru.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+hausWtVsMut_noFru.dm6_genes.uniq.MpBC.itemized$aligner <- as.factor("uniq")
+
+hausWtVsMut_noFru.dm6_genes.MpBC.itemized <- rbind(hausWtVsMut_noFru.dm6_genes.multi.MpBC.itemized,hausWtVsMut_noFru.dm6_genes.rando.MpBC.itemized,hausWtVsMut_noFru.dm6_genes.uniq.MpBC.itemized)
+
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru <- full_join( hausWtVsMut.dm6_genes.MpBC.itemized %>% select(-contains("genotype.FruLexaFru440")) %>% select(-contains("vs_FruLexaFru440.apeglm")) , hausWtVsMut_noFru.dm6_genes.MpBC.itemized, by=c("geneid" = "geneid", "aligner" = "aligner"), suffix = c(".with",".without"))
+
+```
+
+
+Every gene that can be analyzed using the Without counts can be analyzed using the With counts; there are $`r  hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% filter(is.na(baseMean.genotype.wt.with)) %>% nrow() `$ that cannot. On the other hand, there are  $`r  hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% filter(is.na(baseMean.genotype.wt.without)) %>% select(geneid) %>% unique() %>% nrow() `$ genes which can be analyzed using the With counts but not the Without: 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+hausWtVsMut.withOrWithoutFru.geneLoss.gt <-hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% filter(is.na(baseMean.genotype.wt.without)) %>% group_by(aligner) %>% summarise(count=n()) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Genes Lost When FruLexa/Fru440 Counts are Excluded", sep = ""), subtitle=paste("genes which no longer pass minimum count threshold")) 
+
+hausWtVsMut.withOrWithoutFru.geneLoss.gt
+
+write(hausWtVsMut.withOrWithoutFru.geneLoss.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_withOrWithoutFru_geneLoss.html", sep=""))
+
+```
+ 
+In $`r  hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% filter(is.na(baseMean.genotype.wt.without)) %>% select("geneid", contains("padj")) %>% gather(-c(geneid), key = "test", value = "sig") %>% filter(sig<0.01)%>% nrow() `$ cases were these genes significant (padj < 0.01) in the With tests.
+
+A gene with significance values in both tests may gain significance when FruLexa/Fru440 samples are dropped, lose significance, maintain significance while switching direction, or remain unchanged. No switches were seen, but moderate numbers (up to ~5%) gained significance.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.compact  <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% select(geneid, contains("padj"), contains("log2FoldChange"), aligner) 
+
+
+p_thresh <- 0.01
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.compact  %>% gather(key = "test", value = "value", -c(geneid,aligner)) %>% separate(col=test, into=c("stat", "null2", "null3", "contrast", "null4", "frulexa440")) %>% select(-contains("null")) %>%  unite(frulexa440, stat, col="stat", sep="_" ) %>% spread(key=stat, value=value)%>% mutate(change = as.factor(case_when(with_padj < p_thresh & without_padj > p_thresh ~"loss" ,with_padj > p_thresh & without_padj < p_thresh ~"gain" , with_padj < p_thresh & without_padj < p_thresh & (with_log2FoldChange*without_log2FoldChange) < 0 ~"switch" ,T~"none")))
+
+
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+hausWtVsMut.withOrWithoutFru.geneSigChangeCount.gt <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange %>% group_by(aligner,contrast,change) %>% summarise(number=n()) %>% spread(key=change, value=number) %>% ungroup() %>% group_by(contrast) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Changes in Differential Expression Significance", sep = ""), subtitle=paste("when FruLexa/Fru440 samples are dropped")) %>%   tab_spanner(label="change", columns = c("gain", "loss", "none"))  %>% cols_label( aligner = "") 
+	
+	
+
+hausWtVsMut.withOrWithoutFru.geneSigChangeCount.gt
+
+write(hausWtVsMut.withOrWithoutFru.geneSigChangeCount.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_withOrWithoutFru_geneSigChangeCount.html", sep=""))
+
+```
+
+In some cases, the significance increase was very large:
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange.renamed <- left_join(hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange,G_list, by = c("geneid"="flybase_gene_id"))
+
+tbl_cnt <- tbl_cnt + 1
+
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange.chonky.gt <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange.renamed %>% filter(change=="gain") %>% mutate(deltaSig = -log10(without_padj) + log10(with_padj))  %>% group_by(contrast, aligner) %>% mutate(rank = rank(1/deltaSig, ties.method = "first"))  %>% filter(rank<11) %>% filter(aligner == "multi") %>% select(c(contrast, aligner, external_gene_name, contains("log2FoldChange"), contains("padj"))) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top 10 Biggest Significance Changes", sep = ""), subtitle=paste("when FruLexa/Fru440 samples are dropped")) %>%   tab_spanner(label="adjusted p", columns = contains("padj"))  %>% tab_spanner(label="effect size (l2fc)", columns = contains("log2FoldChange")) %>% fmt_number(columns=contains("log2FoldChange"), decimals=2) %>% fmt_number(columns=c("with_padj"), decimals=3) %>% fmt_scientific(columns=c("without_padj"), decimals=2) %>% cols_label( external_gene_name = "",  with_log2FoldChange = "with", without_log2FoldChange = "without", with_padj = "with", without_padj = "without",) 
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange.chonky.gt
+
+
+write(hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.byChange.chonky.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_withOrWithoutFru_chonkiestPchange.html", sep=""))
+
+```
+
+
+
+#### Perturbation to Housing Contrast
+
+To see how much exclusion of the FruLexa/Fru440 alters the big picture results in the group vs. isolated contrast, we can look at how well the top-10 lists agree (similarity is calculated as size of the intersection divided by size of the union)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% group_by(aligner)  %>% mutate(with_padj_rank = rank(padj.housing.vs_isolated.apeglm.with, ties.method = "last"), without_padj_rank = rank(padj.housing.vs_isolated.apeglm.without, ties.method = "last"),with_l2fc_rank = rank(-abs(log2FoldChange.housing.vs_isolated.apeglm.with), ties.method = "last"), without_l2fc_rank = rank(-abs(log2FoldChange.housing.vs_isolated.apeglm.without), ties.method = "last"), with_expr_rank = rank(expression.housing.vs_isolated.apeglm.with, ties.method = "last"), without_expr_rank = rank(expression.housing.vs_isolated.apeglm.without, ties.method = "last")) 
+
+withlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(with_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(without_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+housing.padj.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.padj), area2 = length(withoutlist.padj),  cross.area = length(intersect(withlist.padj,withoutlist.padj)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+housing.padj.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("adjusted p:\n", 100*round(length(intersect(withlist.padj,withoutlist.padj))/length(union(withlist.padj,withoutlist.padj)),2), "% similar", sep = "" ),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(housing.padj.withOrWithoutFru.venn), nrow=2)
+
+###assemble the padj venn grob
+
+
+withlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(with_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(without_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+housing.l2fc.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.l2fc), area2 = length(withoutlist.l2fc),  cross.area = length(intersect(withlist.l2fc,withoutlist.l2fc)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+housing.l2fc.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("log2FoldChange:\n",100*round(length(intersect(withlist.l2fc,withoutlist.l2fc))/length(union(withlist.l2fc,withoutlist.l2fc)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(housing.l2fc.withOrWithoutFru.venn), nrow=2)
+
+###assemble the l2fc venn grob
+
+
+
+withlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(with_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% ungroup() %>% filter(without_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+housing.expr.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.expr), area2 = length(withoutlist.expr),  cross.area = length(intersect(withlist.expr,withoutlist.expr)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+housing.expr.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("expression:\n",100*round(length(intersect(withlist.expr,withoutlist.expr))/length(union(withlist.expr,withoutlist.expr)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(housing.expr.withOrWithoutFru.venn), nrow=2)
+###assemble the expr venn grob
+
+
+
+fig_cnt <- fig_cnt + 1
+
+grid.arrange(grobs=lapply(list(housing.padj.withOrWithoutFru.venn.grb, housing.l2fc.withOrWithoutFru.venn.grb, housing.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of Housing Contrast Top 10 Lists,\nwith/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+
+
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_noFruHausCont_VennSim.png", sep=""))
+grid.arrange(grobs=lapply(list(housing.padj.withOrWithoutFru.venn.grb, housing.l2fc.withOrWithoutFru.venn.grb, housing.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of Housing Contrast Top 10 Lists, with/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+dev.off()
+```
+
+We can also look at the rank correlations:
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt.rot <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt %>% select(c("geneid", "aligner"), contains("_rank")) %>% gather(contains("_rank"), key=measure, value=rank) %>% separate(measure, into=c("fru", "measure", "null")) %>% select(-c("null")) %>% spread(key=fru, value=rank)
+
+
+
+
+fig_cnt <- fig_cnt + 1
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkor.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkt.rot) + geom_point(aes(x=with, y=without, color = aligner)) + facet_grid(.~measure) + labs(title=paste("Figure ",fig_cnt, ". Rank correlations of expression, effect size, and significance\n(housing contrasts, with/without FruLexa)", sep = ""), x = "with FruLexa/Fru440", y = "without FruLexa/Fru440") + theme_bw()
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkor.gg 
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_withWithoutFru_housingContrast_rankCorr.png", sep=""))
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.haus.ronkor.gg 
+dev.off()
+
+
+```
+
+#### Perturbation to 47b1 Contrast
+
+To see how much exclusion of the FruLexa/Fru440 alters the big picture results in the 47b1 vs. wt contrast, we can look at how well the top-10 lists agree (similarity is calculated as size of the intersection divided by size of the union)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% group_by(aligner)  %>% mutate(with_padj_rank = rank(padj.genotype.vs_47b1.apeglm.with, ties.method = "last"), without_padj_rank = rank(padj.genotype.vs_47b1.apeglm.without, ties.method = "last"),with_l2fc_rank = rank(-abs(log2FoldChange.genotype.vs_47b1.apeglm.with), ties.method = "last"), without_l2fc_rank = rank(-abs(log2FoldChange.genotype.vs_47b1.apeglm.without), ties.method = "last"), with_expr_rank = rank(expression.genotype.vs_47b1.apeglm.with, ties.method = "last"), without_expr_rank = rank(expression.genotype.vs_47b1.apeglm.without, ties.method = "last")) 
+
+withlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(with_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(without_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+fotie7b.padj.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.padj), area2 = length(withoutlist.padj),  cross.area = length(intersect(withlist.padj,withoutlist.padj)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+fotie7b.padj.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("adjusted p:\n", 100*round(length(intersect(withlist.padj,withoutlist.padj))/length(union(withlist.padj,withoutlist.padj)),2), "% similar", sep = "" ),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(fotie7b.padj.withOrWithoutFru.venn), nrow=2)
+
+###assemble the padj venn grob
+
+
+
+withlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(with_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(without_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+fotie7b.l2fc.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.l2fc), area2 = length(withoutlist.l2fc),  cross.area = length(intersect(withlist.l2fc,withoutlist.l2fc)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+fotie7b.l2fc.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("log2FoldChange:\n",100*round(length(intersect(withlist.l2fc,withoutlist.l2fc))/length(union(withlist.l2fc,withoutlist.l2fc)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(fotie7b.l2fc.withOrWithoutFru.venn), nrow=2)
+
+
+withlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(with_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% ungroup() %>% filter(without_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+fotie7b.expr.withOrWithoutFru.venn <-draw.pairwise.venn(area1 = length(withlist.expr), area2 = length(withoutlist.expr),  cross.area = length(intersect(withlist.expr,withoutlist.expr)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+
+fotie7b.expr.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("expression:\n",100*round(length(intersect(withlist.expr,withoutlist.expr))/length(union(withlist.expr,withoutlist.expr)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(fotie7b.expr.withOrWithoutFru.venn), nrow=2)
+
+###assemble the expr venn grob
+
+
+
+
+fig_cnt <- fig_cnt + 1
+
+grid.arrange(grobs=lapply(list(fotie7b.padj.withOrWithoutFru.venn.grb, fotie7b.l2fc.withOrWithoutFru.venn.grb, fotie7b.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of 47b1 Contrast Top 10 Lists,\nwith/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+
+
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_noFru47bCont_VennSim.png", sep=""))
+grid.arrange(grobs=lapply(list(fotie7b.padj.withOrWithoutFru.venn.grb, fotie7b.l2fc.withOrWithoutFru.venn.grb, fotie7b.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of 47b1 Contrast Top 10 Lists,\nwith/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+dev.off()
+
+
+
+```
+
+We can also look at the rank correlations:
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt.rot <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt %>% select(c("geneid", "aligner"), contains("_rank")) %>% gather(contains("_rank"), key=measure, value=rank) %>% separate(measure, into=c("fru", "measure", "null")) %>% select(-c("null")) %>% spread(key=fru, value=rank)
+
+
+
+
+fig_cnt <- fig_cnt + 1
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkor.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkt.rot) + geom_point(aes(x=with, y=without, color = aligner)) + facet_grid(.~measure) + labs(title=paste("Figure ",fig_cnt, ". Rank correlations of expression, effect size, and significance\n(47b1 contrasts, with/without FruLexa)", sep = ""), x = "with FruLexa/Fru440", y = "without FruLexa/Fru440") + theme_bw()
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkor.gg 
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_withWithoutFru_47bContrast_rankCorr.png", sep=""))
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.47b.ronkor.gg 
+dev.off()
+
+
+```
+
+
+#### Perturbation to 67d Contrast
+
+To see how much exclusion of the FruLexa/Fru440 alters the big picture results in the 67d vs. wt contrast, we can look at how well the top-10 lists agree (similarity is calculated as size of the intersection divided by size of the union)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru %>% group_by(aligner)  %>% mutate(with_padj_rank = rank(padj.genotype.vs_67d.apeglm.with, ties.method = "last"), without_padj_rank = rank(padj.genotype.vs_67d.apeglm.without, ties.method = "last"),with_l2fc_rank = rank(-abs(log2FoldChange.genotype.vs_67d.apeglm.with), ties.method = "last"), without_l2fc_rank = rank(-abs(log2FoldChange.genotype.vs_67d.apeglm.without), ties.method = "last"), with_expr_rank = rank(expression.genotype.vs_67d.apeglm.with, ties.method = "last"), without_expr_rank = rank(expression.genotype.vs_67d.apeglm.without, ties.method = "last")) 
+
+withlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(with_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.padj <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(without_padj_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+sixty7d.padj.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.padj), area2 = length(withoutlist.padj),  cross.area = length(intersect(withlist.padj,withoutlist.padj)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+sixty7d.padj.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("adjusted p:\n", 100*round(length(intersect(withlist.padj,withoutlist.padj))/length(union(withlist.padj,withoutlist.padj)),2), "% similar", sep = "" ),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(sixty7d.padj.withOrWithoutFru.venn), nrow=2)
+
+
+
+
+withlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(with_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.l2fc <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(without_l2fc_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+sixty7d.l2fc.withOrWithoutFru.venn <- draw.pairwise.venn(area1 = length(withlist.l2fc), area2 = length(withoutlist.l2fc),  cross.area = length(intersect(withlist.l2fc,withoutlist.l2fc)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+sixty7d.l2fc.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("log2FoldChange:\n",100*round(length(intersect(withlist.l2fc,withoutlist.l2fc))/length(union(withlist.l2fc,withoutlist.l2fc)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(sixty7d.l2fc.withOrWithoutFru.venn), nrow=2)
+
+
+
+
+
+withlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(with_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+withoutlist.expr <- (hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% ungroup() %>% filter(without_expr_rank < 11) %>% select(geneid) %>% unique() %>% as.list())$geneid
+
+sixty7d.expr.withOrWithoutFru.venn  <-draw.pairwise.venn(area1 = length(withlist.expr), area2 = length(withoutlist.expr),  cross.area = length(intersect(withlist.expr,withoutlist.expr)), category = c("with", "without"), fill=c("red", "blue"), ind=F)
+
+
+sixty7d.expr.withOrWithoutFru.venn.grb <- arrangeGrob(grobTree(grid.text(paste("expression:\n",100*round(length(intersect(withlist.expr,withoutlist.expr))/length(union(withlist.expr,withoutlist.expr)),2),"% similar", sep=""),gp=gpar(fontsize=16, col="black", rot=30), draw=F)), grobTree(sixty7d.expr.withOrWithoutFru.venn), nrow=2)
+
+###assemble the expr venn grob
+
+
+
+
+fig_cnt <- fig_cnt + 1
+
+grid.arrange(grobs=lapply(list(sixty7d.padj.withOrWithoutFru.venn.grb, sixty7d.l2fc.withOrWithoutFru.venn.grb, sixty7d.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of 67d Contrast Top 10 Lists, with/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+
+
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_noFru67dCont_VennSim.png", sep=""))
+grid.arrange(grobs=lapply(list(sixty7d.padj.withOrWithoutFru.venn.grb, sixty7d.l2fc.withOrWithoutFru.venn.grb, sixty7d.expr.withOrWithoutFru.venn.grb), grobTree), ncol=3)
+grid.text(paste("Figure ", fig_cnt, ". Similarity of 67d Contrast Top 10 Lists, with/without FruLexaFru440 samples  (pooled alignment strategies)"),x = 0.55, y=0.95, gp=gpar(fontsize=11))
+dev.off()
+
+```
+
+We can also look at the rank correlations:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt.rot <- hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt %>% select(c("geneid", "aligner"), contains("_rank")) %>% gather(contains("_rank"), key=measure, value=rank) %>% separate(measure, into=c("fru", "measure", "null")) %>% select(-c("null")) %>% spread(key=fru, value=rank)
+
+
+
+
+fig_cnt <- fig_cnt + 1
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkor.gg <- ggplot(hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkt.rot) + geom_point(aes(x=with, y=without, color = aligner)) + facet_grid(.~measure) + labs(title=paste("Figure ",fig_cnt, ". Rank correlations of expression, effect size, and significance\n(67d contrasts, with/without FruLexa)", sep = ""), x = "with FruLexa/Fru440", y = "without FruLexa/Fru440") + theme_bw()
+
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkor.gg 
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_hausWtVsMut_withWithoutFru_67dContrast_rankCorr.png", sep=""))
+hausWtVsMut.dm6_genes.MpBC.itemized.withOrWithoutFru.67d.ronkor.gg 
+dev.off()
+
+
+```
 
 
 ## Comparing Expression Changes from Housing with Expression Changes from Genotype
@@ -3651,7 +3979,6 @@ dev.off()
 Of the mututally significant genes, fewer have the same direction of change than not:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
 tbl_cnt <- tbl_cnt + 1
 
 haus_and_or47b.change.cosig.agreeNums.gt <- haus_and_or47b.change.cosig %>% mutate(concur=case_when(concur==TRUE ~ "Agree", concur == FALSE ~ "Disagree")) %>% group_by(aligner,concur) %>% summarise(count=n()) %>% spread(key=aligner, value=count) %>% ungroup() %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Number of Genes with Significant Changes in Both Contrasts, by Shared Direction of Change", sep = ""), subtitle=paste("change in housing vs OR47b")) %>% cols_label(concur = " ")
@@ -5067,6 +5394,412 @@ fruIntrons.MpBCO.volcano.gg
 dev.off()
 ```
 
+
+## Impact of 47b2 on 88a 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fotie7_on_88.dm6_genes.multi.MpBC.itemized <- read_delim("diff_expr/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fotie7_on_88.dm6_genes.multi.MpBC.itemized$aligner <- as.factor("multi")
+
+fotie7_on_88.dm6_genes.rando.MpBC.itemized <- read_delim("diff_expr/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceRando.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fotie7_on_88.dm6_genes.rando.MpBC.itemized$aligner <- as.factor("rando")
+
+fotie7_on_88.dm6_genes.uniq.MpBC.itemized <- read_delim("diff_expr/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+fotie7_on_88.dm6_genes.uniq.MpBC.itemized$aligner <- as.factor("uniq")
+
+fotie7_on_88.dm6_genes.MpBC.itemized <- rbind(fotie7_on_88.dm6_genes.multi.MpBC.itemized, fotie7_on_88.dm6_genes.rando.MpBC.itemized, fotie7_on_88.dm6_genes.uniq.MpBC.itemized)
+
+fotie7_on_88_multi.go <- read_delim("gene_ont/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+fotie7_on_88_rando.go <- read_delim("gene_ont/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceRando.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+fotie7_on_88_uniq.go <- read_delim("gene_ont/47b_on_88a/47b_on_88a.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+
+fotie7_on_88.go <- rbind(fotie7_on_88_multi.go %>% mutate(aligner=as.factor("multi")), fotie7_on_88_rando.go%>% mutate(aligner=as.factor("rando")), fotie7_on_88_uniq.go%>% mutate(aligner=as.factor("uniq")))
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+fotie7_on_88.de <-  inner_join(fotie7_on_88.dm6_genes.MpBC.itemized, G_list, by=c("geneid"="flybase_gene_id"))
+
+fotie7_on_88.de.sig <- fotie7_on_88.de  %>% filter(padj.genotype.vs_47b2.88a.apeglm <0.01)
+
+write.table(fotie7_on_88.de, "results/tables/supp/47b_on_88a.de.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
+```
+
+full results: results/tables/supp/47b_on_88a.de.tsv
+
+Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+fotie7_on_88.volcano.gg <- ggplot(fotie7_on_88.de)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.genotype.vs_47b2.88a.apeglm > 0.01), aes(x=-log10(padj.genotype.vs_47b2.88a.apeglm), y = log2FoldChange.genotype.vs_47b2.88a.apeglm), color="black", alpha=0.25, shape=1) + geom_point(data = . %>% filter(padj.genotype.vs_47b2.88a.apeglm < 0.01), aes(x=-log10(padj.genotype.vs_47b2.88a.apeglm), y = log2FoldChange.genotype.vs_47b2.88a.apeglm), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(88a mutants, with/without 47b2)", sep = ""), x = "significance (pp)", y = "log2FoldChange") + theme_bw()
+
+fotie7_on_88.volcano.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_47b2on88a_genotypeVolcano.png", sep=""))
+fotie7_on_88.volcano.gg
+dev.off()
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+fig_cnt <- fig_cnt + 1
+
+fotie7_on_88.lfcHist.gg <- ggplot(fotie7_on_88.de %>% select(aligner, padj.genotype.vs_47b2.88a.apeglm, log2FoldChange.genotype.vs_47b2.88a.apeglm)) + geom_freqpoly(aes(x = log2FoldChange.genotype.vs_47b2.88a.apeglm, y = ..density..), color="black") + geom_freqpoly(data = . %>% filter(padj.genotype.vs_47b2.88a.apeglm < 0.01),aes(x = log2FoldChange.genotype.vs_47b2.88a.apeglm, y = ..density..), color="red") +geom_vline(xintercept = -1, color = "blue", linetype="dotted" ) +geom_vline(xintercept = 1, color = "blue", linetype="dotted" )+ facet_grid(aligner~.)  + labs(title=paste("Figure ",fig_cnt, ". histogram of fold change\nwithsignificant(padj<0.01) changes highlighted in red\n(88a mutants, with/without 47b2)", sep = ""), x = "log2FoldChange", y = "density") + theme_bw()
+
+fotie7_on_88.lfcHist.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_47b2on88a_shrunkFChist.png", sep=""))
+fotie7_on_88.lfcHist.gg
+dev.off()
+
+
+```
+
+Of the $`r  fotie7_on_88.de %>% filter(!is.na(padj.genotype.vs_47b2.88a.apeglm)) %>% select(external_gene_name) %>% unique() %>% nrow() `$ genes with significance scores available, $`r  fotie7_on_88.de %>% filter(!is.na(padj.genotype.vs_47b2.88a.apeglm) & padj.genotype.vs_47b2.88a.apeglm <0.01 ) %>% select(external_gene_name) %>% unique() %>% nrow() `$ have an adjusted p < 0.01 ( $`r  ( fotie7_on_88.de %>% filter(!is.na(padj.genotype.vs_47b2.88a.apeglm) & padj.genotype.vs_47b2.88a.apeglm <0.01 ) %>% select(external_gene_name) %>% unique() %>% nrow())/(fotie7_on_88.de %>% filter(!is.na(padj.genotype.vs_47b2.88a.apeglm)) %>% select(external_gene_name) %>% unique() %>% nrow())*100 `$ %)
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fotie7_on_88.de.chonksters <- fotie7_on_88.de %>% filter(padj.genotype.vs_47b2.88a.apeglm < 0.01 & abs(log2FoldChange.genotype.vs_47b2.88a.apeglm)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.genotype.vs_47b2.88a.apeglm) -log10(padj.genotype.vs_47b2.88a.apeglm))  %>% select(aligner, external_gene_name, maggie, present) 
+
+
+```
+
+From the volcano plots, we can pull out genes with large (ie, a fold change greater than 2 or less than 1/2), significant (ie, padj < 0.01) changes. There were  $`r  fotie7_on_88.de.chonksters %>% select(external_gene_name) %>% unique() %>% nrow() `$ such genes, mostly shared across alignment strategy:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+fotie7_on_88.chonky.gt <-inner_join(fotie7_on_88.de.chonksters %>% group_by(external_gene_name) %>% summarise(maggie = max(maggie)) %>% arrange(-maggie) %>% select(external_gene_name), fotie7_on_88.de.chonksters %>% select(-c(maggie))%>% spread(key = aligner, value =present, fill = "no"), by = c("external_gene_name"="external_gene_name")) %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Genes with Large ( 2< fold change), Significant (padj < 0.01) Changes", sep = ""), subtitle="88a mutants, with/without 47b2") %>% cols_label(external_gene_name = " ")
+
+#fotie7_on_88.chonky.gt
+
+write(fotie7_on_88.chonky.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_47b2on88a_chonky.html", sep=""))
+
+```
+
+$`r paste("results/tables/tbl",tbl_cnt,"_47b2on88a_chonky.html", sep="") `$
+
+### Top Tens
+Genes with top 10 most significant changes
+
+Ordered in decreasing significance, the alignemnt strategies agree on the top 10 most significant changes:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+fotie7_on_88.de.sigRank <- fotie7_on_88.de.sig %>% arrange(-padj.genotype.vs_47b2.88a.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(padj.genotype.vs_47b2.88a.apeglm, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.genotype.vs_47b2.88a.apeglm, log2FoldChange.genotype.vs_47b2.88a.apeglm, padj.genotype.vs_47b2.88a.apeglm ,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+
+fotie7_on_88.de.sigRank.gt <- fotie7_on_88.de.sigRank %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Most Significantly (padj<0.01) Differentially Expressed Genes", sep = ""), subtitle=paste("88a mutants, with/without 47b2"))%>% fmt_scientific(columns=contains("padj.genotype.vs_47b2.88a.apeglm"), decimals=2)%>% fmt_number(columns=contains("log2FoldChange.genotype.vs_47b2.88a.apeglm"), decimals=3) %>% fmt_number(columns=contains("expression.genotype.vs_47b2.88a.apeglm"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi") ) %>% tab_spanner(label = "rando", columns =contains("rando")) %>% tab_spanner(label = "uniq", columns = contains("uniq")) %>% cols_label(multi_expression.genotype.vs_47b2.88a.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",multi_padj.genotype.vs_47b2.88a.apeglm="adjusted p",)%>% cols_label(rando_expression.genotype.vs_47b2.88a.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",rando_padj.genotype.vs_47b2.88a.apeglm ="adjusted p",) %>% cols_label(uniq_expression.genotype.vs_47b2.88a.apeglm ="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",uniq_padj.genotype.vs_47b2.88a.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.genotype.vs_47b2.88a.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.genotype.vs_47b2.88a.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.genotype.vs_47b2.88a.apeglm"), after = c("uniq_geneid"))
+
+tbl_cnt <- tbl_cnt + 1
+fotie7_on_88.de.sigRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(fotie7_on_88.de.sigRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_47b2on88a_top10MostSig.html", sep=""))
+
+```
+
+Top 10 genes with biggest (significant) effect sizes 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+fotie7_on_88.de.lfcRank <- fotie7_on_88.de.sig  %>% arrange(-abs(log2FoldChange.genotype.vs_47b2.88a.apeglm))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.genotype.vs_47b2.88a.apeglm), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.genotype.vs_47b2.88a.apeglm, log2FoldChange.genotype.vs_47b2.88a.apeglm,padj.genotype.vs_47b2.88a.apeglm,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+fotie7_on_88.de.lfcRank.gt <- fotie7_on_88.de.lfcRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Largest Magnitude Fold Changes which were Significant (padj < 0.01)", sep = ""), subtitle=paste("88a mutants, with/without 47b2"))%>% fmt_scientific(columns=contains("padj"), decimals=2) %>% fmt_number(columns=contains("log2FoldChange"), decimals=3) %>% fmt_number(columns=contains("expression"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi")) %>% tab_spanner(label = "rando", columns = contains("rando")) %>% tab_spanner(label = "uniq", columns =contains("uniq") ) %>%cols_label(multi_expression.genotype.vs_47b2.88a.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange", multi_padj.genotype.vs_47b2.88a.apeglm="adjusted p")%>% cols_label(rando_expression.genotype.vs_47b2.88a.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",rando_padj.genotype.vs_47b2.88a.apeglm="adjusted p")  %>% cols_label(uniq_expression.genotype.vs_47b2.88a.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",uniq_padj.genotype.vs_47b2.88a.apeglm="adjusted p") %>% cols_move(columns = c("multi_expression.genotype.vs_47b2.88a.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.genotype.vs_47b2.88a.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.genotype.vs_47b2.88a.apeglm"), after = c("uniq_geneid"))
+
+tbl_cnt <- tbl_cnt + 1
+fotie7_on_88.de.lfcRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(fotie7_on_88.de.lfcRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_47b2on88a_top10lfc_andSig.html", sep=""))
+
+```
+
+Top 10 highest expressed genes with significant change
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fotie7_on_88.de.expRank <- fotie7_on_88.de.sig %>% arrange(-expression.genotype.vs_47b2.88a.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.genotype.vs_47b2.88a.apeglm, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.genotype.vs_47b2.88a.apeglm, log2FoldChange.genotype.vs_47b2.88a.apeglm, padj.genotype.vs_47b2.88a.apeglm, aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+fotie7_on_88.de.expRank.gt <- fotie7_on_88.de.expRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Highest Expressed Genes with Significant (padj < 0.01) Expression Difference", sep = ""), subtitle=paste("88a mutants, with/without 47b2")) %>% fmt_scientific(columns=contains("padj"), decimals=2) %>% fmt_number(columns = contains("log2FoldChange"), decimals=3) %>% fmt_number(columns=contains("expression"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi")) %>% tab_spanner(label = "rando", columns =contains("rando")) %>% tab_spanner(label = "uniq", columns =contains("uniq")) %>% cols_label(multi_expression.genotype.vs_47b2.88a.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",multi_padj.genotype.vs_47b2.88a.apeglm="adjusted p",)%>% cols_label(rando_expression.genotype.vs_47b2.88a.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",rando_padj.genotype.vs_47b2.88a.apeglm="adjusted p",) %>% cols_label(uniq_expression.genotype.vs_47b2.88a.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.genotype.vs_47b2.88a.apeglm="log2 FoldChange",uniq_padj.genotype.vs_47b2.88a.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.genotype.vs_47b2.88a.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.genotype.vs_47b2.88a.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.genotype.vs_47b2.88a.apeglm"), after = c("uniq_geneid"))
+
+tbl_cnt <- tbl_cnt + 1
+fotie7_on_88.de.expRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(fotie7_on_88.de.expRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_47b2on88a_top10exp_andSig.html", sep=""))
+
+```
+
+
+### Gene Ontology Enrichment
+
+Genes were analyzed for GO Term Enrichment using topGO, using Fisher's test applied to those whose expression difference passed a significance threshold (p < 0.01), and applying the Kolmogorov-Smirnov test using p-values as scores. 
+
+-> check consistency between GO terms between alignment strategies
+-> filter out very broad/very specific terms?
+
+Correlation between significance values for the two tests
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+fotie7_on_88.go.gg <- ggplot(fotie7_on_88.go, aes(x=-log10(classicFisher), y=-log10(classicKS))) + geom_point(data = . %>% filter(classicFisher < 0.01 & classicKS < 0.01),color="black", alpha = 0.5 ) + geom_point(data = . %>% filter(classicFisher < 0.01 & classicKS < 0.01), aes(color=ontology)) + geom_hline(yintercept = -log10(0.01), color = "blue", alpha = 0.5)  + geom_vline(xintercept = -log10(0.01), color = "blue", alpha = 0.5)+ facet_grid(~aligner)  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of GO Term Enrichment Significance for Two Tests\n(88a mutants, with/without 47b2)", sep = ""), x = "classicFisher significance (pp)", y = "classicKS significance (pp)") + theme_bw()
+
+fotie7_on_88.go.gg
+
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_47b2on88a_GO_scatter.png", sep=""))
+fotie7_on_88.go.gg
+dev.off()
+
+
+```
+
+```
+tetrapyrrole binding (GO:0046906)
+inorganic molecular entity transmembrane transporter activity (GO:0015318)
+system process (GO:0003008)
+sensory perception (GO:0007600)
+response to chemical (GO:0042221)
+obsolete plasma membrane part (GO:0044459) 
+plasma membrane bounded cell projection (GO:0120025)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#hausWtVsMut.67b.go  %>% filter(classicFisher < 0.01 & classicKS < 0.01) 
+
+tbl_cnt <- tbl_cnt + 1
+
+fotie7_on_88.go.sig <- fotie7_on_88.go   %>% filter(classicFisher < 0.01 & classicKS < 0.01) %>% select(c("GO.ID","go_name", "classicFisher", "classicKS", "ontology", "aligner")) 
+
+fotie7_on_88.go.sig.gt <- fotie7_on_88.go.sig %>% filter(aligner == "multi") %>% group_by(ontology)  %>% mutate(rank = rank(classicFisher, ties.method = "last")) %>% filter(rank<11) %>% select(-c("aligner", "rank")) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Enriched GO Terms among Significantly Differentially Expressed Genes", sep = ""), subtitle=paste("88a mutants, with/without 47b2; multi only; top 10 most significant per category")) %>% tab_spanner(label="p-value", columns = c("classicFisher", "classicKS"))%>% fmt_scientific(columns=vars(classicFisher,classicKS), decimals=2) %>% cols_label( GO.ID="GO Term", go_name="Description", classicFisher ="Fisher", classicKS = "K-S") 
+
+
+
+fotie7_on_88.go.sig.gt
+write(fotie7_on_88.go.sig.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_hausWtVsMut_FruLexa440_geneOnt.html", sep=""))
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+write.table(fotie7_on_88.go, "results/tables/supp/47b_on_88a.go.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
+```
+
+
+
+## Two Days' Difference
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+two_days_difference.dm6_genes.multi.MpBC.itemized <- read_delim("diff_expr/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+two_days_difference.dm6_genes.multi.MpBC.itemized$aligner <- as.factor("multi")
+
+two_days_difference.dm6_genes.rando.MpBC.itemized <- read_delim("diff_expr/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceRando.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+two_days_difference.dm6_genes.rando.MpBC.itemized$aligner <- as.factor("rando")
+
+two_days_difference.dm6_genes.uniq.MpBC.itemized <- read_delim("diff_expr/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
+two_days_difference.dm6_genes.uniq.MpBC.itemized$aligner <- as.factor("uniq")
+
+two_days_difference.dm6_genes.MpBC.itemized <- rbind(two_days_difference.dm6_genes.multi.MpBC.itemized, two_days_difference.dm6_genes.rando.MpBC.itemized, two_days_difference.dm6_genes.uniq.MpBC.itemized)
+
+two_days_difference_multi.go <- read_delim("gene_ont/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+two_days_difference_rando.go <- read_delim("gene_ont/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceRando.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+two_days_difference_uniq.go <- read_delim("gene_ont/2_days_difference/2_days_difference.vs_dm6main.dm6_genes.mapspliceUniq.MpBC.go", "\t", escape_double = FALSE, trim_ws = TRUE)
+
+two_days_difference.go <- rbind(two_days_difference_multi.go %>% mutate(aligner=as.factor("multi")), two_days_difference_rando.go%>% mutate(aligner=as.factor("rando")), two_days_difference_uniq.go%>% mutate(aligner=as.factor("uniq")))
+```
+
+
+Full table: results/tables/supp/two_days_difference.de.tsv
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+two_days_difference.de <-  inner_join(two_days_difference.dm6_genes.MpBC.itemized, G_list, by=c("geneid"="flybase_gene_id"))
+
+write.table(two_days_difference.de, "results/tables/supp/two_days_difference.de.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
+
+two_days_difference.de.sig <- two_days_difference.de  %>% filter(padj.day.vs_7.apeglm <0.01)
+
+
+```
+
+Here is a volcano plot for the three alignment strategies, with significance on the horizontal axis and log2 fold change on the vertical. Significant (padj<0.01) differences are highlighted in red. Dashed blue guidelines mark a log2 fold change of +/-1 (ie, a difference in expression of a factor of 2). Genes with negative log2 fold changes are downregulated relative to the group-housed condition; positive fold changes are upregulated. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+two_days_difference.volcano.gg <- ggplot(two_days_difference.de)+ geom_hline(yintercept = 1, color = "blue", linetype="dotted" )+ geom_hline(yintercept = -1, color = "blue", linetype="dotted" ) + geom_point(data = . %>% filter(padj.day.vs_7.apeglm > 0.01), aes(x=-log10(padj.day.vs_7.apeglm), y = log2FoldChange.day.vs_7.apeglm), color="black", alpha=0.25, shape=1) + geom_point(data = . %>% filter(padj.day.vs_7.apeglm < 0.01), aes(x=-log10(padj.day.vs_7.apeglm), y = log2FoldChange.day.vs_7.apeglm), color="red", alpha=1, shape=16) + facet_grid(.~aligner) + labs(title=paste("Figure ",fig_cnt, ". Volcano Plot: Fold Change vs. Significance\n(from day 5 to day 7)", sep = ""), x = "significance (pp)", y = "log2FoldChange") + theme_bw()
+
+two_days_difference.volcano.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_2daysdifference_Volcano.png", sep=""))
+two_days_difference.volcano.gg
+dev.off()
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+two_days_difference.lfcHist.gg <- ggplot(two_days_difference.de %>% select(aligner, padj.day.vs_7.apeglm, log2FoldChange.day.vs_7.apeglm)) + geom_freqpoly(aes(x = log2FoldChange.day.vs_7.apeglm, y = ..density..), color="black") + geom_freqpoly(data = . %>% filter(padj.day.vs_7.apeglm < 0.01),aes(x = log2FoldChange.day.vs_7.apeglm, y = ..density..), color="red") +geom_vline(xintercept = -1, color = "blue", linetype="dotted" ) +geom_vline(xintercept = 1, color = "blue", linetype="dotted" )+ facet_grid(aligner~.)  + labs(title=paste("Figure ",fig_cnt, ". histogram of fold change\nwithsignificant(padj<0.01) changes highlighted in red\n(from day 5 to day 7)", sep = ""), x = "log2FoldChange", y = "density") + theme_bw()
+
+two_days_difference.lfcHist.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_twoDaysDifference_shrunkFChist.png", sep=""))
+two_days_difference.lfcHist.gg
+dev.off()
+
+
+```
+
+Of the $`r  two_days_difference.de %>% filter(!is.na(padj.day.vs_7.apeglm)) %>% select(external_gene_name) %>% unique() %>% nrow() `$ genes with significance scores available, $`r  two_days_difference.de %>% filter(!is.na(padj.day.vs_7.apeglm) & padj.day.vs_7.apeglm <0.01 ) %>% select(external_gene_name) %>% unique() %>% nrow() `$ have an adjusted p < 0.01 ( $`r  ( two_days_difference.de %>% filter(!is.na(padj.day.vs_7.apeglm) & padj.day.vs_7.apeglm <0.01 ) %>% select(external_gene_name) %>% unique() %>% nrow())/(two_days_difference.de %>% filter(!is.na(padj.day.vs_7.apeglm)) %>% select(external_gene_name) %>% unique() %>% nrow())*100 `$ %)
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+two_days_difference.de.chonksters <- two_days_difference.de %>% filter(padj.day.vs_7.apeglm < 0.01 & abs(log2FoldChange.day.vs_7.apeglm)>1 )%>% mutate(present = "yes", maggie = abs(log2FoldChange.day.vs_7.apeglm) -log10(padj.day.vs_7.apeglm))  %>% select(aligner, external_gene_name, maggie, present) 
+
+
+```
+
+From the volcano plots, we can pull out genes with large (ie, a fold change greater than 2 or less than 1/2), significant (ie, padj < 0.01) changes. There were  $`r  two_days_difference.de.chonksters %>% select(external_gene_name) %>% unique() %>% nrow() `$ such genes, mostly shared across alignment strategy:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+two_days_difference.chonky.gt <-inner_join(two_days_difference.de.chonksters %>% group_by(external_gene_name) %>% summarise(maggie = max(maggie)) %>% arrange(-maggie) %>% select(external_gene_name), two_days_difference.de.chonksters %>% select(-c(maggie))%>% spread(key = aligner, value =present, fill = "no"), by = c("external_gene_name"="external_gene_name")) %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Genes with Large ( 2< fold change), Significant (padj < 0.01) Changes", sep = ""), subtitle="from day 5 to day 7") %>% cols_label(external_gene_name = " ")
+
+two_days_difference.chonky.gt
+
+write(two_days_difference.chonky.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_2daysdifference_chonky.html", sep=""))
+
+```
+
+### Top Tens
+Genes with top 10 most significant changes
+
+Ordered in decreasing significance, the alignemnt strategies agree on the top 10 most significant changes:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+two_days_difference.de.sigRank <- two_days_difference.de.sig %>% arrange(-padj.day.vs_7.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(padj.day.vs_7.apeglm, ties.method = "last")) %>% filter(rank<11) %>% select(c(geneid, expression.day.vs_7.apeglm, log2FoldChange.day.vs_7.apeglm, padj.day.vs_7.apeglm ,aligner, external_gene_name, rank)) %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_") %>% spread(key=nu_key, value=value) %>% mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+tbl_cnt <- tbl_cnt + 1
+
+two_days_difference.de.sigRank.gt <- two_days_difference.de.sigRank %>% gt()%>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Most Significantly (padj<0.01) Differentially Expressed Genes", sep = ""), subtitle=paste("88a mutants, with/without 47b2"))%>% fmt_scientific(columns=contains("padj.day.vs_7.apeglm"), decimals=2)%>% fmt_number(columns=contains("log2FoldChange.day.vs_7.apeglm"), decimals=3) %>% fmt_number(columns=contains("expression.day.vs_7.apeglm"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi") ) %>% tab_spanner(label = "rando", columns =contains("rando")) %>% tab_spanner(label = "uniq", columns = contains("uniq")) %>% cols_label(multi_expression.day.vs_7.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",multi_padj.day.vs_7.apeglm="adjusted p",)%>% cols_label(rando_expression.day.vs_7.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",rando_padj.day.vs_7.apeglm ="adjusted p",) %>% cols_label(uniq_expression.day.vs_7.apeglm ="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.day.vs_7.apeglm="log2 FoldChange", uniq_padj.day.vs_7.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.day.vs_7.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.day.vs_7.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.day.vs_7.apeglm"), after = c("uniq_geneid"))
+
+two_days_difference.de.sigRank.gt  %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(two_days_difference.de.sigRank.gt   %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_2daysDifference_top10MostSig.html", sep=""))
+
+```
+
+Top 10 genes with biggest (significant) effect sizes 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+two_days_difference.de.lfcRank <- two_days_difference.de.sig  %>% arrange(-abs(log2FoldChange.day.vs_7.apeglm))%>% group_by(aligner)  %>% mutate(rank = rank(-abs(log2FoldChange.day.vs_7.apeglm), ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid,expression.day.vs_7.apeglm, log2FoldChange.day.vs_7.apeglm,padj.day.vs_7.apeglm,aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+
+two_days_difference.de.lfcRank.gt <- two_days_difference.de.lfcRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Largest Magnitude Fold Changes which were Significant (padj < 0.01)", sep = ""), subtitle=paste("47b1 mutants, from day 5 to day 7"))%>% fmt_scientific(columns=contains("padj"), decimals=2) %>% fmt_number(columns=contains("log2FoldChange"), decimals=3) %>% fmt_number(columns=contains("expression"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi")) %>% tab_spanner(label = "rando", columns = contains("rando")) %>% tab_spanner(label = "uniq", columns =contains("uniq") ) %>%cols_label(multi_expression.day.vs_7.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.day.vs_7.apeglm="log2 FoldChange", multi_padj.day.vs_7.apeglm="adjusted p")%>% cols_label(rando_expression.day.vs_7.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",rando_padj.day.vs_7.apeglm="adjusted p")  %>% cols_label(uniq_expression.day.vs_7.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",uniq_padj.day.vs_7.apeglm="adjusted p") %>% cols_move(columns = c("multi_expression.day.vs_7.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.day.vs_7.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.day.vs_7.apeglm"), after = c("uniq_geneid"))
+
+two_days_difference.de.lfcRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(two_days_difference.de.lfcRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_2daysDifference_top10lfc_andSig.html", sep=""))
+```
+
+Top 10 highest expressed genes with significant change
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+two_days_difference.de.expRank <- two_days_difference.de.sig %>% arrange(-expression.day.vs_7.apeglm)%>% group_by(aligner)  %>% mutate(rank = rank(-expression.day.vs_7.apeglm, ties.method = "first"))  %>% filter(rank<11) %>% select(c(geneid, expression.day.vs_7.apeglm, log2FoldChange.day.vs_7.apeglm, padj.day.vs_7.apeglm, aligner, external_gene_name, rank))  %>% gather(key = key, value = value, -one_of("rank", "aligner")) %>% unite(aligner, key, col = "nu_key", sep="_")%>% spread(key=nu_key, value=value)  %>%   mutate_at(vars(-one_of("multi_external_gene_name","multi_geneid","uniq_external_gene_name","uniq_geneid","rando_external_gene_name","rando_geneid")), funs(as.numeric(.)))
+tbl_cnt <- tbl_cnt + 1
+
+two_days_difference.de.expRank.gt <- two_days_difference.de.expRank %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Top Ten Highest Expressed Genes with Significant (padj < 0.01) Expression Difference", sep = ""), subtitle=paste("47b1 mutants, from day 5 to day 7")) %>% fmt_scientific(columns=contains("padj"), decimals=2) %>% fmt_number(columns = contains("log2FoldChange"), decimals=3) %>% fmt_number(columns=contains("expression"), decimals=2) %>% tab_spanner(label = "multi", columns = contains("multi")) %>% tab_spanner(label = "rando", columns =contains("rando")) %>% tab_spanner(label = "uniq", columns =contains("uniq")) %>% cols_label(multi_expression.day.vs_7.apeglm="expression",multi_external_gene_name="name", multi_geneid="FB ID",multi_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",multi_padj.day.vs_7.apeglm="adjusted p",)%>% cols_label(rando_expression.day.vs_7.apeglm="expression",rando_external_gene_name="name", rando_geneid="FB ID",rando_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",rando_padj.day.vs_7.apeglm="adjusted p",) %>% cols_label(uniq_expression.day.vs_7.apeglm="expression",uniq_external_gene_name="name", uniq_geneid="FB ID", uniq_log2FoldChange.day.vs_7.apeglm="log2 FoldChange",uniq_padj.day.vs_7.apeglm="adjusted p",) %>% cols_move(columns = c("multi_expression.day.vs_7.apeglm"), after = c("multi_geneid"))%>% cols_move(columns = c("rando_expression.day.vs_7.apeglm"), after = c("rando_geneid"))%>% cols_move(columns = c("uniq_expression.day.vs_7.apeglm"), after = c("uniq_geneid"))
+
+two_days_difference.de.expRank.gt %>% cols_hide(c("multi_geneid","rando_geneid","uniq_geneid"))
+
+write(two_days_difference.de.expRank.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_2daysDifference_top10exp_andSig.html", sep=""))
+
+```
+
+
+### Gene Ontology Enrichment
+
+Genes were analyzed for GO Term Enrichment using topGO, using Fisher's test applied to those whose expression difference passed a significance threshold (p < 0.01), and applying the Kolmogorov-Smirnov test using p-values as scores. 
+
+-> check consistency between GO terms between alignment strategies
+-> filter out very broad/very specific terms?
+
+Correlation between significance values for the two tests
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+two_days_difference.go.gg <- ggplot(two_days_difference.go, aes(x=-log10(classicFisher), y=-log10(classicKS))) + geom_point(data = . %>% filter(classicFisher < 0.01 & classicKS < 0.01),color="black", alpha = 0.5 ) + geom_point(data = . %>% filter(classicFisher < 0.01 & classicKS < 0.01), aes(color=ontology)) + geom_hline(yintercept = -log10(0.01), color = "blue", alpha = 0.5)  + geom_vline(xintercept = -log10(0.01), color = "blue", alpha = 0.5)+ facet_grid(~aligner)  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of GO Term Enrichment Significance for Two Tests\n(47b1 mutants, from day 5 to day 7)", sep = ""), x = "classicFisher significance (pp)", y = "classicKS significance (pp)") + theme_bw()
+
+two_days_difference.go.gg 
+
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_2daysDifference_GO_scatter.png", sep=""))
+two_days_difference.go.gg 
+dev.off()
+
+
+```
+
+```
+ regulation of vesicle-mediated transport (GO:0060627)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#hausWtVsMut.67b.go  %>% filter(classicFisher < 0.01 & classicKS < 0.01) 
+
+tbl_cnt <- tbl_cnt + 1
+
+two_days_difference.go.sig <- two_days_difference.go   %>% filter(classicFisher < 0.01 & classicKS < 0.01) %>% select(c("GO.ID","go_name", "classicFisher", "classicKS", "ontology", "aligner")) 
+
+two_days_difference.go.sig.gt <- two_days_difference.go.sig %>% filter(aligner == "uniq") %>% group_by(ontology)  %>% mutate(rank = rank(classicFisher, ties.method = "last")) %>% filter(rank<11) %>% select(-c("aligner", "rank")) %>% gt() %>%  tab_header(title=paste("Table ",tbl_cnt, ". Enriched GO Terms among Significantly Differentially Expressed Genes", sep = ""), subtitle=paste("47b1 mutants, from day 5 to day 7; uniq only; top 10 most significant per category")) %>% tab_spanner(label="p-value", columns = c("classicFisher", "classicKS"))%>% fmt_scientific(columns=vars(classicFisher,classicKS), decimals=2) %>% cols_label( GO.ID="GO Term", go_name="Description", classicFisher ="Fisher", classicKS = "K-S") 
+
+
+
+two_days_difference.go.sig.gt
+write(two_days_difference.go.sig.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_2daysDifference_geneOnt.html", sep=""))
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+write.table(two_days_difference.go, "results/tables/supp/2daysDifference.go.tsv", sep = "\t", col.names = TRUE, row.names = FALSE)
+```
 
 
 
