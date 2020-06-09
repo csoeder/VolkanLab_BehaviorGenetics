@@ -173,7 +173,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
       tissue: antennae
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
@@ -184,7 +184,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
       tissue: antennae
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
@@ -195,7 +195,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
       tissue: antennae
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
@@ -265,15 +265,83 @@ data_sets:
       tissue: antennae
       SRA: a
 
+    - name: CantonS_1
+      path: FASTQ/RNAseq/CantonS/rep1/
+      paired: True
+      readsfile1: SRR8890850_1.fastq
+      readsfile2: SRR8890850_2.fastq
+      rep: 1
+#      day: adult
+      genotype: [CantonS,]
+      housing: group
+      subgroups: [all,cantonAmos,cantonWt]
+      tissue: antennae
+      SRA: SRR8890850
+    - name: CantonS_2
+      path: FASTQ/RNAseq/CantonS/rep2/
+      paired: True
+      readsfile1: SRR8890851_1.fastq
+      readsfile2: SRR8890851_2.fastq
+      rep: 2
+#      day: adult
+      genotype: [CantonS,]
+      housing: group
+      subgroups: [all,cantonAmos,cantonWt]
+      tissue: antennae
+      SRA: SRR8890851
+    - name: CantonS_3
+      path: FASTQ/RNAseq/CantonS/rep3/
+      paired: True
+      readsfile1: SRR8890849_1.fastq
+      readsfile2: SRR8890849_2.fastq
+      rep: 3
+#      day: adult
+      genotype: [CantonS,]
+      housing: group
+      subgroups: [all,cantonAmos,cantonWt]
+      tissue: antennae
+      SRA: SRR8890849
+    - name: amos_1
+      path: FASTQ/RNAseq/amos/rep1/
+      paired: True
+      readsfile1: SRR8884118_1.fastq
+      readsfile2: SRR8884118_2.fastq
+      rep: 1
+#      day: adult
+      genotype: [amos,]
+      housing: group
+      subgroups: [all,cantonAmos,]
+      tissue: antennae
+      SRA: SRR8884118
+    - name: amos_2
+      path: FASTQ/RNAseq/amos/rep2/
+      paired: True
+      readsfile1: SRR8890847_1.fastq
+      readsfile2: SRR8890847_2.fastq
+      rep: 2
+#      day: adult
+      genotype: [amos,]
+      housing: group
+      subgroups: [all,cantonAmos,]
+      tissue: antennae
+      SRA: SRR8890847
+    - name: amos_3
+      path: FASTQ/RNAseq/amos/rep3/
+      paired: True
+      readsfile1: SRR8890848_1.fastq
+      readsfile2: SRR8890848_2.fastq
+      rep: 3
+#      day: adult
+      genotype: [amos,]
+      housing: group
+      subgroups: [all,cantonAmos,]
+      tissue: antennae
+      SRA: SRR8890848
+
+
+
 
 reference_genomes:
-    - name: dm6v13
-      species: drosophila melanogaster
-      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta
-      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta.fai
-      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_bowtie/dmel-r6.13
-      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_split/
-      source: Flybase
     - name: dm6main
       species: drosophila melanogaster
       path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa
@@ -281,9 +349,6 @@ reference_genomes:
       bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_bowtie/dm6.main
       split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_split/
       source: UCSC Genome Browser
-
-
-
 
 annotations:
     - name: dm6_genes
@@ -360,6 +425,10 @@ gene_queries:
       list_path: utils/geneLists/brysonRush_FBgn.clean.txt 
       base: dm6_genes
       bed_path: utils/annotations/brysonPriority.bed
+    - name: ionChannel
+      list_path: utils/geneLists/ionChannel_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionChannel.bed
 
 
 
@@ -409,5 +478,15 @@ contrasts:
       filt: 2_days_difference
       vars: ["rep", "day"]
       ref: ["1", "5" ]
+    - name: cantonAmos
+      design: ~ genotype
+      filt: cantonAmos
+      vars: ["rep", "genotype"]
+      ref: ["1", "CantonS" ]
+    - name: cantonWt
+      design: ~ genotype
+      filt: cantonWt
+      vars: ["rep", "genotype"]
+      ref: ["1", "wt" ]
 
 

@@ -305,8 +305,6 @@ rule mapsplice2_align_raw:
 		reads_in = lambda wildcards: expand("{path}{sample}.clean.R{pair}.fastq", path=sample_by_name[wildcards.sample]['path'], sample=wildcards.sample, pair = [1,2]),
 	output:
 		raw_bam = "mapped_reads/mapspliceRaw/{sample}/{sample}.vs_{ref_genome}.mapspliceRaw.sort.bam",
-#		bam_out = "mapped_reads/mapsplice/{sample}/{sample}.vs_{ref_genome}.mapsplice.sort.bam",
-#		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
 		runmem_gb=16,
 		runtime="16:00:00",
@@ -325,12 +323,6 @@ rule mapsplice2_align_raw:
 			samtools index {output.raw_bam};
 			rm mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam;
 			""")
-#			mv mapped_reads/mapsplice/{wildcards.sample}/stats.txt summaries/BAMs/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.fresh.stats;
-#			mv mapped_reads/mapsplice/{wildcards.sample}/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats summaries/BAMs/{wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats;
-
-#			samtools view -Sbh alignments.sam | samtools sort -n | samtools fixmate -m | samtools sort - | samtools markdup {params.dup_flg} -s - {wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.sort.bam 2> {wildcards.sample}.vs_{wildcards.ref_genome}.mapsplice.dupStats;
-
-#		
 
 
 
@@ -339,8 +331,6 @@ rule mapsplice2_align_multi:
 		raw_bam = "mapped_reads/mapspliceRaw/{sample}/{sample}.vs_{ref_genome}.mapspliceRaw.sort.bam",
 	output:
 		multi_bam = "mapped_reads/mapspliceMulti/{sample}/{sample}.vs_{ref_genome}.mapspliceMulti.sort.bam",
-#		bam_out = "mapped_reads/mapsplice/{sample}/{sample}.vs_{ref_genome}.mapsplice.sort.bam",
-#		splutflg = "utils/mapsplut.{sample}.vs_{ref_genome}.flg"
 	params:
 		runmem_gb=8,
 		runtime="1:00:00",
@@ -385,7 +375,7 @@ rule mapsplice2_align_rando:
 		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
 	params:
 		runmem_gb=16,
-		runtime="12:00:00",
+		runtime="24:00:00",
 		cores=8,
 	message:
 		"Downsampling multimappers from {wildcards.sample} alignment to {wildcards.ref_genome}..."
@@ -612,7 +602,6 @@ rule de_GOntologer:
 
 
 
-
 rule write_report:
 	input:
 		reference_genome_summary = ["summaries/reference_genomes.summary"],
@@ -621,12 +610,13 @@ rule write_report:
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
 		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
 		counting_summary_genes = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["dm6_genes","fru_exons"], flag=["MpBC","MpBCO"], aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
-		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["fru_junct", "fru_intron"], flag="MpBC", aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"]),#"mapspliceRaw",
+		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["fru_junct", "fru_intron"], flag=["MpBC","MpBCO"], aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"]),#"mapspliceRaw",
 		expFlg = "utils/all.expression.flag",
 		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"]),#,"itemized.de"]),
-		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru", "2_days_difference", "47b_on_88a"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+		diff_item2 = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["2_days_difference", "47b_on_88a", "cantonAmos"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", ],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
 		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru"], annot = ["fru_junct", "fru_intron"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
-		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference"]),
+		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference", "cantonAmos", "cantonWt"]),
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:
