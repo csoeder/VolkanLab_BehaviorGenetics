@@ -107,7 +107,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,2_days_difference]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,2_days_difference]
       tissue: antennae
     - name: 7D_47B1MUT_2
       path: FASTQ/RNAseq/47B1MUT_7D/rep2/
@@ -118,7 +118,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,2_days_difference]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,2_days_difference]
       tissue: antennae
     - name: 7D_47B1MUT_3
       path: FASTQ/RNAseq/47B1MUT_7D/rep3/
@@ -129,7 +129,7 @@ data_sets:
       day: 7
       genotype: [47b1,]
       housing: group
-      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,2_days_difference]
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,2_days_difference]
       tissue: antennae
     - name: 7D_67DMUT_1
       path: FASTQ/RNAseq/67DMUT_7D/rep1/
@@ -140,7 +140,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru]
       tissue: antennae
     - name: 7D_67DMUT_2
       path: FASTQ/RNAseq/67DMUT_7D/rep2/
@@ -151,7 +151,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru]
       tissue: antennae
     - name: 7D_67DMUT_3
       path: FASTQ/RNAseq/67DMUT_7D/rep3/
@@ -162,7 +162,7 @@ data_sets:
       day: 7
       genotype: [67d,]
       housing: group
-      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru]
       tissue: antennae
     - name: 7D_GROUPHOUSE_1
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
@@ -173,8 +173,10 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,cantonWt,cantonAmosWt,grpWtVsFru_smolFru]
       tissue: antennae
+      normie: regular
+      cw: w
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
       paired: True
@@ -184,8 +186,10 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,cantonWt,cantonAmosWt,grpWtVsFru_smolFru]
       tissue: antennae
+      normie: regular
+      cw: w
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
       paired: True
@@ -195,8 +199,10 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: group
-      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut,hausWtVsMut_noFru,cantonWt]
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,cantonWt,cantonAmosWt,grpWtVsFru_smolFru]
       tissue: antennae
+      normie: regular
+      cw: w
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
       paired: True
@@ -206,7 +212,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru]
       tissue: antennae
     - name: 7D_ISOLATED_2
       path: FASTQ/RNAseq/ISOLATED_7D/rep2/
@@ -217,7 +223,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru]
       tissue: antennae
     - name: 7D_ISOLATED_3
       path: FASTQ/RNAseq/ISOLATED_7D/rep3/
@@ -228,7 +234,7 @@ data_sets:
       day: 7
       genotype: [wt,]
       housing: isolated
-      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_noFru]
+      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru]
       tissue: antennae
     - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
@@ -250,7 +256,7 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,]
       tissue: antennae
     - name: FRULEXAFRU440_3
       path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
@@ -261,7 +267,7 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,]
       tissue: antennae
       SRA: a
 
@@ -274,9 +280,11 @@ data_sets:
 #      day: adult
       genotype: [CantonS,]
       housing: group
-      subgroups: [all,cantonAmos,cantonWt]
+      subgroups: [all,cantonAmos,cantonWt,cantonAmosWt]
       tissue: antennae
       SRA: SRR8890850
+      normie: regular
+      cw: C
     - name: CantonS_2
       path: FASTQ/RNAseq/CantonS/rep2/
       paired: True
@@ -286,9 +294,11 @@ data_sets:
 #      day: adult
       genotype: [CantonS,]
       housing: group
-      subgroups: [all,cantonAmos,cantonWt]
+      subgroups: [all,cantonAmos,cantonWt,cantonAmosWt]
       tissue: antennae
       SRA: SRR8890851
+      normie: regular
+      cw: C
     - name: CantonS_3
       path: FASTQ/RNAseq/CantonS/rep3/
       paired: True
@@ -298,9 +308,11 @@ data_sets:
 #      day: adult
       genotype: [CantonS,]
       housing: group
-      subgroups: [all,cantonAmos,cantonWt]
+      subgroups: [all,cantonAmos,cantonWt,cantonAmosWt]
       tissue: antennae
       SRA: SRR8890849
+      normie: regular
+      cw: C
     - name: amos_1
       path: FASTQ/RNAseq/amos/rep1/
       paired: True
@@ -310,9 +322,11 @@ data_sets:
 #      day: adult
       genotype: [amos,]
       housing: group
-      subgroups: [all,cantonAmos,]
+      subgroups: [all,cantonAmos,cantonAmosWt]
       tissue: antennae
       SRA: SRR8884118
+      normie: mutant
+      cw: C
     - name: amos_2
       path: FASTQ/RNAseq/amos/rep2/
       paired: True
@@ -322,9 +336,11 @@ data_sets:
 #      day: adult
       genotype: [amos,]
       housing: group
-      subgroups: [all,cantonAmos,]
+      subgroups: [all,cantonAmos,cantonAmosWt]
       tissue: antennae
       SRA: SRR8890847
+      normie: mutant
+      cw: C
     - name: amos_3
       path: FASTQ/RNAseq/amos/rep3/
       paired: True
@@ -334,9 +350,341 @@ data_sets:
 #      day: adult
       genotype: [amos,]
       housing: group
-      subgroups: [all,cantonAmos,]
+      subgroups: [all,cantonAmos,cantonAmosWt]
       tissue: antennae
       SRA: SRR8890848
+      normie: mutant
+      cw: C
+
+
+    - name: wt_L_1
+      path: FASTQ/RNAseq/wt_L/rep1/
+      paired: True
+      readsfile1: PV1118_1-WT_L1_ATCACG_L002_R1_001.fastq
+      readsfile2: PV1118_1-WT_L1_ATCACG_L002_R2_001.fastq
+      rep: 1
+      day: larva
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_L_2
+      path: FASTQ/RNAseq/wt_L/rep2/
+      paired: True
+      readsfile1: PV1118_2-WT_L2_CGATGT_L002_R1_001.fastq
+      readsfile2: PV1118_2-WT_L2_CGATGT_L002_R2_001.fastq
+      rep: 2
+      day: larva
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_P8_1
+      path: FASTQ/RNAseq/wt_P8/rep1/
+      paired: True
+      readsfile1: PV1118_3-WT_P8_1_TTAGGC_L002_R1_001.fastq
+      readsfile2: PV1118_3-WT_P8_1_TTAGGC_L002_R2_001.fastq
+      rep: 1
+      day: P8
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_P8_2
+      path: FASTQ/RNAseq/wt_P8/rep2/
+      paired: True
+      readsfile1: PV1118_4-WT_P8_2_TGACCA_L002_R1_001.fastq
+      readsfile2: PV1118_4-WT_P8_2_TGACCA_L002_R2_001.fastq
+      rep: 2
+      day: P8
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_P40_1
+      path: FASTQ/RNAseq/wt_P40/rep1/
+      paired: True
+      readsfile1: PV1118_5-WT_P40_1_ACAGTG_L002_R1_001.fastq
+      readsfile2: PV1118_5-WT_P40_1_ACAGTG_L002_R2_001.fastq
+      rep: 1
+      day: P40
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_P40_2
+      path: FASTQ/RNAseq/wt_P40/rep2/
+      paired: True
+      readsfile1: PV1118_6-WT_P40_2_GCCAAT_L002_R1_001.fastq
+      readsfile2: PV1118_6-WT_P40_2_GCCAAT_L002_R2_001.fastq
+      rep: 2
+      day: P40
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_A_1
+      path: FASTQ/RNAseq/wt_A/rep1/
+      paired: True
+      readsfile1: PV1118_7-WT_A1_CAGATC_L002_R1_001.fastq
+      readsfile2: PV1118_7-WT_A1_CAGATC_L002_R2_001.fastq
+      rep: 1
+      day: adult
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+    - name: wt_A_2
+      path: FASTQ/RNAseq/wt_A/rep2/
+      paired: True
+      readsfile1: PV1118_8-WT_A2_ACTTGA_L002_R1_001.fastq
+      readsfile2: PV1118_8-WT_A2_ACTTGA_L002_R2_001.fastq
+      rep: 2
+      day: adult
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: regular
+ #     cw: C
+
+
+
+
+
+    - name: het_L_1
+      path: FASTQ/RNAseq/het_L/rep1/
+      paired: True
+      readsfile1: PV_HET_1-het_L1_GATCAG_L002_R1_001.fastq
+      readsfile2: PV_HET_1-het_L1_GATCAG_L002_R2_001.fastq
+      rep: 1
+      day: larva
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_L_2
+      path: FASTQ/RNAseq/het_L/rep2/
+      paired: True
+      readsfile1: PV_HET_2-het_L2_TAGCTT_L002_R1_001.fastq
+      readsfile2: PV_HET_2-het_L2_TAGCTT_L002_R2_001.fastq
+      rep: 2
+      day: larva
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_P8_1
+      path: FASTQ/RNAseq/het_P8/rep1/
+      paired: True
+      readsfile1: PV_HET_3-het_P8_1_GGCTAC_L002_R1_001.fastq
+      readsfile2: PV_HET_3-het_P8_1_GGCTAC_L002_R2_001.fastq
+      rep: 1
+      day: P8
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_P8_2
+      path: FASTQ/RNAseq/het_P8/rep2/
+      paired: True
+      readsfile1: PV_HET_4-het_P8_2_CTTGTA_L002_R1_001.fastq
+      readsfile2: PV_HET_4-het_P8_2_CTTGTA_L002_R2_001.fastq
+      rep: 2
+      day: P8
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_P40_1
+      path: FASTQ/RNAseq/het_P40/rep1/
+      paired: True
+      readsfile1: PV_HET_5-het_P40_1_AGTCAA_L002_R1_001.fastq
+      readsfile2: PV_HET_5-het_P40_1_AGTCAA_L002_R2_001.fastq
+      rep: 1
+      day: P40
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_P40_2
+      path: FASTQ/RNAseq/het_P40/rep2/
+      paired: True
+      readsfile1: PV_HET_6-het_P40_2_AGTTCC_L002_R1_001.fastq
+      readsfile2: PV_HET_6-het_P40_2_AGTTCC_L002_R2_001.fastq
+      rep: 2
+      day: P40
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_A_1
+      path: FASTQ/RNAseq/het_A/rep1/
+      paired: True
+      readsfile1: PV_HET_7-het_A1_ATGTCA_L002_R1_001.fastq
+      readsfile2: PV_HET_7-het_A1_ATGTCA_L002_R2_001.fastq
+      rep: 1
+      day: adult
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: het_A_2
+      path: FASTQ/RNAseq/het_A/rep2/
+      paired: True
+      readsfile1: PV_HET_8-het_A2_CCGTCC_L002_R1_001.fastq
+      readsfile2: PV_HET_8-het_A2_CCGTCC_L002_R2_001.fastq
+      rep: 2
+      day: adult
+      genotype: [wt,rn,]
+      housing: group
+      subgroups: [all,rotund]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+
+
+
+
+
+
+
+    - name: rn_L_1
+      path: FASTQ/RNAseq/rn_L/rep1/
+      paired: True
+      readsfile1: PV_RN_1-rn_L1_GTCCGC_L002_R1_001.fastq
+      readsfile2: PV_RN_1-rn_L1_GTCCGC_L002_R2_001.fastq
+      rep: 1
+      day: larva
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_L_2
+      path: FASTQ/RNAseq/rn_L/rep2/
+      paired: True
+      readsfile1: PV_RN_2-rn_L2_GTGAAA_L002_R1_001.fastq
+      readsfile2: PV_RN_2-rn_L2_GTGAAA_L002_R2_001.fastq
+      rep: 2
+      day: larva
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_P8_1
+      path: FASTQ/RNAseq/rn_P8/rep1/
+      paired: True
+      readsfile1: PV_RN_3-rn_P8_1_GTGGCC_L002_R1_001.fastq
+      readsfile2: PV_RN_3-rn_P8_1_GTGGCC_L002_R2_001.fastq
+      rep: 1
+      day: P8
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_P8_2
+      path: FASTQ/RNAseq/rn_P8/rep2/
+      paired: True
+      readsfile1: PV_RN_4-rn_P8_2_GTTTCG_L002_R1_001.fastq
+      readsfile2: PV_RN_4-rn_P8_2_GTTTCG_L002_R2_001.fastq
+      rep: 2
+      day: P8
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_P40_1
+      path: FASTQ/RNAseq/rn_P40/rep1/
+      paired: True
+      readsfile1: PV_RN_5-rn_P40_1_CGTACG_L002_R1_001.fastq
+      readsfile2: PV_RN_5-rn_P40_1_CGTACG_L002_R2_001.fastq
+      rep: 1
+      day: P40
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_P40_2
+      path: FASTQ/RNAseq/rn_P40/rep2/
+      paired: True
+      readsfile1: PV_RN_6-rn_P40_2_GAGTGG_L002_R1_001.fastq
+      readsfile2: PV_RN_6-rn_P40_2_GAGTGG_L002_R2_001.fastq
+      rep: 2
+      day: P40
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_A_1
+      path: FASTQ/RNAseq/rn_A/rep1/
+      paired: True
+      readsfile1: PV_RN_7-rn_A1_ACTGAT_L002_R1_001.fastq
+      readsfile2: PV_RN_7-rn_A1_ACTGAT_L002_R2_001.fastq
+      rep: 1
+      day: adult
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+    - name: rn_A_2
+      path: FASTQ/RNAseq/rn_A/rep2/
+      paired: True
+      readsfile1: PV_RN_8-rn_A2_ATTCCT_L002_R1_001.fastq
+      readsfile2: PV_RN_8-rn_A2_ATTCCT_L002_R2_001.fastq
+      rep: 2
+      day: adult
+      genotype: [rn,]
+      housing: group
+      subgroups: [all,rotund,rotundCorrSimple]
+ #     tissue: antennae
+      normie: mutant
+ #     cw: C
+
+
+
+
 
 
 
@@ -369,6 +717,10 @@ annotations:
     - name: fru_intron
       bed_path: utils/annotations/fru_ex.bed
       gtf_path: utils/annotations/fru_introns.gtf
+      derived: False
+    - name: fru_isoid
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru.isoids.gtf
       derived: False
     - name: ionotropic
       bed_path: utils/annotations/ionotropic.bed
@@ -468,6 +820,18 @@ contrasts:
       filt: hausWtVsMut_noFru
       vars: ["rep", "genotype", "housing"]
       ref: ["1", "wt", "group" ]
+
+    - name: hausWtVsMut_smolFru
+      design: ~ genotype + housing
+      filt: hausWtVsMut_smolFru
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+    - name: grpWtVsFru_smolFru
+      design: ~ genotype
+      filt: grpWtVsFru_smolFru
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+
     - name: 47b_on_88a
       design: ~ genotype 
       filt: 47b_on_88a
@@ -488,5 +852,37 @@ contrasts:
       filt: cantonWt
       vars: ["rep", "genotype"]
       ref: ["1", "wt" ]
+    - name: cantonAmosWt
+      design: ~ normie + cw
+      filt: cantonAmosWt
+      vars: ["rep", "normie", "cw"]
+      ref: ["1", "regular", "w" ]
 
 
+xcontrasts:
+    - name: dex_wtHousing
+      design: ~ sample + exon + condition:exon
+      filt: wtHousing
+      vars: [housing]
+      ref: ["group" ]
+    - name: dex_grpWtVs67d
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs67d
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVs47b
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs47b
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru
+      vars: [genotype]
+      ref: ["wt" ]      
+
+correlations:
+    - name: rotundCorrSimple
+      compare: ["wt","rn"]
+      filt: rotundCorrSimple
+      vars: ["genotype"]

@@ -209,6 +209,20 @@ rule demand_annotation_summaries:
 			shell(""" cat summaries/annotations/{anne}.stats | awk '{{print"{anne}\t"$0}}' >> {output.refann_summary}""")
 
 
+rule fruIsoids:
+	input:
+		fruGene_in = "utils/annotations/fru.gtf",
+	output:
+		fruIsoid_out = "utils/annotations/fru.isoids.gtf",
+	params:
+		runmem_gb=8,
+		runtime="1:00",
+		cores=8,
+	message:
+		"running the edgeHog on Fru .... "
+	run:
+		shell(""" python scripts/edgeHog.py --gtf_in $(pwd)/utils/annotations/fru.gtf -o utils/annotations/fru -n FBgn0004652 """)
+
 
 rule geneListReporter:
 	input:
@@ -473,12 +487,46 @@ rule demand_BAM_analytics:
 		"""cat {input.bam_reports} | awk '{{print "{wildcards.ref_genome}\t{wildcards.aligner}\t"$0}}'> {output.full_report}"""
 
 
+rule extract_fru_coverage:
+	input:
+		bam_in = "mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam",
+	output:
+		bg_out = "summaries/coverage/fru.{aligner}.{sample}.{ref_genome}.bedgraph"
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+		location = "chr3R:18,413,579-18,546,928"
+	message:
+		"collecting all alignment metadata.... "
+	run:
+		fai = ref_genome_by_name[wildcards.ref_genome]['fai']
+		shell(""" mkdir -p summaries/coverage/ """)
+		shell(""" samtools view -hb {input.bam_in} {params.location} | bedtools genomecov -split -bga -ibam - -g {fai} > {output.bg_out} """)
+
+
+
+rule summon_fru_coverages:
+	input:
+		beegees = lambda wildcards: expand("summaries/coverage/fru.mapspliceMulti.{sample}.dm6main.bedgraph",sample= sampname_by_group['hausWtVsMut'] ),
+	output:
+		bg_out = "utils/frubeds.graphed"
+	params:
+		runmem_gb=1,
+		runtime="1:00",
+		cores=1,
+		location = "chr3R:18,413,579-18,546,928"
+	message:
+		"collecting all alignment metadata.... "
+	run:
+		shell(""" touch {output} """)
 
 
 
 rule count_features:
 	input:
 		alignments_in = lambda wildcards: expand("mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam", aligner = wildcards.aligner, sample=sampname_by_group[wildcards.group], ref_genome = wildcards.ref_genome  ),
+		annot_in = lambda wildcards: annotation_by_name[wildcards.annot]["gtf_path"]
 	output:
 		counted_features = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts",
 		count_stats = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts.summary",
@@ -580,7 +628,8 @@ rule da_Seeker:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p diff_expr/{wildcards.contrast} """)
 		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} """)
-
+		shell(""" mkdir -p meta/DESeq2_methods/ """)
+		shell(""" mv diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag}.method meta/DESeq2_methods/ """)
 
 
 
@@ -602,6 +651,124 @@ rule de_GOntologer:
 
 
 
+
+rule da_Correlator:
+	input:
+		xpr_in = "expression/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.rpkm",#, group =["all"])
+	output:
+		corr_out = "correlations/{correlation}/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.corr.tsv"
+	params:
+		runmem_gb=64,
+		runtime="30:00",
+		cores=8,
+	message:
+		"calculating differential correlation in {wildcards.correlation} contrast ({wildcards.aligner} to {wildcards.ref_genome} overlapping {wildcards.annot}) .... "
+	run:
+		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
+		shell(""" mkdir -p correlations/{wildcards.correlation}/ """)
+		shell(""" Rscript scripts/correlate.R {input.xpr_in} {wildcards.correlation} correlations/{wildcards.correlation}/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} """)
+
+
+#dexseq_prepper
+#~/R/libs/DEXSeq/python_scripts/dexseq_count.py 
+
+rule DEXSeq_builder:
+	output:
+		scripts = ["utils/DEXSeq/Subread_to_DEXSeq/dexseq_prepare_annotation2.py","utils/DEXSeq/Subread_to_DEXSeq/load_SubreadOutput.R"]
+#		scripts=['utils/DEXSeq/dexseq_count.py','utils/DEXSeq/dexseq_prepare_annotation.py']
+	params:
+		runmem_gb=8,
+		runtime="30:00",
+		cores=1,
+	run:
+		shell(
+			"""
+			mkdir -p utils/DEXSeq/;
+			""")
+
+#			dexwd=$(Rscript <(echo "cat(system.file( 'python_scripts', package='DEXSeq' ))" ));
+#			2to3 --verbose -n -W --output-dir=utils/DEXSeq/ $dexwd ;
+		shell("""
+			cd utils/DEXSeq/;
+			git clone https://github.com/vivekbhr/Subread_to_DEXSeq;
+			""")
+		#patch for wonky transcripts:https://stat.ethz.ch/pipermail/bioconductor/2012-June/046494.html
+
+
+rule DEXSeq_annot_prepper:
+	input:
+		scripts='utils/DEXSeq/Subread_to_DEXSeq/dexseq_prepare_annotation2.py',
+		anne = lambda wildcards: annotation_by_name[wildcards.anne]["gtf_path"]
+	output:
+		nu_gff = "utils/annotations/DEXSeq/{anne}.dxsqReady.gff",
+		fc_ready = "utils/annotations/DEXSeq/{anne}.dxsqReady.gtf"
+	params:
+		runmem_gb=8,
+		runtime="10:00",
+		cores=1,
+		prep_params = " --aggregate no",
+	run:
+		shell(
+			"""	
+				mkdir -p utils/annotations/DEXSeq/;
+				python utils/DEXSeq/Subread_to_DEXSeq/dexseq_prepare_annotation2.py {params.prep_params} <( cat {input.anne}| awk '{{print"chr"$0}}' ) -f {output.fc_ready} {output.nu_gff}
+			""")
+
+rule DEXSeq_annot_counter:#flag = M
+	input:
+		dxq_ann = "utils/annotations/DEXSeq/{anne}.dxsqReady.gtf",
+		alignments_in = lambda wildcards: expand("mapped_reads/{aligner}/{sample}/{sample}.vs_{ref_genome}.{aligner}.sort.bam", aligner = wildcards.aligner, sample=sampname_by_group[wildcards.group], ref_genome = wildcards.ref_genome  ),
+	output:
+		counted_features = "dxCounts/{group}.vs_{ref_genome}.{anne}.{aligner}.{flags}.dxsq.counts",
+		count_stats = "dxCounts/{group}.vs_{ref_genome}.{anne}.{aligner}.{flags}.dxsq.counts.summary",
+	params:
+		runmem_gb=8,
+		runtime="8:00:00",
+		cores=8,
+		fc_params = " -s 0 -f -O -p -B -C ",#count multimappers, record junctions, count paired-end fragments, well-mapped   <- some of this is moved into the "flag" wildcard
+	message:
+		"counting reads from {wildcards.group} aligned to {wildcards.ref_genome} with {wildcards.aligner} overlapping the DEXSeq-squashed {wildcards.anne} .... "
+	run:
+		flug_str = wildcards.flags
+		flug_lst = [ s for s in flug_str if s != "_"]
+		flug_str = " -%s "*len(flug_lst) % tuple(flug_lst)
+
+		sed_suff = ".vs_%s.%s.sort.bam" % tuple([wildcards.ref_genome, wildcards.aligner])		
+		sed_cmd =  " sed -e 's/mapped_reads\/[a-zA-Z0-9\/_]*\///g' | sed -e 's/%s//g' " % tuple([sed_suff])
+
+		shell(""" mkdir -p dxCounts summaries/dxCounts/""")
+		shell("""
+			featureCounts {flug_str} {params.fc_params} -t exon -g gene_id -F GTF -a {input.dxq_ann} -o {output.counted_features}.tmp {input.alignments_in}
+			""")
+		shell("""
+			cat {output.counted_features}.tmp | tail -n +2 | {sed_cmd} > {output.counted_features}
+			cat {output.counted_features}.tmp.summary | {sed_cmd} > {output.count_stats}
+			rm {output.counted_features}.tmp* 
+			""")
+		##cat {output.counted_features}.tmp.jcounts | {sed_cmd} > counts/DEXSeq/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.anne}.{wildcards.aligner}.{wildcards.flags}.counts.jcounts
+
+
+
+rule deX_seeker:#needs v3.5.0 lol
+	input:
+		dxq_ann = "utils/annotations/DEXSeq/{anne}.dxsqReady.gtf",
+		counted_features = "dxCounts/{group}.vs_{ref_genome}.{anne}.{aligner}.{flags}.dxsq.counts",
+	output:
+		dexSq ="diff_exon_use/{contrast}/{group}.vs_{ref_genome}.{anne}.{aligner}.{flags}.de",
+	params:
+		runmem_gb=8,
+		runtime="30:00",
+		cores=1,
+	message:
+		"calculating differential expression in {wildcards.contrast} contrast ({wildcards.aligner} to {wildcards.ref_genome} overlapping {wildcards.anne}) .... "
+	run:
+		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
+		shell(""" mkdir -p diff_exon_use/{wildcards.contrast}/ """)
+		shell(""" module unload r; module load r/3.5.0; Rscript scripts/dexSeqe.R {input.counted_features} diff_exon_use/{wildcards.contrast}/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.anne}.{wildcards.aligner}.{wildcards.flags} {input.dxq_ann} {wildcards.contrast} 'chr3R_FBgn0004652-' ; module unload r; module load r/3.6.0; """)
+
+
+
+
 rule write_report:
 	input:
 		reference_genome_summary = ["summaries/reference_genomes.summary"],
@@ -614,15 +781,16 @@ rule write_report:
 		expFlg = "utils/all.expression.flag",
 		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"]),#,"itemized.de"]),
 		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
-		diff_item2 = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["2_days_difference", "47b_on_88a", "cantonAmos"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", ],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
-		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru"], annot = ["fru_junct", "fru_intron"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
-		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference", "cantonAmos", "cantonWt"]),
+		diff_item2 = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["2_days_difference", "47b_on_88a", "cantonAmos", "cantonWt", "cantonAmosWt"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", ],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", "hausWtVsMut_noFru"], annot = ["fru_junct", "fru_intron", "fru_exons"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
+		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference", "cantonAmos", "cantonWt", "cantonAmosWt"]),
+		dxsq_readr = "utils/DEXSeq/Subread_to_DEXSeq/load_SubreadOutput.R",
 	output:
 		pdf_out="results/VolkanLab_BehaviorGenetics.pdf",
 	params:
-		runmem_gb=8,
-		runtime="1:00:00",
-		cores=2,
+		runmem_gb=64,
+		runtime="2:00:00",
+		cores=8,
 	message:
 		"writing up the results.... "
 	run:
