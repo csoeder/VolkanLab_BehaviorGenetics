@@ -54,12 +54,59 @@ names(coldata.df) <- "condition"
 print("experimental metadata selecteted")
 
 
+coldata.df$condition <- factor(coldata.df$condition, ordered = FALSE)
+
+coldata.df$condition = relevel(coldata.df$condition, ref = as.character(contrasts.df$ref))
+
+
+
+#relevel 
+#dxd.fc$condition <- factor(dxd.fc$condition, ordered=FALSE)
+#eg, https://support.bioconductor.org/p/74520/
+#dxd.fc$condition <- relevel(dxd.fc$condition, ref = as.factor(contrasts.df$ref))
+
+
+
+# #counts.dds$condition <- relevel(counts.dds$condition, ref = "untreated")
+# for (i in seq(nrow(contrasts.df))){
+# 	var <- contrasts.df[i,]$vars %>% as.character()
+# 	ruf <-contrasts.df[i,]$ref %>% as.character()
+# 	counts.dds[[var]] <- relevel(counts.dds[[var]], ref = ruf)
+# }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Run DEXSeq
 #desgn <- "~ sample + exon + condition:exon"
 desgn <- as.character(contrasts.df$design[1])
+
+
 dxd.fc = DEXSeqDataSetFromFeatureCounts(counts_in,flattenedfile = dsqx_gtf, sampleData =coldata.df, design= eval(parse(text=desgn)))
 print("DEXSeq Dataset Built")
+
+
+
+
+
+
+
+
+
+
+
+
 
 dxd.fc = estimateSizeFactors( dxd.fc )
 print("size factors estimated")
