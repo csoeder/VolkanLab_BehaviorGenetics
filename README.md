@@ -31,7 +31,7 @@ This recursively generates the differential expression analysis from raw data, s
 
 ## Code of Note
 
-
+```html
 ├── config.yaml<br>
 │ └── <i>configuration file for the pipeline</i><br>
 ├── dev<br>
@@ -70,7 +70,7 @@ This recursively generates the differential expression analysis from raw data, s
 └── VolkanLab_BehaviorGenetics.05_Apr_2021.pdf<br>
   └── <i>pipeline walkthrough and results summary</i><br>
 
-
+```
 
 
 
