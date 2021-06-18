@@ -10,8 +10,10 @@ module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie
 ```
 
 as well, the Snakefile includes rules with hard paths that will need changing:
+```
 fastp_clean_sample_pe	:	fastp
 write_report	:	pandoc_path
+```
 
 
 ## Data
