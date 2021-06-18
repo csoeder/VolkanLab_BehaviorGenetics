@@ -32,43 +32,43 @@ This recursively generates the differential expression analysis from raw data, s
 ## Code of Note
 
 ```html
-├── config.yaml<br>
-│ └── <i>configuration file for the pipeline</i><br>
-├── dev<br>
-│ ├── ...<br>
-│ └── <i>files from earlier stages in project development, including an older FAIRE-seq experiment</i><br>
-├── misc<br>
-│ ├── ...<br>
-│ └── <i>mostly metadata re: sequencing</i><br>
-├── README.md<br>
-├── scripts<br>
-│ ├── bam_summarizer.mapspliced.py<br>
-│ ├── collapsedSignalMerger.py<br>
-│ ├── correlate.R<br>
-│ ├── deSeqer.R<br>
-│ │ └── <i>differential expression testing script</i><br>
-│ ├── dexSeqe.R<br>
-│ │ └── <i>differential exon use testing script</i><br>
-│ ├── edgeHog.py<br>
-│ ├── expressionOmete.R<br>
-│ ├── faire_results.Rmd<br>
-│ ├── fastp_reporter.py<br>
-│ ├── geneOntologe.R<br>
-│ ├── multimap_spreader.py<br>
-│ ├── overlapSignalCollapser.py<br>
-│ ├── read_Hollower.py<br>
-│ ├── references.bib<br>
-│ ├── replicateCorrelations.png<br>
-│ └── RNAseq_results.Rmd<br>
-│   └── <i>summarize results</i><br>
-├── Snakefile<br>
-│ └── <i>rules file for the pipeline</i><br>
-├── utils<br>
-│ └── annotations<br>
-│   ├── ...<br>
-│   └── <i>includes lists of genes of interest</i><br>
-└── VolkanLab_BehaviorGenetics.05_Apr_2021.pdf<br>
-  └── <i>pipeline walkthrough and results summary</i><br>
+├── config.yaml
+│ └── (configuration file for the pipeline)
+├── dev
+│ ├── ...
+│ └── (files from earlier stages in project development, including an older FAIRE-seq experiment)
+├── misc
+│ ├── ...
+│ └── (mostly metadata re: sequencing)
+├── README.md
+├── scripts
+│ ├── bam_summarizer.mapspliced.py
+│ ├── collapsedSignalMerger.py
+│ ├── correlate.R
+│ ├── deSeqer.R
+│ │ └── (differential expression testing script)
+│ ├── dexSeqe.R
+│ │ └── (differential exon use testing script)
+│ ├── edgeHog.py
+│ ├── expressionOmete.R
+│ ├── faire_results.Rmd
+│ ├── fastp_reporter.py
+│ ├── geneOntologe.R
+│ ├── multimap_spreader.py
+│ ├── overlapSignalCollapser.py
+│ ├── read_Hollower.py
+│ ├── references.bib
+│ ├── replicateCorrelations.png
+│ └── RNAseq_results.Rmd
+│   └── (summarize results)
+├── Snakefile
+│ └── (rules file for the pipeline)
+├── utils
+│ └── annotations
+│   ├── ...
+│   └── (includes lists of genes of interest)
+└── VolkanLab_BehaviorGenetics.05_Apr_2021.pdf
+  └── (pipeline walkthrough and results summary)
 
 ```
 
