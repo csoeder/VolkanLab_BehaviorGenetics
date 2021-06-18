@@ -33,43 +33,42 @@ This recursively generates the differential expression analysis from raw data, s
 
 
 ├── config.yaml
-│   └── <i>configuration file for the pipeline</i>
+│ └── <i>configuration file for the pipeline</i>
 ├── dev
-│   ├── ...
-│   └── <i>files from earlier stages in project development, including an older FAIRE-seq experiment</i>
+│ ├── ...
+│ └── <i>files from earlier stages in project development, including an older FAIRE-seq experiment</i>
 ├── misc
-│   ├── ...
-│   └── <i>mostly metadata re: sequencing</i>
+│ ├── ...
+│ └── <i>mostly metadata re: sequencing</i>
 ├── README.md
-│
 ├── scripts
-│   ├── bam_summarizer.mapspliced.py
-│   ├── collapsedSignalMerger.py
-│   ├── correlate.R
-│   ├── deSeqer.R
-│   │   └── <i>differential expression testing script</i>
-│   ├── dexSeqe.R
-│   │   └── <i>differential exon use testing script</i>
-│   ├── edgeHog.py
-│   ├── expressionOmete.R
-│   ├── faire_results.Rmd
-│   ├── fastp_reporter.py
-│   ├── geneOntologe.R
-│   ├── multimap_spreader.py
-│   ├── overlapSignalCollapser.py
-│   ├── read_Hollower.py
-│   ├── references.bib
-│   ├── replicateCorrelations.png
-│   └── RNAseq_results.Rmd
-│      └── <i>summarize results</i>
+│ ├── bam_summarizer.mapspliced.py
+│ ├── collapsedSignalMerger.py
+│ ├── correlate.R
+│ ├── deSeqer.R
+│ │ └── <i>differential expression testing script</i>
+│ ├── dexSeqe.R
+│ │ └── <i>differential exon use testing script</i>
+│ ├── edgeHog.py
+│ ├── expressionOmete.R
+│ ├── faire_results.Rmd
+│ ├── fastp_reporter.py
+│ ├── geneOntologe.R
+│ ├── multimap_spreader.py
+│ ├── overlapSignalCollapser.py
+│ ├── read_Hollower.py
+│ ├── references.bib
+│ ├── replicateCorrelations.png
+│ └── RNAseq_results.Rmd
+│   └── <i>summarize results</i>
 ├── Snakefile
-│   └── <i>rules file for the pipeline</i>
+│ └── <i>rules file for the pipeline</i>
 ├── utils
-│   └── annotations
-│       ├── ...
-│       └── <i>includes lists of genes of interest</i>
+│ └── annotations
+│   ├── ...
+│   └── <i>includes lists of genes of interest</i>
 └── VolkanLab_BehaviorGenetics.05_Apr_2021.pdf
-   └── <i>pipeline walkthrough and results summary</i>
+  └── <i>pipeline walkthrough and results summary</i>
 
 
 
