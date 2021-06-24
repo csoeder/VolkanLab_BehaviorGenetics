@@ -1,6 +1,8 @@
 # Behavioral Genetics in Drosophila: RNA-Seq analysis pipeline
 
-Software used to analyze data for [to be published]
+Software used to analyze data for: "Changes in splicing and neuromodulatory gene expression programs in sensory neurons with pheromone signaling and social experience", Deanhard et al. 2021, bioRxiv. doi: https://doi.org/10.1101/2021.06.18.449021
+https://www.biorxiv.org/content/10.1101/2021.06.18.449021v2
+
 
 ## Dependencies
 
@@ -43,6 +45,9 @@ This recursively generates the differential expression analysis from raw data, s
 │ ├── ...
 │ └── (mostly metadata re: sequencing)
 ├── README.md
+├── quichen_duan
+│ ├── ...
+│ └── (scripts for followup analyses from Quichen Duan)
 ├── scripts
 │ ├── bam_summarizer.mapspliced.py
 │ ├── collapsedSignalMerger.py

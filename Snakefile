@@ -1,23 +1,12 @@
 configfile: 'config.yaml'
 #	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
-#rstudio/1.2.1335 
-
-#from itertools import combinations
 
 sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
 annotation_by_name = { a['name'] : a for a in config['annotations']}
 genelist_by_name = { l['name'] : l for l in config['gene_queries']}
 contrasts_by_name = {c['name'] : c for c in config['contrasts']}
-#distance_categories = ["I","II","III","IV","V","VI","VII","VIII","IX","X"]
-#distance_breaks = { distance_categories[n] : [config["distance_divisions"][n]['distance'],config["distance_divisions"][n+1]['distance']] for n in range(0, len(config["distance_divisions"])-1) }
-# samplist_by_experimental = {c['experimental'] : [] for c in config['data_sets']}
-# for c in config['data_sets']:
-# 	samplist_by_experimental[c["experimental"]].append(c)
 
-# samples_by_put = { c['put'] : [] for c in config['data_sets'] }
-# for c in config['data_sets']:
-# 	samples_by_put[c['put']].append(c)
 
 sampname_by_group = {}
 for s in sample_by_name.keys():
@@ -462,10 +451,6 @@ rule spliced_alignment_reporter:
 		shell(""" samtools sort -n {input.bam_in} | samtools fixmate -m - -  | samtools sort - | samtools markdup -sS - - 1> /dev/null 2> {input.bam_in}.dupe """)# /dev/null 2> {input.bam_in}.dupe;""")
 		shell("python3 scripts/bam_summarizer.mapspliced.py -f {input.bam_in}.flagstat --mapped_count {input.bam_in}.maptCount -i {input.bam_in}.idxstats -g {input.bam_in}.split.genomcov -G {input.bam_in}.span.genomcov -d {input.bam_in}.dpthStats -D {input.bam_in}.dupe -m {input.bam_in}.mapmult -o {output.report_out} -t {wildcards.sample}")
 
-# cat stats.pass1.txt  | grep -A4 "By mapping uniqueness" | grep -v "By mapping uniqueness" | cut -f 2 | paste <(echo -e "total_reads\nuniquely_mapped\nmultimapped\nunmapped") - 
-# cat stats.pass1.txt | grep paired_reads | grep -v fusion | cut -f 1,2
-# cat stats.pass1.txt | grep -A 3 "alignment types" | tail -n +2 | head -n 2 | sed -e 's/spliced/spliced_alignments/g'
-# cat stats.pass1.txt | grep -A 3 "Splice junctions" | tail -n +2 | head -n 2 | cut -f 1,2
 #https://github.com/broadinstitute/rnaseqc
 #awk '($6 ~ /N/)' | wc -l
 
@@ -584,6 +569,7 @@ rule measure_expression:
 		aln_rprt = "summaries/alignments.vs_{ref_genome}.{aligner}.summary",
 	output:
 		rpkm = "expression/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.rpkm",
+		tpm="expression/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.tpm",
 	params:
 		runmem_gb=1,
 		runtime="15:00",
@@ -592,7 +578,7 @@ rule measure_expression:
 		"converting counts of {wildcards.group} aligned to {wildcards.ref_genome} with {wildcards.aligner} overlapping {wildcards.annot} to expression values.... "
 	run:
 		shell(""" mkdir -p expression/ """)
-		shell(""" Rscript  scripts/expressionOmete.R {input.counted_features} {input.aln_rprt} {output.rpkm} """)
+		shell(""" Rscript  scripts/expressionOmete.R {input.counted_features} {input.aln_rprt} expression/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags} """)
 
 
 rule summon_expression_measures:
@@ -802,16 +788,3 @@ rule write_report:
 #		shell(""" tar cf results.tar results/ """)
 
 
-
-# rule geneList_ontologist:
-# 	input:
-# 		gene_list = "features/genelists/closest/{lust_prefix}.list"
-# 	output:
-# 		list_ontology = "features/ontologies/{lust_prefix}.go"
-# 	params:
-# 		runmem_gb=8,
-# 		runtime="1:00:00",
-# 		cores=8,
-# 	run:
-# 		shell(""" mkdir -p features/ontologies/ """)
-# 		shell(""" Rscript scripts/geneOntologer.R {input.gene_list} {output.list_ontology} """)
