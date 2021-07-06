@@ -109,6 +109,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,2_days_difference,new_sequence]
       tissue: antennae
+      SRA: SRR15005129
     - name: 7D_47B1MUT_2
       path: FASTQ/RNAseq/47B1MUT_7D/rep2/
       paired: True
@@ -120,6 +121,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,2_days_difference,new_sequence]
       tissue: antennae
+      SRA: SRR15005130
     - name: 7D_47B1MUT_3
       path: FASTQ/RNAseq/47B1MUT_7D/rep3/
       paired: True
@@ -131,6 +133,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,2_days_difference,new_sequence]
       tissue: antennae
+      SRA: SRR15005131
     - name: 7D_67DMUT_1
       path: FASTQ/RNAseq/67DMUT_7D/rep1/
       paired: True
@@ -142,6 +145,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005132
     - name: 7D_67DMUT_2
       path: FASTQ/RNAseq/67DMUT_7D/rep2/
       paired: True
@@ -153,6 +157,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005133
     - name: 7D_67DMUT_3
       path: FASTQ/RNAseq/67DMUT_7D/rep3/
       paired: True
@@ -164,6 +169,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005134
     - name: 7D_GROUPHOUSE_1
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
       paired: True
@@ -177,6 +183,7 @@ data_sets:
       tissue: antennae
       normie: regular
       cw: w
+      SRA: SRR15005135
     - name: 7D_GROUPHOUSE_2
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
       paired: True
@@ -190,6 +197,7 @@ data_sets:
       tissue: antennae
       normie: regular
       cw: w
+      SRA: SRR15005136
     - name: 7D_GROUPHOUSE_3
       path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
       paired: True
@@ -203,6 +211,7 @@ data_sets:
       tissue: antennae
       normie: regular
       cw: w
+      SRA: SRR15005137
     - name: 7D_ISOLATED_1
       path: FASTQ/RNAseq/ISOLATED_7D/rep1/
       paired: True
@@ -214,6 +223,7 @@ data_sets:
       housing: isolated
       subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005138
     - name: 7D_ISOLATED_2
       path: FASTQ/RNAseq/ISOLATED_7D/rep2/
       paired: True
@@ -225,6 +235,7 @@ data_sets:
       housing: isolated
       subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005139
     - name: 7D_ISOLATED_3
       path: FASTQ/RNAseq/ISOLATED_7D/rep3/
       paired: True
@@ -236,6 +247,7 @@ data_sets:
       housing: isolated
       subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005140
     - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
       paired: True
@@ -247,6 +259,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence]
       tissue: antennae
+      SRA: tbd
     - name: FRULEXAFRU440_2
       path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
       paired: True
@@ -258,6 +271,7 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence]
       tissue: antennae
+      SRA: SRR15005141
     - name: FRULEXAFRU440_3
       path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
       paired: True
@@ -269,7 +283,8 @@ data_sets:
       housing: group
       subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence]
       tissue: antennae
-      SRA: a
+      SRA: SRR15005142
+
 
     - name: CantonS_1
       path: FASTQ/RNAseq/CantonS/rep1/
@@ -879,7 +894,12 @@ xcontrasts:
       design: ~ sample + exon + condition:exon
       filt: grpWtVsFru
       vars: [genotype]
-      ref: ["wt" ]      
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru_smolFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru_smolFru
+      vars: [genotype]
+      ref: ["wt" ]
 
 correlations:
     - name: rotundCorrSimple

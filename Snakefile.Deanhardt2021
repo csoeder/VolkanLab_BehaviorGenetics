@@ -51,7 +51,7 @@ def partition_experimental_by_put(exp):
 
 rule all:
 	input: 
-		pdf_out="results/VolkanLabBehaviorGenetics.full.pdf",
+		pdf_out="results/VolkanLabBehaviorGenetics.Deanhardt2021.pdf",
 	params:
 		runmem_gb=1,
 		runtime="0:01:00",
@@ -63,8 +63,8 @@ rule all:
 		shell(""" mkdir -p results/tables/ ; touch results/tables/null.tmp ; for phial in $(ls -p results/tables/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/$phial results/tables/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/null.*.tmp; """)
 		shell(""" mkdir -p results/tables/supp/ ; touch results/tables/supp/null.tmp ; for phial in $(ls -p results/tables/supp/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/supp/$phial results/tables/supp/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/supp/null.*.tmp; """)
 
-		shell(""" mv results/VolkanLabBehaviorGenetics.full.pdf results/VolkanLab_BehaviorGenetics.full.$(date +%d_%b_%Y).pdf """)
-		shell(""" tar cf results.full.$(date +%d_%b_%Y).tar results/ """)
+		shell(""" mv results/VolkanLabBehaviorGenetics.Deanhardt2021.pdf results/VolkanLabBehaviorGenetics.Deanhardt2021.$(date +%d_%b_%Y).pdf """)
+		shell(""" tar cf results.Deanhardt2021.$(date +%d_%b_%Y).tar results/ """)
 
 
 rule summon_reads_SRA:
@@ -774,7 +774,7 @@ rule write_report:
 #		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference", "cantonAmos", "cantonWt", "cantonAmosWt"]),
 #		dxsq_readr = "utils/DEXSeq/Subread_to_DEXSeq/load_SubreadOutput.R",
 	output:
-		pdf_out="results/VolkanLabBehaviorGenetics.full.pdf",
+		pdf_out="results/VolkanLabBehaviorGenetics.Deanhardt2021.pdf",
 	params:
 		runmem_gb=64,
 		runtime="2:00:00",
@@ -785,7 +785,7 @@ rule write_report:
 		pandoc_path="/nas/longleaf/apps/rstudio/1.0.136/bin/pandoc"
 		pwd = subprocess.check_output("pwd",shell=True).decode().rstrip()+"/"
 		shell("""mkdir -p results/figures/supp/ results/tables/supp/""")
-		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/RNAseq_results.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
+		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/RNAseq_results.Deanhardt2021.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
 #		shell(""" tar cf results.tar results/ """)
 
 

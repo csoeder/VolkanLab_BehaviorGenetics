@@ -1,0 +1,353 @@
+data_sets:
+    - name: 7D_47B1MUT_1
+      path: FASTQ/RNAseq/47B1MUT_7D/rep1/
+      paired: True
+      readsfile1: SRR15005129_1.fastq
+      readsfile2: SRR15005129_2.fastq
+      rep: 1
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005129
+    - name: 7D_47B1MUT_2
+      path: FASTQ/RNAseq/47B1MUT_7D/rep2/
+      paired: True
+      readsfile1: SRR15005130_1.fastq
+      readsfile2: SRR15005130_2.fastq
+      rep: 2
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005130
+    - name: 7D_47B1MUT_3
+      path: FASTQ/RNAseq/47B1MUT_7D/rep3/
+      paired: True
+      readsfile1: SRR15005131_1.fastq
+      readsfile2: SRR15005131_2.fastq
+      rep: 3
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005131
+    - name: 7D_67DMUT_1
+      path: FASTQ/RNAseq/67DMUT_7D/rep1/
+      paired: True
+      readsfile1: SRR15005132_1.fastq
+      readsfile2: SRR15005132_2.fastq
+      rep: 1
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005132
+    - name: 7D_67DMUT_2
+      path: FASTQ/RNAseq/67DMUT_7D/rep2/
+      paired: True
+      readsfile1: SRR15005133_1.fastq
+      readsfile2: SRR15005133_2.fastq
+      rep: 2
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005133
+    - name: 7D_67DMUT_3
+      path: FASTQ/RNAseq/67DMUT_7D/rep3/
+      paired: True
+      readsfile1: SRR15005134_1.fastq
+      readsfile2: SRR15005134_2.fastq
+      rep: 3
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005134
+    - name: 7D_GROUPHOUSE_1
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
+      paired: True
+      readsfile1: SRR15005135_1.fastq
+      readsfile2: SRR15005135_2.fastq
+      rep: 1
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005135
+    - name: 7D_GROUPHOUSE_2
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
+      paired: True
+      readsfile1: SRR15005136_1.fastq
+      readsfile2: SRR15005136_2.fastq
+      rep: 2
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005136
+    - name: 7D_GROUPHOUSE_3
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
+      paired: True
+      readsfile1: SRR15005137_1.fastq
+      readsfile2: SRR15005137_2.fastq
+      rep: 3
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005137
+    - name: 7D_ISOLATED_1
+      path: FASTQ/RNAseq/ISOLATED_7D/rep1/
+      paired: True
+      readsfile1: SRR15005138_1.fastq
+      readsfile2: SRR15005138_2.fastq
+      rep: 1
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005138
+    - name: 7D_ISOLATED_2
+      path: FASTQ/RNAseq/ISOLATED_7D/rep2/
+      paired: True
+      readsfile1: SRR15005139_1.fastq
+      readsfile2: SRR15005139_2.fastq
+      rep: 2
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005139
+    - name: 7D_ISOLATED_3
+      path: FASTQ/RNAseq/ISOLATED_7D/rep3/
+      paired: True
+      readsfile1: SRR15005140_1.fastq
+      readsfile2: SRR15005140_2.fastq
+      rep: 3
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005140
+    - name: FRULEXAFRU440_1
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
+      paired: True
+      readsfile1: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R1_001.fastq
+      readsfile2: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R2_001.fastq
+      rep: 1
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence]
+      tissue: antennae
+      SRA: tbd
+    - name: FRULEXAFRU440_2
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
+      paired: True
+      readsfile1: SRR15005141_1.fastq
+      readsfile2: SRR15005141_2.fastq
+      rep: 2
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005141
+    - name: FRULEXAFRU440_3
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
+      paired: True
+      readsfile1: SRR15005142_1.fastq
+      readsfile2: SRR15005142_2.fastq
+      rep: 3
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence]
+      tissue: antennae
+      SRA: SRR15005142
+
+
+reference_genomes:
+    - name: dm6main
+      species: drosophila melanogaster
+      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa
+      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa.fai
+      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_bowtie/dm6.main
+      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_split/
+      source: UCSC Genome Browser
+
+annotations:
+    - name: dm6_genes
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.bed
+      gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.gtf
+      derived: False
+    - name: dm6_repeats
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dm6.repeatMasker.main.bed
+      derived: False
+    - name: fru_exons
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_ex.gtf
+      derived: False
+    - name: fru_junct
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_exonJunctions.gtf
+      derived: False
+    - name: fru_intron
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_introns.gtf
+      derived: False
+    - name: fru_isoid
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru.isoids.gtf
+      derived: False
+    - name: ionotropic
+      bed_path: utils/annotations/ionotropic.bed
+      base: dm6_genes
+      derived: True
+    - name: nervSysDev
+      bed_path: utils/annotations/nervSysDev.bed
+      base: dm6_genes
+      derived: True
+    - name: histoneMod
+      bed_path: utils/annotations/histoneMod.bed
+      base: dm6_genes
+      derived: True
+    - name: mating
+      bed_path: utils/annotations/mating.bed
+      base: dm6_genes
+      derived: True
+    - name: synapseSig
+      bed_path: utils/annotations/synapseSig.bed
+      base: dm6_genes
+      derived: True
+    - name: brysonsList
+      bed_path: utils/annotations/brysonsList.bed
+      base: dm6_genes
+      derived: True
+
+
+gene_queries:
+    - name: ionotropic
+      list_path: utils/geneLists/ionotropic_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionotropic.bed
+    - name: nervSysDev
+      list_path: utils/geneLists/nervSysDev_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/nervSysDev.bed
+    - name: histoneMod
+      list_path: utils/geneLists/histoneMod_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/histoneMod.bed
+    - name: mating
+      list_path: utils/geneLists/mating_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/mating.bed
+    - name: synapseSig
+      list_path: utils/geneLists/synapseSig_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/synapseSig.bed
+    - name: brysonsList
+      list_path: utils/geneLists/bryson_FBgn.clean.txt 
+      base: dm6_genes
+      bed_path: utils/annotations/brysonsList.bed
+    - name: brysonPriority
+      list_path: utils/geneLists/brysonRush_FBgn.clean.txt 
+      base: dm6_genes
+      bed_path: utils/annotations/brysonPriority.bed
+    - name: ionChannel
+      list_path: utils/geneLists/ionChannel_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionChannel.bed
+
+
+
+contrasts:
+    - name: wildTypeHousing
+      design: ~ housing
+      filt: wtHousing
+      vars: [rep, housing]
+      ref: ["1", "group" ]
+    - name: grpWtVs47b
+      design: ~ genotype
+      filt: grpWtVs47b
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    - name: grpWtVs67d
+      design: ~ genotype
+      filt: grpWtVs67d
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    - name: grpWtVsFru
+      design: ~ genotype
+      filt: grpWtVsFru
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    # - name: grpWtVsMut
+    #   design: ~ genotype
+    #   filt: grpWtVsMut
+    #   vars: [rep, genotype]
+    #   ref: ["1", "wt"]
+    - name: hausWtVsMut
+      design: ~ genotype + housing
+      filt: hausWtVsMut
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+    - name: hausWtVsMut_noFru
+      design: ~ genotype + housing
+      filt: hausWtVsMut_noFru
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+
+    - name: hausWtVsMut_smolFru
+      design: ~ genotype + housing
+      filt: hausWtVsMut_smolFru
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+    - name: grpWtVsFru_smolFru
+      design: ~ genotype
+      filt: grpWtVsFru_smolFru
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+
+xcontrasts:
+    - name: dex_wtHousing
+      design: ~ sample + exon + condition:exon
+      filt: wtHousing
+      vars: [housing]
+      ref: ["group" ]
+    - name: dex_grpWtVs67d
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs67d
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVs47b
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs47b
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru_smolFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru_smolFru
+      vars: [genotype]
+      ref: ["wt" ]
+

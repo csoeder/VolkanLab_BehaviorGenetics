@@ -1,6 +1,6 @@
 # Behavioral Genetics in Drosophila: RNA-Seq analysis pipeline
 
-Software used to analyze data for: "Changes in splicing and neuromodulatory gene expression programs in sensory neurons with pheromone signaling and social experience", Deanhard et al. 2021, bioRxiv. doi: https://doi.org/10.1101/2021.06.18.449021
+Software used to analyze data for: "Changes in splicing and neuromodulatory gene expression programs in sensory neurons with pheromone signaling and social experience", Deanhardt et al. 2021, bioRxiv. doi: https://doi.org/10.1101/2021.06.18.449021
 https://www.biorxiv.org/content/10.1101/2021.06.18.449021v2
 
 
@@ -32,6 +32,25 @@ snakemake
 ```
 
 This recursively generates the differential expression analysis from raw data, summarizes/vizualizes it in a PDF, and bundles/timestamps the results summary.
+
+
+The underlying differential expression and differential exon use data from Deanhardt et al. 2021 can be generated:
+
+```bash
+snakemake diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de 
+snakemake diff_exon_use/dex_grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.M.de
+```
+
+The results summary from Deanhardt et al. 2021 can be generated: (untested!)
+
+```bash
+snakemake --snakefile Snakefile.Deanhardt2021  --configfile config.Deanhardt2021.yaml 
+```
+
+
+
+
+
 
 ## Code of Note
 
