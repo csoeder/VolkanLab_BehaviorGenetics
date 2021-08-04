@@ -146,15 +146,15 @@ data_sets:
     - name: FRULEXAFRU440_1
       path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
       paired: True
-      readsfile1: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R1_001.fastq
-      readsfile2: FRULEXAFRU440_1_CTTCGACT-GCAAGATC_S26_L002_R2_001.fastq
+      readsfile1: SRR15095835_1.fastq
+      readsfile2: SRR15095835_2.fastq
       rep: 1
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence,new_sequence_update]
       tissue: antennae
-      SRA: tbd
+      SRA: SRR15095835
     - name: FRULEXAFRU440_2
       path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
       paired: True

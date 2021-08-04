@@ -257,9 +257,9 @@ data_sets:
       day: 7
       genotype: [FruLexaFru440,]
       housing: group
-      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence]
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence,new_sequence_update]
       tissue: antennae
-      SRA: tbd
+      SRA: SRR15095835
     - name: FRULEXAFRU440_2
       path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
       paired: True
