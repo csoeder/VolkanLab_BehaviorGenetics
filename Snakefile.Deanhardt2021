@@ -1,5 +1,8 @@
-configfile: 'config.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
+configfile: 'config.Deanhardt2021.yaml'
+#	module load python/3.6.6 bedtools bedops samtools r/4.0.3 rstudio/1.1.453 bowtie sratoolkit subread/1.5.1
+####	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
+
+
 
 sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
@@ -21,7 +24,6 @@ sra_by_fqpath = {}
 for s in sample_by_name.keys():
 	if "SRA" in sample_by_name[s].keys():
 		sra_by_fqpath[sample_by_name[s]["path"]] = sample_by_name[s]["SRA"]
-
 
 
 def return_filename_by_sampname(sampname):
@@ -203,6 +205,7 @@ rule fruIsoids:
 		fruGene_in = "utils/annotations/fru.gtf",
 	output:
 		fruIsoid_out = "utils/annotations/fru.isoids.gtf",
+		fruIsoid_list = "utils/annotations/fru.isoids.list",
 	params:
 		runmem_gb=8,
 		runtime="1:00",
@@ -210,7 +213,8 @@ rule fruIsoids:
 	message:
 		"running the edgeHog on Fru .... "
 	run:
-		shell(""" python scripts/edgeHog.py --gtf_in $(pwd)/utils/annotations/fru.gtf -o utils/annotations/fru -n FBgn0004652 """)
+#		shell(""" python scripts/edgeHog.py --gtf_in $(pwd)/utils/annotations/fru.gtf -o utils/annotations/fru -n FBgn0004652 """)
+		shell(""" python scripts/edgeHog.py --gtf_in $(pwd)/{input.fruGene_in} -o utils/annotations/fru -n FBgn0004652 """)
 
 
 rule geneListReporter:
@@ -378,7 +382,7 @@ rule mapsplice2_align_rando:
 		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
 	params:
 		runmem_gb=16,
-		runtime="24:00:00",
+		runtime="150:00:00",
 		cores=8,
 	message:
 		"Downsampling multimappers from {wildcards.sample} alignment to {wildcards.ref_genome}..."
@@ -517,9 +521,9 @@ rule count_features:
 		count_stats = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts.summary",
 	params:
 		runmem_gb=8,
-		runtime="8:00:00",
+		runtime="24:00:00",
 		cores=8,
-		fc_params = " -J --verbose ",#count multimappers, record junctions, count paired-end fragments, well-mapped   <- some of this is moved into the "flag" wildcard
+		fc_params = " -J ",#--verbose count multimappers, record junctions, count paired-end fragments, well-mapped   <- some of this is moved into the "flag" wildcard
 		#-O ? -f? 
 	message:
 		"counting reads from {wildcards.group} aligned to {wildcards.ref_genome} with {wildcards.aligner} overlapping {wildcards.annot} .... "
@@ -537,6 +541,10 @@ rule count_features:
 		shell("""
 			featureCounts {flug_str} {params.fc_params} -t exon -g gene_id -F GTF -a <(cat {annot_gtf} | awk '{{print"chr"$0}}') -o {output.counted_features}.tmp {input.alignments_in}
 			""")
+		# shell(""" cat {annot_gtf} | awk '{{print"chr"$0}}' >  {annot_gtf}.chr """)
+		# shell("""
+		# 	featureCounts {flug_str} {params.fc_params} -t exon -g gene_id -F GTF -a {annot_gtf}.chr -o {output.counted_features}.tmp {input.alignments_in}
+		# 	""")
 		shell("""
 			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp | tail -n +2 | {sed_cmd} > {output.counted_features}
 			cat counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.tmp.jcounts | {sed_cmd} > counts/{wildcards.group}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flags}.counts.jcounts
@@ -613,9 +621,9 @@ rule da_Seeker:
 	run:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p diff_expr/{wildcards.contrast} """)
-		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} """)
-		shell(""" mkdir -p meta/DESeq2_methods/ """)
-		shell(""" mv diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag}.method meta/DESeq2_methods/ """)
+		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} config.Deanhardt2021.yaml """)
+		#shell(""" mkdir -p meta/DESeq2_methods/ """)
+		#shell(""" mv diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag}.method meta/DESeq2_methods/ """)
 
 
 
@@ -633,7 +641,7 @@ rule de_GOntologer:
 	run:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p gene_ont/{wildcards.contrast}/ """)
-		shell(""" Rscript scripts/geneOntologe.R {input.deSq_itemized} {wildcards.contrast} {output.deSq_go} """)
+		shell(""" Rscript scripts/geneOntologe.R {input.deSq_itemized} {wildcards.contrast} {output.deSq_go} config.Deanhardt2021.yaml """)
 
 
 
@@ -755,7 +763,6 @@ rule deX_seeker:#needs v3.5.0 lol
 
 
 
-
 rule write_report:
 	input:
 		reference_genome_summary = ["summaries/reference_genomes.summary"],
@@ -764,15 +771,27 @@ rule write_report:
 		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
 		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
 		counting_summary_genes = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["dm6_genes","fru_exons"], flag=["MpBC","MpBCO"], aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"]),#"mapspliceRaw",
-#		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["fru_junct", "fru_intron"], flag=["MpBCO"], aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"]),#"mapspliceRaw",
+		counting_summary_exons = expand("summaries/{group}.vs_{ref_genome}.{annot}.{aligner}.{flag}.counts.stat", group ="all", ref_genome = "dm6main", annot = ["fru_junct", "fru_intron"], flag=["MpBCO"], aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"]),#"mapspliceRaw",
 #		expFlg = "utils/all.expression.flag",
-#		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","grpWtVsMut","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes",], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"]),#,"itemized.de"]),
-#		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", ], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
-#		fruQC = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut_smolFru", "hausWtVsMut_noFru"], annot = ["dm6_genes",], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+
+		frucov = expand("summaries/coverage/fru.mapspliceMulti.{samp}.dm6main.bedgraph",samp = sampname_by_group['all']),
+
+		expressions = expand("expression/all.vs_dm6main.dm6_genes.{aligner}.{flag}.rpkm", flag = ["MpBC"], aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"] ),
+		diff_exprs = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes",], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"]),#,"itemized.de"]),
+		diff_item = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","hausWtVsMut","wildTypeHousing"], annot = ["dm6_genes","fru_exons"], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
+		fruQC = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut_smolFru", "hausWtVsMut_noFru","grpWtVsFru_smolFru"], annot = ["dm6_genes",], flag= ["MpBC", "MpBCO"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
 #		diff_item2 = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["2_days_difference", "47b_on_88a", "cantonAmos", "cantonWt", "cantonAmosWt"], annot = ["dm6_genes",], flag= ["MpBC", ],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["itemized.de"]),#,""]),
-#		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", ], annot = ["fru_junct", "fru_intron", "fru_exons"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
-#		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut","47b_on_88a","2_days_difference", "cantonAmos", "cantonWt", "cantonAmosWt"]),
-#		dxsq_readr = "utils/DEXSeq/Subread_to_DEXSeq/load_SubreadOutput.R",
+		diff_fru = expand("diff_expr/{contrast}/{contrast}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", contrast = ["hausWtVsMut", ], annot = ["fru_junct", "fru_intron", "fru_exons", "fru_isoid"], flag= [ "MpBCO"],aligner=["mapspliceMulti_SpliceOnly","mapspliceUniq_SpliceOnly","mapspliceRando_SpliceOnly"], suff = ["itemized.de"]),#,""]),
+		gene_onts = expand("gene_ont/{contrast}/{contrast}.vs_dm6main.dm6_genes.mapsplice{aligner}.MpBC.go", aligner = ["Multi","Rando","Uniq"], contrast = ["hausWtVsMut",]),
+		dxsq_readr = "utils/DEXSeq/Subread_to_DEXSeq/load_SubreadOutput.R",
+		dxsq_anne = "utils/annotations/DEXSeq/dm6_genes.dxsqReady.gtf",
+
+
+		dxsq = expand(["diff_exon_use/%s/%s.vs_dm6main.{annot}.{aligner}.{flag}.{suff}" %tuple([z[0],z[1]]) for z in list(zip( ["dex_grpWtVs47b","dex_grpWtVs67d","dex_grpWtVsFru","dex_wtHousing"],["grpWtVs47b","grpWtVs67d","grpWtVsFru","wtHousing"]))], annot = ["dm6_genes",], flag= [ "M"], suff = ["de"],aligner=["mapspliceMulti"]),#"mapspliceUniq","mapspliceRando"] ),#,""]),
+
+
+#		dxsq = expand("diff_exon_use/{contrast}/{group}.vs_dm6main.{annot}.{aligner}.{flag}.{suff}", zip , annot = ["dm6_genes",], flag= [ "M"],aligner=["mapspliceMulti","mapspliceUniq","mapspliceRando"], suff = ["de"], contrast = ["dex_grpWtVs47b","dex_grpWtVs67d","dex_grpWtVsFru","dex_hausWtVsMut","dex_wildTypeHousing"], group = ["grpWtVs47b","grpWtVs67d","grpWtVsFru","hausWtVsMut","wildTypeHousing"]),#,""]),
+
 	output:
 		pdf_out="results/VolkanLabBehaviorGenetics.Deanhardt2021.pdf",
 	params:
@@ -782,6 +801,7 @@ rule write_report:
 	message:
 		"writing up the results.... "
 	run:
+		print(input.dxsq)
 		pandoc_path="/nas/longleaf/apps/rstudio/1.0.136/bin/pandoc"
 		pwd = subprocess.check_output("pwd",shell=True).decode().rstrip()+"/"
 		shell("""mkdir -p results/figures/supp/ results/tables/supp/""")

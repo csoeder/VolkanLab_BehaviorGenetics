@@ -1,5 +1,6 @@
 configfile: 'config.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
+#	module load python/3.6.6 bedtools bedops samtools r/4.0.3 rstudio/1.1.453 bowtie sratoolkit subread
+####	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
 
 sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
@@ -368,8 +369,10 @@ rule mapsplice2_align_uniq:
 			samtools view {input.multi_bam} | grep -w "IH:i:1" | cat <( samtools view -H {input.multi_bam} ) - | samtools view -Sbh > {output.uniq_bam};
 			samtools index {output.uniq_bam}
 			""")
-### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
 
+
+
+### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
 rule mapsplice2_align_rando:
 	input:
 		multi_bam = "mapped_reads/mapspliceMulti/{sample}/{sample}.vs_{ref_genome}.mapspliceMulti.sort.bam",
@@ -378,7 +381,7 @@ rule mapsplice2_align_rando:
 		rando_bam = "mapped_reads/mapspliceRando/{sample}/{sample}.vs_{ref_genome}.mapspliceRando.sort.bam",
 	params:
 		runmem_gb=16,
-		runtime="24:00:00",
+		runtime="150:00:00",
 		cores=8,
 	message:
 		"Downsampling multimappers from {wildcards.sample} alignment to {wildcards.ref_genome}..."
@@ -455,6 +458,7 @@ rule spliced_alignment_reporter:
 #awk '($6 ~ /N/)' | wc -l
 
 ### filtering on uniqueness: MapSplice2 uses the IH:i:1 flag in the SAM specs. 
+
 
 
 rule demand_BAM_analytics:
@@ -613,9 +617,9 @@ rule da_Seeker:
 	run:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p diff_expr/{wildcards.contrast} """)
-		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} """)
-		shell(""" mkdir -p meta/DESeq2_methods/ """)
-		shell(""" mv diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag}.method meta/DESeq2_methods/ """)
+		shell(""" Rscript scripts/deSeqer.R {input.fc_in} diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag} {wildcards.contrast} config.yaml """)
+		#shell(""" mkdir -p meta/DESeq2_methods/ """)
+		#shell(""" mv diff_expr/{wildcards.contrast}/{wildcards.contrast}.vs_{wildcards.ref_genome}.{wildcards.annot}.{wildcards.aligner}.{wildcards.flag}.method meta/DESeq2_methods/ """)
 
 
 
@@ -633,7 +637,7 @@ rule de_GOntologer:
 	run:
 		#cont_sbgrp = contrasts_by_name[wildcards.contrast]["filt"]
 		shell(""" mkdir -p gene_ont/{wildcards.contrast}/ """)
-		shell(""" Rscript scripts/geneOntologe.R {input.deSq_itemized} {wildcards.contrast} {output.deSq_go} """)
+		shell(""" Rscript scripts/geneOntologe.R {input.deSq_itemized} {wildcards.contrast} {output.deSq_go} config.yaml """)
 
 
 

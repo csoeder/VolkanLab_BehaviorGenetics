@@ -1,0 +1,302 @@
+3R	FlyBase	gene	18414273	18545586	.	-	.	gene_id "FBgn0004652"; gene_symbol "fru";
+3R	FlyBase	mRNA	18425959	18506562	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	5UTR	18506520	18506562	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18506494	18506562	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	start_codon	18506517	18506519	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	CDS	18506494	18506519	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083648"; transcript_symbol "fru-RI";
+3R	FlyBase	mRNA	18425959	18504066	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	5UTR	18503980	18504066	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18503846	18504066	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	start_codon	18503977	18503979	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	CDS	18503846	18503979	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083649"; transcript_symbol "fru-RJ";
+3R	FlyBase	mRNA	18418716	18480676	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	5UTR	18480328	18480676	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	5UTR	18478072	18478332	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18480328	18480676	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18478064	18478332	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	exon	18418716	18423182	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	start_codon	18478069	18478071	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	CDS	18478064	18478071	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18422641	18423182	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18422638	18422640	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	3UTR	18418716	18422637	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083650"; transcript_symbol "fru-RK";
+3R	FlyBase	mRNA	18425959	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	5UTR	18446701	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18446701	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083651"; transcript_symbol "fru-RL";
+3R	FlyBase	mRNA	18425959	18438771	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	5UTR	18438700	18438771	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18438700	18438771	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083652"; transcript_symbol "fru-RM";
+3R	FlyBase	mRNA	18418716	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	5UTR	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	exon	18418716	18423182	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18422641	18423182	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18422638	18422640	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	3UTR	18418716	18422637	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083640"; transcript_symbol "fru-RH";
+3R	FlyBase	mRNA	18415473	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	5UTR	18515333	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18515052	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	exon	18415473	18417300	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	start_codon	18515330	18515332	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	CDS	18515052	18515332	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18416780	18417300	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18416777	18416779	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	3UTR	18415473	18416776	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083641"; transcript_symbol "fru-RB";
+3R	FlyBase	mRNA	18425959	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	5UTR	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083642"; transcript_symbol "fru-RC";
+3R	FlyBase	mRNA	18425959	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	5UTR	18515333	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18515052	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	exon	18425959	18427166	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	start_codon	18515330	18515332	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	CDS	18515052	18515332	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	3UTR	18425959	18426144	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083643"; transcript_symbol "fru-RE";
+3R	FlyBase	mRNA	18414273	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	5UTR	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	exon	18414273	18417300	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18416780	18417300	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18416777	18416779	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	3UTR	18414273	18416776	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083644"; transcript_symbol "fru-RF";
+3R	FlyBase	mRNA	18418716	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	5UTR	18515333	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18515052	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	exon	18418716	18423182	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	start_codon	18515330	18515332	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	CDS	18515052	18515332	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	3	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18422641	18423182	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18422638	18422640	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	3UTR	18418716	18422637	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083645"; transcript_symbol "fru-RG";
+3R	FlyBase	mRNA	18427480	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	5UTR	18446701	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18446701	18447329	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	exon	18427480	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430827	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18430824	18430826	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	3UTR	18427480	18430823	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083646"; transcript_symbol "fru-RA";
+3R	FlyBase	mRNA	18431233	18450254	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	5UTR	18450235	18450254	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18450235	18450254	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	exon	18431233	18432034	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18431450	18432034	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18431447	18431449	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	3UTR	18431233	18431446	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0083647"; transcript_symbol "fru-RD";
+3R	FlyBase	mRNA	18425959	18545586	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	5UTR	18545113	18545586	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	5UTR	18515333	18515343	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18545113	18545586	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18515052	18515343	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18463267	18463281	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18435643	18435790	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18435370	18435570	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18434235	18435062	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18432564	18432818	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18430832	18430964	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	exon	18425959	18427166	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	start_codon	18515330	18515332	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	CDS	18515052	18515332	11	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18463267	18463281	11	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435643	18435790	11	-	1	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	11	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	11	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	11	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	11	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18426148	18427166	11	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18426145	18426147	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	3UTR	18425959	18426144	11	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0301284"; transcript_symbol "fru-RN";
+3R	FlyBase	mRNA	18418716	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	5UTR	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	5UTR	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	5UTR	18435769	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18545113	18545586	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18513451	18515343	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18435643	18435790	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18435370	18435570	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18434235	18435062	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18432564	18432818	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18430832	18430964	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	exon	18418716	18423182	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	start_codon	18435766	18435768	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	CDS	18435643	18435768	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18435370	18435570	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18434235	18435062	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18432564	18432818	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18430832	18430964	3	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	CDS	18422080	18423182	3	-	2	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO"; # SO:0000697:gene_with_stop_codon_read_through
+3R	FlyBase	stop_codon	18422077	18422079	.	-	0	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";
+3R	FlyBase	3UTR	18418716	18422076	3	-	.	gene_id "FBgn0004652"; gene_symbol "fru"; transcript_id "FBtr0330040"; transcript_symbol "fru-RO";

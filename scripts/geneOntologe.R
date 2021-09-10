@@ -14,6 +14,8 @@ data("geneList")
 deSeq_file <- args[1]
 nombre <- args[2]
 go_out <- args[3]
+config <- args[4]
+
 #nombre <- "hausWtVsMut"
 
 
@@ -22,7 +24,8 @@ sig_thresh <- 0.01
 #hausWtVsMut_vs_dm6main_dm6_genes_mapspliceMulti_MpBC_itemized <- read_delim("diff_expr/hausWtVsMut/hausWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de", "\t", escape_double = FALSE, trim_ws = TRUE)
 DESeq.itemized<- read_delim(deSeq_file, "\t", escape_double = FALSE, trim_ws = TRUE)
 
-trammel <- read_yaml("config.yaml")
+trammel <- read_yaml(config)
+#trammel <- read_yaml("config.yaml")
 #	build the contrast experiment
 contrasts.df <- plyr::ldply(trammel$contrasts, data.frame) %>% filter(name == nombre )
 #get the factors in the design
@@ -33,7 +36,8 @@ query_genes.list <- DESeq.itemized$geneid %>% unique() %>% as.list()
 
 #ensembl_dm = useMart("ensembl",dataset="dmelanogaster_gene_ensembl")
 marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
-G_list <- getBM(attributes= c("flybase_gene_id", "ensembl_gene_id", "external_gene_name", "go_id", "name_1006"), mart= marty) %>% mutate(go_name = name_1006) %>% select(-c("name_1006"))
+G_list <- getBM(attributes= c("flybase_gene_id", "ensembl_gene_id", "external_gene_name", "go_id", "name_1006"), mart= marty, useCache= FALSE) %>% mutate(go_name = name_1006) %>% select(-c("name_1006"))
+#G_list <- getBM(attributes= c("flybase_gene_id", "ensembl_gene_id", "external_gene_name", "go_id", "name_1006"), mart= marty) %>% mutate(go_name = name_1006) %>% select(-c("name_1006"))
 
 
 ### ### ### ### ### ### ### ### 

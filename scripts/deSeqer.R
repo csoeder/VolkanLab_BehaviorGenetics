@@ -15,9 +15,11 @@ library("stringr")
 counts_in <- args[1]
 dsq_pre <- args[2]
 nombre <- args[3]
+config <- args[4]
 
 #	build the sample DF
-trammel <- read_yaml("config.yaml")
+#trammel <- read_yaml("config.yaml")
+trammel <- read_yaml(config)
 data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
 data_sets.df$name <- as.factor(data_sets.df$name)
 data_sets.df$day<- as.factor(data_sets.df$day)
@@ -34,7 +36,7 @@ contrasts.df <- plyr::ldply(trammel$contrasts, data.frame) %>% filter(name == no
 sbgrp <- (contrasts.df %>% select(filt))[1,] %>% as.character
 #coldata <- data_sets.df %>% as.data.frame() %>% ungroup()%>% filter(subgroups == sbgrp)
 #coldata <- data_sets.df %>% ungroup() %>% group_by(name) %>%  mutate(genotype = paste0(as.character(genotype), collapse = "," ))  %>% filter(subgroups == sbgrp)
-coldata <- data_sets.df%>% group_by(name) %>%  mutate(genotype = paste0(unique(as.character(genotype)), collapse = "." )) %>% ungroup()  %>% filter(subgroups == sbgrp)  %>% as.data.frame() 
+coldata <- data_sets.df%>% group_by(name) %>%  mutate(genotype = paste0(unique(as.character(genotype)), collapse = "." )) %>% ungroup()  %>% filter(subgroups == sbgrp) %>% unique() %>% as.data.frame() 
 
 rownames(coldata) <- coldata$name
 coldata <- coldata %>% select(contrasts.df$vars %>% as.character() )
