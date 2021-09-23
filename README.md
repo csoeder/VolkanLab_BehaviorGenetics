@@ -25,21 +25,8 @@ Not all the data in the config.yaml have been published; so full results summary
 
 ## Use
 
-The full results summary ("VolkanLab_BehaviorGenetics.05_Apr_2021.pdf") was generated simply by running 
+### Deanhardt et al. 2021
 
-```bash
-snakemake
-```
-
-This recursively generates the differential expression analysis from raw data, summarizes/vizualizes it in a PDF, and bundles/timestamps the results summary.
-
-
-The underlying differential expression and differential exon use data from Deanhardt et al. 2021 can be generated:
-
-```bash
-snakemake diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de 
-snakemake diff_exon_use/dex_grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.M.de
-```
 
 The results summary from Deanhardt et al. 2021 can be generated: (untested!)
 
@@ -47,6 +34,39 @@ The results summary from Deanhardt et al. 2021 can be generated: (untested!)
 snakemake --snakefile Snakefile.Deanhardt2021  --configfile config.Deanhardt2021.yaml 
 ```
 
+This recursively generates the differential expression analysis from raw data, summarizes/vizualizes it in a PDF, and bundles/timestamps the results summary (".pdf")
+
+ The underlying differential expression and differential exon use data from Deanhardt et al. 2021 can be generated:
+
+```bash
+snakemake diff_expr/grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de diff_expr/grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.MpBC.itemized.de 
+snakemake diff_exon_use/dex_grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVs67d/grpWtVs67d.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsFru_smolFru/grpWtVsFru_smolFru.vs_dm6main.dm6_genes.mapspliceMulti.M.de diff_exon_use/dex_grpWtVsMut/grpWtVsMut.vs_dm6main.dm6_genes.mapspliceMulti.M.de
+```
+
+
+### Full Results Summary
+
+The full results summary ("VolkanLab_BehaviorGenetics.05_Apr_2021.pdf") was generated simply by running 
+
+```bash
+snakemake
+```
+
+### Bypassing the Hard Part
+
+Users may wish to avoid the time and memory consuming steps of read downloading, cleaning, mapping, and counting. The raw counts underlying the results of Deanhardt et al. 2021 are stored in the NCBI GEO ( https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE179213 ); a shortcut script is included to download this data and prepare it such that it's where the Snakemake workflow anticipates. Currently only the "multi" alignment is available. 
+
+The shortcut script is run thus:
+
+```bash
+bash utils/shortcut.bash
+```
+
+Fruitless replicate #1 was problematic and not used in the final analysis; it is not included in the download by default. To include it, run:
+
+```bash
+bash utils/shortcut.bash -f
+```
 
 
 

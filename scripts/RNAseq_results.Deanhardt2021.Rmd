@@ -16,6 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(dev = 'png')
 
 #knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/VolkanLab_BehaviorGenetics/')
+
+#knitr::opts_knit$set(root.dir = '/pine/scr/c/s/csoeder/VolkanLab_BehaviorGenetics')
+
 #knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/VolkanLab_BehaviorGenetics/')
 knitr::opts_knit$set(root.dir=peaDubDee)
 
@@ -90,7 +93,7 @@ G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= ma
 
 show_singleFactor <- TRUE
 show_multiFactor <- TRUE
-run_diffCorr <- TRUE
+run_diffCorr <- FALSE
 
 ```
 
@@ -774,7 +777,7 @@ all_alignments <- rbind(vs_dm6.mapspliceRaw)#, vs_dm6.bwaUniq)
 vs_dm6.mapspliceRaw.meta <- inner_join(vs_dm6.mapspliceRaw, data_sets.df.sparse.collapse, by = c("sample"="name")) 
 
 
-vs_dm6.mapspliceRaw.meta <- rbind(vs_dm6.mapspliceRaw.meta,filtration_stats %>% filter(type == "postfiltered" & measure== "total_reads" ) %>% mutate(ref_genome="dm6main", aligner = "unmapped", sample=name) %>% select(c("ref_genome","aligner","sample","measure","value","rep","day" ,"genotype","housing","tissue","cw","normie" )))
+vs_dm6.mapspliceRaw.meta <- rbind(vs_dm6.mapspliceRaw.meta,filtration_stats %>% filter(type == "postfiltered" & measure== "total_reads" ) %>% mutate(ref_genome="dm6main", aligner = "unmapped", sample=name) %>% select(c("ref_genome","aligner","sample","measure","value","rep","day" ,"genotype","housing","tissue")))
 
 #all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
 
