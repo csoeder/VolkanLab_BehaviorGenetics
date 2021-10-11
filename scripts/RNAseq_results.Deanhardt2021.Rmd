@@ -88,7 +88,8 @@ fig_cnt <- 0
 tbl_cnt <- 0
 
 
-marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "uswest.ensembl.org") )
+#marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "uswest.ensembl.org") )
+marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
 G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= marty) 
 
 show_singleFactor <- TRUE

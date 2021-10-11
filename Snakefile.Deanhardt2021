@@ -521,7 +521,7 @@ rule count_features:
 		count_stats = "counts/{group}.vs_{ref_genome}.{annot}.{aligner}.{flags}.counts.summary",
 	params:
 		runmem_gb=8,
-		runtime="48:00:00",
+		runtime="64:00:00",
 		cores=8,
 		fc_params = " -J ",#--verbose count multimappers, record junctions, count paired-end fragments, well-mapped   <- some of this is moved into the "flag" wildcard
 		#-O ? -f? 
