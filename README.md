@@ -49,7 +49,8 @@ snakemake diff_exon_use/dex_grpWtVs47b/grpWtVs47b.vs_dm6main.dm6_genes.mapsplice
 The full results summary ("VolkanLab_BehaviorGenetics.05_Apr_2021.pdf") was generated simply by running 
 
 ```bash
-snakemake
+snakemake --cluster "sbatch --time={params.runtime} -n {params.cores} --mem={params.runmem_gb}G "
+
 ```
 
 ### Bypassing the Hard Part
