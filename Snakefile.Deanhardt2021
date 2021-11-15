@@ -1,5 +1,5 @@
 configfile: 'config.Deanhardt2021.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/4.0.3 rstudio/1.1.453 bowtie sratoolkit subread/1.5.1
+#	module load python/3.6.6 bedtools bedops samtools r/4.0.3 rstudio/1.1.453 bowtie sratoolkit subread
 ####	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
 
 
@@ -687,6 +687,9 @@ rule DEXSeq_builder:
 			git clone https://github.com/vivekbhr/Subread_to_DEXSeq;
 			""")
 		#patch for wonky transcripts:https://stat.ethz.ch/pipermail/bioconductor/2012-June/046494.html
+		shell("""
+			cp utils/dexseq_prepare_annotation2.patch.py  utils/DEXSeq/Subread_to_DEXSeq/dexseq_prepare_annotation2.py
+			""")
 
 
 rule DEXSeq_annot_prepper:

@@ -31,7 +31,9 @@ Not all the data in the config.yaml have been published; so full results summary
 The results summary from Deanhardt et al. 2021 can be generated: (untested!)
 
 ```bash
-snakemake --snakefile Snakefile.Deanhardt2021  --configfile config.Deanhardt2021.yaml 
+
+nohup time snakemake --restart-times 6 --latency-wait 60 --jobs 24 -p --cluster "sbatch --time={params.runtime} -n {params.cores} --mem={params.runmem_gb}G "  --snakefile Snakefile.Deanhardt2021  --configfile config.Deanhardt2021.yaml &
+
 ```
 
 This recursively generates the differential expression analysis from raw data, summarizes/vizualizes it in a PDF, and bundles/timestamps the results summary (".pdf")
@@ -53,7 +55,7 @@ snakemake --cluster "sbatch --time={params.runtime} -n {params.cores} --mem={par
 
 ```
 
-### Bypassing the Hard Part
+### Bypassing the Hard Parts
 
 Users may wish to avoid the time and memory consuming steps of read downloading, cleaning, mapping, and counting. The raw counts underlying the results of Deanhardt et al. 2021 are stored in the NCBI GEO ( https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE179213 ); a shortcut script is included to download this data and prepare it such that it's where the Snakemake workflow anticipates. Currently only the "multi" alignment is available. 
 
@@ -69,7 +71,13 @@ Fruitless replicate #1 was problematic and not used in the final analysis; it is
 bash utils/shortcut.bash -f
 ```
 
+The main time bottleneck is the "rando" alignment, which downsamples but does not entirely remove multimapping reads. Alignement strategy ultimately had little impact on results, so users may wish to omit them by generating the "noRando" PDF (untested!)
 
+```bash
+
+nohup time snakemake --restart-times 6 --latency-wait 60 --jobs 24 -p --cluster "sbatch --time={params.runtime} -n {params.cores} --mem={params.runmem_gb}G "  --snakefile Snakefile.Deanhardt2021  --configfile config.Deanhardt2021.yaml results/VolkanLabBehaviorGenetics.Deanhardt2021.noRando.pdf &
+
+```
 
 
 
@@ -118,8 +126,5 @@ bash utils/shortcut.bash -f
   └── (pipeline walkthrough and results summary)
 
 ```
-
-
-
 
 

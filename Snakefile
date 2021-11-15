@@ -683,7 +683,9 @@ rule DEXSeq_builder:
 			git clone https://github.com/vivekbhr/Subread_to_DEXSeq;
 			""")
 		#patch for wonky transcripts:https://stat.ethz.ch/pipermail/bioconductor/2012-June/046494.html
-
+		shell("""
+			cp utils/dexseq_prepare_annotation2.patch.py  utils/DEXSeq/Subread_to_DEXSeq/dexseq_prepare_annotation2.py
+			""")
 
 rule DEXSeq_annot_prepper:
 	input:
