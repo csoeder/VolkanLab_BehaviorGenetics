@@ -1,7 +1,7 @@
 
 # scripts/
 
-Welcome to the [i]scripts/[/i] folder! The main folder for the workflow is above this one, so if it's not obvious what any of this does or you're looking for a procedure that doesn't appear here, [head up one level](https://github.com/csoeder/VolkanLab_BehaviorGenetics)!
+Welcome to the *scripts/* folder! The main folder for the workflow is above this one, so if it's not obvious what any of this does or you're looking for a procedure that doesn't appear here, [head up one level](https://github.com/csoeder/VolkanLab_BehaviorGenetics)!
 
 ## code of note 
 
