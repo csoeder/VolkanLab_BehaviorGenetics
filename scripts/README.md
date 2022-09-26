@@ -14,5 +14,7 @@ Welcome to the *scripts/* folder! The main folder for the workflow is above this
     - fastp_reporter.py
 - expression analysis
     - correlate.R
+    - deSeqer.R
+    - dexSeqe.R
     - expressionOmete.R
     - geneOntologe.R
