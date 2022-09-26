@@ -3,6 +3,8 @@
 
 Welcome to the *scripts/* folder! The main folder for the workflow is above this one, so if it's not obvious what any of this does or you're looking for a procedure that doesn't appear here, [head up one level](https://github.com/csoeder/VolkanLab_BehaviorGenetics)!
 
+Analysis downstream of this pipeline was handled by [Quichen Duan](https://github.com/csoeder/VolkanLab_BehaviorGenetics/tree/master/quichen_duan). 
+
 ## code of note 
 
 - summarization of process, data, and results
@@ -16,5 +18,7 @@ Welcome to the *scripts/* folder! The main folder for the workflow is above this
     - correlate.R
     - deSeqer.R
     - dexSeqe.R
+    - edgeHog.py (experimental!)
     - expressionOmete.R
     - geneOntologe.R
+
