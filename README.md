@@ -1,7 +1,18 @@
 # Behavioral Genetics in Drosophila: RNA-Seq analysis pipeline
 
-Software used to analyze data for: "Changes in splicing and neuromodulatory gene expression programs in sensory neurons with pheromone signaling and social experience", Deanhardt et al. 2021, bioRxiv. doi: https://doi.org/10.1101/2021.06.18.449021
-https://www.biorxiv.org/content/10.1101/2021.06.18.449021v2
+Software used to analyze data for: 
+
+Social experience and pheromone receptor activity reprogram behavioral switch and neuromodulatory gene expression in sensory neurons
+Bryson Deanhardt, Qichen Duan, Chengcheng Du, Charles Soeder, Alec Morlote, Deeya Garg, Corbin D. Jones, Pelin Cayirlioglu Volkan
+bioRxiv 2021.06.18.449021; doi: https://doi.org/10.1101/2021.06.18.449021
+  latest version: https://www.biorxiv.org/content/10.1101/2021.06.18.449021v3
+
+Changes in splicing and neuromodulatory gene expression programs in sensory neurons with pheromone signaling and social experience
+Deanhardt Bryson, Duan Qichen, Du Chengcheng, Soeder Charles, Jones Corbin, C. Volkan Pelin
+bioRxiv 2021.06.18.449021; doi: https://doi.org/10.1101/2021.06.18.449021
+  version 1: https://www.biorxiv.org/content/10.1101/2021.06.18.449021v1 
+  version 2: https://www.biorxiv.org/content/10.1101/2021.06.18.449021v2
+
 
 
 ## Dependencies
