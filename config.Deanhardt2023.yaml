@@ -1,0 +1,4206 @@
+data_sets:
+    - name: 7D_47B1MUT_1
+      path: FASTQ/RNAseq/47B1MUT_7D/rep1/
+      paired: True
+      readsfile1: SRR15005129_1.fastq
+      readsfile2: SRR15005129_2.fastq
+      rep: 1
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005129
+    - name: 7D_47B1MUT_2
+      path: FASTQ/RNAseq/47B1MUT_7D/rep2/
+      paired: True
+      readsfile1: SRR15005130_1.fastq
+      readsfile2: SRR15005130_2.fastq
+      rep: 2
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005130
+    - name: 7D_47B1MUT_3
+      path: FASTQ/RNAseq/47B1MUT_7D/rep3/
+      paired: True
+      readsfile1: SRR15005131_1.fastq
+      readsfile2: SRR15005131_2.fastq
+      rep: 3
+      day: 7
+      genotype: [47b1,]
+      housing: group
+      subgroups: [all,grpWtVs47b,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005131
+    - name: 7D_67DMUT_1
+      path: FASTQ/RNAseq/67DMUT_7D/rep1/
+      paired: True
+      readsfile1: SRR15005132_1.fastq
+      readsfile2: SRR15005132_2.fastq
+      rep: 1
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005132
+    - name: 7D_67DMUT_2
+      path: FASTQ/RNAseq/67DMUT_7D/rep2/
+      paired: True
+      readsfile1: SRR15005133_1.fastq
+      readsfile2: SRR15005133_2.fastq
+      rep: 2
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005133
+    - name: 7D_67DMUT_3
+      path: FASTQ/RNAseq/67DMUT_7D/rep3/
+      paired: True
+      readsfile1: SRR15005134_1.fastq
+      readsfile2: SRR15005134_2.fastq
+      rep: 3
+      day: 7
+      genotype: [67d,]
+      housing: group
+      subgroups: [all,grpWtVs67d,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005134
+    - name: 7D_GROUPHOUSE_1
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep1/
+      paired: True
+      readsfile1: SRR15005135_1.fastq
+      readsfile2: SRR15005135_2.fastq
+      rep: 1
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005135
+    - name: 7D_GROUPHOUSE_2
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep2/
+      paired: True
+      readsfile1: SRR15005136_1.fastq
+      readsfile2: SRR15005136_2.fastq
+      rep: 2
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005136
+    - name: 7D_GROUPHOUSE_3
+      path: FASTQ/RNAseq/GROUPHOUSE_7D/rep3/
+      paired: True
+      readsfile1: SRR15005137_1.fastq
+      readsfile2: SRR15005137_2.fastq
+      rep: 3
+      day: 7
+      genotype: [wt,]
+      housing: group
+      subgroups: [all,wtHousing,grpWtVs47b,grpWtVs67d,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,grpWtVsFru_smolFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005137
+    - name: 7D_ISOLATED_1
+      path: FASTQ/RNAseq/ISOLATED_7D/rep1/
+      paired: True
+      readsfile1: SRR15005138_1.fastq
+      readsfile2: SRR15005138_2.fastq
+      rep: 1
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005138
+    - name: 7D_ISOLATED_2
+      path: FASTQ/RNAseq/ISOLATED_7D/rep2/
+      paired: True
+      readsfile1: SRR15005139_1.fastq
+      readsfile2: SRR15005139_2.fastq
+      rep: 2
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005139
+    - name: 7D_ISOLATED_3
+      path: FASTQ/RNAseq/ISOLATED_7D/rep3/
+      paired: True
+      readsfile1: SRR15005140_1.fastq
+      readsfile2: SRR15005140_2.fastq
+      rep: 3
+      day: 7
+      genotype: [wt,]
+      housing: isolated
+      subgroups: [all,wtHousing,hausWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,hausWtVsMut_noFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005140
+    - name: FRULEXAFRU440_1
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep1/
+      paired: True
+      readsfile1: SRR15095835_1.fastq
+      readsfile2: SRR15095835_2.fastq
+      rep: 1
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut,new_sequence,new_sequence_update]
+      tissue: antennae
+      SRA: SRR15095835
+    - name: FRULEXAFRU440_2
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep2/
+      paired: True
+      readsfile1: SRR15005141_1.fastq
+      readsfile2: SRR15005141_2.fastq
+      rep: 2
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005141
+    - name: FRULEXAFRU440_3
+      path: FASTQ/RNAseq/FRULEXAFRU440/rep3/
+      paired: True
+      readsfile1: SRR15005142_1.fastq
+      readsfile2: SRR15005142_2.fastq
+      rep: 3
+      day: 7
+      genotype: [FruLexaFru440,]
+      housing: group
+      subgroups: [all,grpWtVsFru,grpWtVsMut,hausWtVsMut_smolFru,hausWtVsMut,grpWtVsFru_smolFru,new_sequence,phylo]
+      tissue: antennae
+      SRA: SRR15005142
+
+#cat DGRP.list | tr "," "\t"  | awk '{{print "    - name: "$2"_"$3"\n      path: FASTQ/RNAseq/"$2"_"$3"/\n      paired: True\n      readsfile1: "$1"_1.fastq\n      readsfile2: "$1"_2.fastq\n      genotype: [DGRP,]\n      subgroups: [none,]\n      SRA: "$1}}' > dgrp.yaml
+
+    - name: DGRP-317_1
+      path: FASTQ/RNAseq/DGRP-317_1/
+      paired: True
+      readsfile1: SRR834506_1.fastq
+      readsfile2: SRR834506_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834506
+    - name: DGRP-318_2
+      path: FASTQ/RNAseq/DGRP-318_2/
+      paired: True
+      readsfile1: SRR834507_1.fastq
+      readsfile2: SRR834507_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834507
+    - name: DGRP-319_3
+      path: FASTQ/RNAseq/DGRP-319_3/
+      paired: True
+      readsfile1: SRR834508_1.fastq
+      readsfile2: SRR834508_2.fastq
+      genotype: [DGRP,phylo]
+      subgroups: [none,]
+      SRA: SRR834508
+    - name: DGRP-320_4
+      path: FASTQ/RNAseq/DGRP-320_4/
+      paired: True
+      readsfile1: SRR834510_1.fastq
+      readsfile2: SRR834510_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834510
+    - name: DGRP-348_5
+      path: FASTQ/RNAseq/DGRP-348_5/
+      paired: True
+      readsfile1: SRR834514_1.fastq
+      readsfile2: SRR834514_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834514
+    - name: DGRP-385_6
+      path: FASTQ/RNAseq/DGRP-385_6/
+      paired: True
+      readsfile1: SRR834518_1.fastq
+      readsfile2: SRR834518_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834518
+    - name: DGRP-390_7
+      path: FASTQ/RNAseq/DGRP-390_7/
+      paired: True
+      readsfile1: SRR834519_1.fastq
+      readsfile2: SRR834519_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834519
+    - name: DGRP-217_8
+      path: FASTQ/RNAseq/DGRP-217_8/
+      paired: True
+      readsfile1: SRR834525_1.fastq
+      readsfile2: SRR834525_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834525
+    - name: DGRP-21_9
+      path: FASTQ/RNAseq/DGRP-21_9/
+      paired: True
+      readsfile1: SRR834526_1.fastq
+      readsfile2: SRR834526_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834526
+    - name: DGRP-227_10
+      path: FASTQ/RNAseq/DGRP-227_10/
+      paired: True
+      readsfile1: SRR834528_1.fastq
+      readsfile2: SRR834528_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834528
+    - name: DGRP-228_11
+      path: FASTQ/RNAseq/DGRP-228_11/
+      paired: True
+      readsfile1: SRR834529_1.fastq
+      readsfile2: SRR834529_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834529
+    - name: DGRP-233_12
+      path: FASTQ/RNAseq/DGRP-233_12/
+      paired: True
+      readsfile1: SRR834530_1.fastq
+      readsfile2: SRR834530_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834530
+    - name: DGRP-239_13
+      path: FASTQ/RNAseq/DGRP-239_13/
+      paired: True
+      readsfile1: SRR834532_1.fastq
+      readsfile2: SRR834532_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834532
+    - name: DGRP-256_14
+      path: FASTQ/RNAseq/DGRP-256_14/
+      paired: True
+      readsfile1: SRR834533_1.fastq
+      readsfile2: SRR834533_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834533
+    - name: DGRP-370_15
+      path: FASTQ/RNAseq/DGRP-370_15/
+      paired: True
+      readsfile1: SRR834539_1.fastq
+      readsfile2: SRR834539_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834539
+    - name: DGRP-377_16
+      path: FASTQ/RNAseq/DGRP-377_16/
+      paired: True
+      readsfile1: SRR834543_1.fastq
+      readsfile2: SRR834543_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834543
+    - name: DGRP-359_17
+      path: FASTQ/RNAseq/DGRP-359_17/
+      paired: True
+      readsfile1: SRR834546_1.fastq
+      readsfile2: SRR834546_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834546
+    - name: DGRP-142_18
+      path: FASTQ/RNAseq/DGRP-142_18/
+      paired: True
+      readsfile1: SRR834551_1.fastq
+      readsfile2: SRR834551_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834551
+    - name: DGRP-361_19
+      path: FASTQ/RNAseq/DGRP-361_19/
+      paired: True
+      readsfile1: SRR834553_1.fastq
+      readsfile2: SRR834553_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834553
+    - name: DGRP-42_20
+      path: FASTQ/RNAseq/DGRP-42_20/
+      paired: True
+      readsfile1: SRR835027_1.fastq
+      readsfile2: SRR835027_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835027
+    - name: DGRP-439_21
+      path: FASTQ/RNAseq/DGRP-439_21/
+      paired: True
+      readsfile1: SRR835028_1.fastq
+      readsfile2: SRR835028_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835028
+    - name: DGRP-440_22
+      path: FASTQ/RNAseq/DGRP-440_22/
+      paired: True
+      readsfile1: SRR835029_1.fastq
+      readsfile2: SRR835029_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835029
+    - name: DGRP-443_23
+      path: FASTQ/RNAseq/DGRP-443_23/
+      paired: True
+      readsfile1: SRR835031_1.fastq
+      readsfile2: SRR835031_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835031
+    - name: DGRP-48_24
+      path: FASTQ/RNAseq/DGRP-48_24/
+      paired: True
+      readsfile1: SRR835034_1.fastq
+      readsfile2: SRR835034_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835034
+    - name: DGRP-509_25
+      path: FASTQ/RNAseq/DGRP-509_25/
+      paired: True
+      readsfile1: SRR835041_1.fastq
+      readsfile2: SRR835041_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835041
+    - name: DGRP-530_26
+      path: FASTQ/RNAseq/DGRP-530_26/
+      paired: True
+      readsfile1: SRR835044_1.fastq
+      readsfile2: SRR835044_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835044
+    - name: DGRP-531_27
+      path: FASTQ/RNAseq/DGRP-531_27/
+      paired: True
+      readsfile1: SRR835045_1.fastq
+      readsfile2: SRR835045_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835045
+    - name: DGRP-563_28
+      path: FASTQ/RNAseq/DGRP-563_28/
+      paired: True
+      readsfile1: SRR835049_1.fastq
+      readsfile2: SRR835049_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835049
+    - name: DGRP-566_29
+      path: FASTQ/RNAseq/DGRP-566_29/
+      paired: True
+      readsfile1: SRR835050_1.fastq
+      readsfile2: SRR835050_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835050
+    - name: DGRP-83_30
+      path: FASTQ/RNAseq/DGRP-83_30/
+      paired: True
+      readsfile1: SRR835058_1.fastq
+      readsfile2: SRR835058_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835058
+    - name: DGRP-855_31
+      path: FASTQ/RNAseq/DGRP-855_31/
+      paired: True
+      readsfile1: SRR835062_1.fastq
+      readsfile2: SRR835062_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835062
+    - name: DGRP-879_32
+      path: FASTQ/RNAseq/DGRP-879_32/
+      paired: True
+      readsfile1: SRR835066_1.fastq
+      readsfile2: SRR835066_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835066
+    - name: DGRP-887_33
+      path: FASTQ/RNAseq/DGRP-887_33/
+      paired: True
+      readsfile1: SRR835069_1.fastq
+      readsfile2: SRR835069_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835069
+    - name: DGRP-88_34
+      path: FASTQ/RNAseq/DGRP-88_34/
+      paired: True
+      readsfile1: SRR835070_1.fastq
+      readsfile2: SRR835070_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835070
+    - name: DGRP-908_35
+      path: FASTQ/RNAseq/DGRP-908_35/
+      paired: True
+      readsfile1: SRR835075_1.fastq
+      readsfile2: SRR835075_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835075
+    - name: DGRP-703_36
+      path: FASTQ/RNAseq/DGRP-703_36/
+      paired: True
+      readsfile1: SRR835084_1.fastq
+      readsfile2: SRR835084_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835084
+    - name: DGRP-716_37
+      path: FASTQ/RNAseq/DGRP-716_37/
+      paired: True
+      readsfile1: SRR835085_1.fastq
+      readsfile2: SRR835085_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835085
+    - name: DGRP-761_38
+      path: FASTQ/RNAseq/DGRP-761_38/
+      paired: True
+      readsfile1: SRR835088_1.fastq
+      readsfile2: SRR835088_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835088
+    - name: DGRP-790_39
+      path: FASTQ/RNAseq/DGRP-790_39/
+      paired: True
+      readsfile1: SRR835092_1.fastq
+      readsfile2: SRR835092_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835092
+    - name: DGRP-796_40
+      path: FASTQ/RNAseq/DGRP-796_40/
+      paired: True
+      readsfile1: SRR835093_1.fastq
+      readsfile2: SRR835093_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835093
+    - name: DGRP-627_41
+      path: FASTQ/RNAseq/DGRP-627_41/
+      paired: True
+      readsfile1: SRR835097_1.fastq
+      readsfile2: SRR835097_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835097
+    - name: DGRP-73_42
+      path: FASTQ/RNAseq/DGRP-73_42/
+      paired: True
+      readsfile1: SRR835100_1.fastq
+      readsfile2: SRR835100_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835100
+    - name: DGRP-374_43
+      path: FASTQ/RNAseq/DGRP-374_43/
+      paired: True
+      readsfile1: SRR835103_1.fastq
+      readsfile2: SRR835103_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835103
+    - name: DGRP-109_44
+      path: FASTQ/RNAseq/DGRP-109_44/
+      paired: True
+      readsfile1: SRR835219_1.fastq
+      readsfile2: SRR835219_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835219
+    - name: DGRP-301_45
+      path: FASTQ/RNAseq/DGRP-301_45/
+      paired: True
+      readsfile1: SRR835223_1.fastq
+      readsfile2: SRR835223_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835223
+    - name: DGRP-304_46
+      path: FASTQ/RNAseq/DGRP-304_46/
+      paired: True
+      readsfile1: SRR835236_1.fastq
+      readsfile2: SRR835236_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835236
+    - name: DGRP-371_47
+      path: FASTQ/RNAseq/DGRP-371_47/
+      paired: True
+      readsfile1: SRR835326_1.fastq
+      readsfile2: SRR835326_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835326
+    - name: DGRP-373_48
+      path: FASTQ/RNAseq/DGRP-373_48/
+      paired: True
+      readsfile1: SRR835329_1.fastq
+      readsfile2: SRR835329_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835329
+    - name: DGRP-821_49
+      path: FASTQ/RNAseq/DGRP-821_49/
+      paired: True
+      readsfile1: SRR835347_1.fastq
+      readsfile2: SRR835347_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835347
+    - name: DGRP-340_50
+      path: FASTQ/RNAseq/DGRP-340_50/
+      paired: True
+      readsfile1: SRR835939_1.fastq
+      readsfile2: SRR835939_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835939
+    - name: DGRP-309_51
+      path: FASTQ/RNAseq/DGRP-309_51/
+      paired: True
+      readsfile1: SRR834504_1.fastq
+      readsfile2: SRR834504_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834504
+    - name: DGRP-31_52
+      path: FASTQ/RNAseq/DGRP-31_52/
+      paired: True
+      readsfile1: SRR834509_1.fastq
+      readsfile2: SRR834509_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834509
+    - name: DGRP-338_53
+      path: FASTQ/RNAseq/DGRP-338_53/
+      paired: True
+      readsfile1: SRR834513_1.fastq
+      readsfile2: SRR834513_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834513
+    - name: DGRP-392_54
+      path: FASTQ/RNAseq/DGRP-392_54/
+      paired: True
+      readsfile1: SRR834520_1.fastq
+      readsfile2: SRR834520_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834520
+    - name: DGRP-395_55
+      path: FASTQ/RNAseq/DGRP-395_55/
+      paired: True
+      readsfile1: SRR834521_1.fastq
+      readsfile2: SRR834521_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834521
+    - name: DGRP-397_56
+      path: FASTQ/RNAseq/DGRP-397_56/
+      paired: True
+      readsfile1: SRR834522_1.fastq
+      readsfile2: SRR834522_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834522
+    - name: DGRP-280_57
+      path: FASTQ/RNAseq/DGRP-280_57/
+      paired: True
+      readsfile1: SRR834534_1.fastq
+      readsfile2: SRR834534_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834534
+    - name: DGRP-287_58
+      path: FASTQ/RNAseq/DGRP-287_58/
+      paired: True
+      readsfile1: SRR834535_1.fastq
+      readsfile2: SRR834535_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834535
+    - name: DGRP-38_59
+      path: FASTQ/RNAseq/DGRP-38_59/
+      paired: True
+      readsfile1: SRR834541_1.fastq
+      readsfile2: SRR834541_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834541
+    - name: DGRP-136_60
+      path: FASTQ/RNAseq/DGRP-136_60/
+      paired: True
+      readsfile1: SRR834542_1.fastq
+      readsfile2: SRR834542_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834542
+    - name: DGRP-367_61
+      path: FASTQ/RNAseq/DGRP-367_61/
+      paired: True
+      readsfile1: SRR834544_1.fastq
+      readsfile2: SRR834544_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834544
+    - name: DGRP-355_62
+      path: FASTQ/RNAseq/DGRP-355_62/
+      paired: True
+      readsfile1: SRR834545_1.fastq
+      readsfile2: SRR834545_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834545
+    - name: DGRP-177_63
+      path: FASTQ/RNAseq/DGRP-177_63/
+      paired: True
+      readsfile1: SRR834547_1.fastq
+      readsfile2: SRR834547_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834547
+    - name: DGRP-383_64
+      path: FASTQ/RNAseq/DGRP-383_64/
+      paired: True
+      readsfile1: SRR834554_1.fastq
+      readsfile2: SRR834554_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834554
+    - name: DGRP-405_65
+      path: FASTQ/RNAseq/DGRP-405_65/
+      paired: True
+      readsfile1: SRR835023_1.fastq
+      readsfile2: SRR835023_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835023
+    - name: DGRP-441_66
+      path: FASTQ/RNAseq/DGRP-441_66/
+      paired: True
+      readsfile1: SRR835030_1.fastq
+      readsfile2: SRR835030_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835030
+    - name: DGRP-45_67
+      path: FASTQ/RNAseq/DGRP-45_67/
+      paired: True
+      readsfile1: SRR835032_1.fastq
+      readsfile2: SRR835032_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835032
+    - name: DGRP-461_68
+      path: FASTQ/RNAseq/DGRP-461_68/
+      paired: True
+      readsfile1: SRR835033_1.fastq
+      readsfile2: SRR835033_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835033
+    - name: DGRP-491_69
+      path: FASTQ/RNAseq/DGRP-491_69/
+      paired: True
+      readsfile1: SRR835035_1.fastq
+      readsfile2: SRR835035_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835035
+    - name: DGRP-502_70
+      path: FASTQ/RNAseq/DGRP-502_70/
+      paired: True
+      readsfile1: SRR835038_1.fastq
+      readsfile2: SRR835038_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835038
+    - name: DGRP-505_71
+      path: FASTQ/RNAseq/DGRP-505_71/
+      paired: True
+      readsfile1: SRR835039_1.fastq
+      readsfile2: SRR835039_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835039
+    - name: DGRP-810_72
+      path: FASTQ/RNAseq/DGRP-810_72/
+      paired: True
+      readsfile1: SRR835051_1.fastq
+      readsfile2: SRR835051_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835051
+    - name: DGRP-819_73
+      path: FASTQ/RNAseq/DGRP-819_73/
+      paired: True
+      readsfile1: SRR835054_1.fastq
+      readsfile2: SRR835054_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835054
+    - name: DGRP-832_74
+      path: FASTQ/RNAseq/DGRP-832_74/
+      paired: True
+      readsfile1: SRR835057_1.fastq
+      readsfile2: SRR835057_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835057
+    - name: DGRP-861_75
+      path: FASTQ/RNAseq/DGRP-861_75/
+      paired: True
+      readsfile1: SRR835065_1.fastq
+      readsfile2: SRR835065_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835065
+    - name: DGRP-882_76
+      path: FASTQ/RNAseq/DGRP-882_76/
+      paired: True
+      readsfile1: SRR835067_1.fastq
+      readsfile2: SRR835067_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835067
+    - name: DGRP-884_77
+      path: FASTQ/RNAseq/DGRP-884_77/
+      paired: True
+      readsfile1: SRR835068_1.fastq
+      readsfile2: SRR835068_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835068
+    - name: DGRP-890_78
+      path: FASTQ/RNAseq/DGRP-890_78/
+      paired: True
+      readsfile1: SRR835071_1.fastq
+      readsfile2: SRR835071_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835071
+    - name: DGRP-892_79
+      path: FASTQ/RNAseq/DGRP-892_79/
+      paired: True
+      readsfile1: SRR835072_1.fastq
+      readsfile2: SRR835072_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835072
+    - name: DGRP-907_80
+      path: FASTQ/RNAseq/DGRP-907_80/
+      paired: True
+      readsfile1: SRR835074_1.fastq
+      readsfile2: SRR835074_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835074
+    - name: DGRP-911_81
+      path: FASTQ/RNAseq/DGRP-911_81/
+      paired: True
+      readsfile1: SRR835076_1.fastq
+      readsfile2: SRR835076_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835076
+    - name: DGRP-93_82
+      path: FASTQ/RNAseq/DGRP-93_82/
+      paired: True
+      readsfile1: SRR835080_1.fastq
+      readsfile2: SRR835080_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835080
+    - name: DGRP-59_83
+      path: FASTQ/RNAseq/DGRP-59_83/
+      paired: True
+      readsfile1: SRR835081_1.fastq
+      readsfile2: SRR835081_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835081
+    - name: DGRP-646_84
+      path: FASTQ/RNAseq/DGRP-646_84/
+      paired: True
+      readsfile1: SRR835083_1.fastq
+      readsfile2: SRR835083_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835083
+    - name: DGRP-75_85
+      path: FASTQ/RNAseq/DGRP-75_85/
+      paired: True
+      readsfile1: SRR835087_1.fastq
+      readsfile2: SRR835087_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835087
+    - name: DGRP-776_86
+      path: FASTQ/RNAseq/DGRP-776_86/
+      paired: True
+      readsfile1: SRR835089_1.fastq
+      readsfile2: SRR835089_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835089
+    - name: DGRP-805_87
+      path: FASTQ/RNAseq/DGRP-805_87/
+      paired: True
+      readsfile1: SRR835095_1.fastq
+      readsfile2: SRR835095_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835095
+    - name: DGRP-630_88
+      path: FASTQ/RNAseq/DGRP-630_88/
+      paired: True
+      readsfile1: SRR835098_1.fastq
+      readsfile2: SRR835098_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835098
+    - name: DGRP-721_89
+      path: FASTQ/RNAseq/DGRP-721_89/
+      paired: True
+      readsfile1: SRR835099_1.fastq
+      readsfile2: SRR835099_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835099
+    - name: DGRP-595_90
+      path: FASTQ/RNAseq/DGRP-595_90/
+      paired: True
+      readsfile1: SRR835101_1.fastq
+      readsfile2: SRR835101_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835101
+    - name: DGRP-229_91
+      path: FASTQ/RNAseq/DGRP-229_91/
+      paired: True
+      readsfile1: SRR835221_1.fastq
+      readsfile2: SRR835221_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835221
+    - name: DGRP-306_92
+      path: FASTQ/RNAseq/DGRP-306_92/
+      paired: True
+      readsfile1: SRR835242_1.fastq
+      readsfile2: SRR835242_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835242
+    - name: DGRP-307_93
+      path: FASTQ/RNAseq/DGRP-307_93/
+      paired: True
+      readsfile1: SRR835247_1.fastq
+      readsfile2: SRR835247_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835247
+    - name: DGRP-315_94
+      path: FASTQ/RNAseq/DGRP-315_94/
+      paired: True
+      readsfile1: SRR835252_1.fastq
+      readsfile2: SRR835252_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835252
+    - name: DGRP-360_95
+      path: FASTQ/RNAseq/DGRP-360_95/
+      paired: True
+      readsfile1: SRR835260_1.fastq
+      readsfile2: SRR835260_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835260
+    - name: DGRP-409_96
+      path: FASTQ/RNAseq/DGRP-409_96/
+      paired: True
+      readsfile1: SRR835331_1.fastq
+      readsfile2: SRR835331_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835331
+    - name: DGRP-437_97
+      path: FASTQ/RNAseq/DGRP-437_97/
+      paired: True
+      readsfile1: SRR835333_1.fastq
+      readsfile2: SRR835333_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835333
+    - name: DGRP-748_98
+      path: FASTQ/RNAseq/DGRP-748_98/
+      paired: True
+      readsfile1: SRR835336_1.fastq
+      readsfile2: SRR835336_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835336
+    - name: DGRP-853_99
+      path: FASTQ/RNAseq/DGRP-853_99/
+      paired: True
+      readsfile1: SRR835349_1.fastq
+      readsfile2: SRR835349_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835349
+    - name: DGRP-589_100
+      path: FASTQ/RNAseq/DGRP-589_100/
+      paired: True
+      readsfile1: SRR060821_1.fastq
+      readsfile2: SRR060821_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR060821
+    - name: DGRP-301_101
+      path: FASTQ/RNAseq/DGRP-301_101/
+      paired: True
+      readsfile1: SRR518718_1.fastq
+      readsfile2: SRR518718_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518718
+    - name: DGRP-301_102
+      path: FASTQ/RNAseq/DGRP-301_102/
+      paired: True
+      readsfile1: SRR518719_1.fastq
+      readsfile2: SRR518719_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518719
+    - name: DGRP-301_103
+      path: FASTQ/RNAseq/DGRP-301_103/
+      paired: True
+      readsfile1: SRR518720_1.fastq
+      readsfile2: SRR518720_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518720
+    - name: DGRP-301_104
+      path: FASTQ/RNAseq/DGRP-301_104/
+      paired: True
+      readsfile1: SRR518721_1.fastq
+      readsfile2: SRR518721_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518721
+    - name: DGRP-301_105
+      path: FASTQ/RNAseq/DGRP-301_105/
+      paired: True
+      readsfile1: SRR518722_1.fastq
+      readsfile2: SRR518722_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518722
+    - name: DGRP-303_106
+      path: FASTQ/RNAseq/DGRP-303_106/
+      paired: True
+      readsfile1: SRR518725_1.fastq
+      readsfile2: SRR518725_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518725
+    - name: DGRP-303_107
+      path: FASTQ/RNAseq/DGRP-303_107/
+      paired: True
+      readsfile1: SRR518726_1.fastq
+      readsfile2: SRR518726_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518726
+    - name: DGRP-303_108
+      path: FASTQ/RNAseq/DGRP-303_108/
+      paired: True
+      readsfile1: SRR518727_1.fastq
+      readsfile2: SRR518727_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518727
+    - name: DGRP-303_109
+      path: FASTQ/RNAseq/DGRP-303_109/
+      paired: True
+      readsfile1: SRR518728_1.fastq
+      readsfile2: SRR518728_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518728
+    - name: DGRP-303_110
+      path: FASTQ/RNAseq/DGRP-303_110/
+      paired: True
+      readsfile1: SRR518729_1.fastq
+      readsfile2: SRR518729_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518729
+    - name: DGRP-303_111
+      path: FASTQ/RNAseq/DGRP-303_111/
+      paired: True
+      readsfile1: SRR518730_1.fastq
+      readsfile2: SRR518730_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518730
+    - name: DGRP-303_112
+      path: FASTQ/RNAseq/DGRP-303_112/
+      paired: True
+      readsfile1: SRR518731_1.fastq
+      readsfile2: SRR518731_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518731
+    - name: DGRP-306_113
+      path: FASTQ/RNAseq/DGRP-306_113/
+      paired: True
+      readsfile1: SRR518740_1.fastq
+      readsfile2: SRR518740_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518740
+    - name: DGRP-306_114
+      path: FASTQ/RNAseq/DGRP-306_114/
+      paired: True
+      readsfile1: SRR518741_1.fastq
+      readsfile2: SRR518741_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518741
+    - name: DGRP-306_115
+      path: FASTQ/RNAseq/DGRP-306_115/
+      paired: True
+      readsfile1: SRR518742_1.fastq
+      readsfile2: SRR518742_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518742
+    - name: DGRP-306_116
+      path: FASTQ/RNAseq/DGRP-306_116/
+      paired: True
+      readsfile1: SRR518743_1.fastq
+      readsfile2: SRR518743_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518743
+    - name: DGRP-306_117
+      path: FASTQ/RNAseq/DGRP-306_117/
+      paired: True
+      readsfile1: SRR518744_1.fastq
+      readsfile2: SRR518744_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518744
+    - name: DGRP-306_118
+      path: FASTQ/RNAseq/DGRP-306_118/
+      paired: True
+      readsfile1: SRR518745_1.fastq
+      readsfile2: SRR518745_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518745
+    - name: DGRP-306_119
+      path: FASTQ/RNAseq/DGRP-306_119/
+      paired: True
+      readsfile1: SRR518746_1.fastq
+      readsfile2: SRR518746_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518746
+    - name: DGRP-335_120
+      path: FASTQ/RNAseq/DGRP-335_120/
+      paired: True
+      readsfile1: SRR518862_1.fastq
+      readsfile2: SRR518862_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518862
+    - name: DGRP-335_121
+      path: FASTQ/RNAseq/DGRP-335_121/
+      paired: True
+      readsfile1: SRR518863_1.fastq
+      readsfile2: SRR518863_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518863
+    - name: DGRP-335_122
+      path: FASTQ/RNAseq/DGRP-335_122/
+      paired: True
+      readsfile1: SRR518864_1.fastq
+      readsfile2: SRR518864_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518864
+    - name: DGRP-335_123
+      path: FASTQ/RNAseq/DGRP-335_123/
+      paired: True
+      readsfile1: SRR518865_1.fastq
+      readsfile2: SRR518865_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518865
+    - name: DGRP-335_124
+      path: FASTQ/RNAseq/DGRP-335_124/
+      paired: True
+      readsfile1: SRR518866_1.fastq
+      readsfile2: SRR518866_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518866
+    - name: DGRP-362_125
+      path: FASTQ/RNAseq/DGRP-362_125/
+      paired: True
+      readsfile1: SRR518867_1.fastq
+      readsfile2: SRR518867_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518867
+    - name: DGRP-362_126
+      path: FASTQ/RNAseq/DGRP-362_126/
+      paired: True
+      readsfile1: SRR518868_1.fastq
+      readsfile2: SRR518868_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518868
+    - name: DGRP-362_127
+      path: FASTQ/RNAseq/DGRP-362_127/
+      paired: True
+      readsfile1: SRR518869_1.fastq
+      readsfile2: SRR518869_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518869
+    - name: DGRP-362_128
+      path: FASTQ/RNAseq/DGRP-362_128/
+      paired: True
+      readsfile1: SRR518870_1.fastq
+      readsfile2: SRR518870_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518870
+    - name: DGRP-362_129
+      path: FASTQ/RNAseq/DGRP-362_129/
+      paired: True
+      readsfile1: SRR518871_1.fastq
+      readsfile2: SRR518871_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518871
+    - name: DGRP-362_130
+      path: FASTQ/RNAseq/DGRP-362_130/
+      paired: True
+      readsfile1: SRR518872_1.fastq
+      readsfile2: SRR518872_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518872
+    - name: DGRP-362_131
+      path: FASTQ/RNAseq/DGRP-362_131/
+      paired: True
+      readsfile1: SRR518873_1.fastq
+      readsfile2: SRR518873_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518873
+    - name: DGRP-732_132
+      path: FASTQ/RNAseq/DGRP-732_132/
+      paired: True
+      readsfile1: SRR518968_1.fastq
+      readsfile2: SRR518968_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518968
+    - name: DGRP-732_133
+      path: FASTQ/RNAseq/DGRP-732_133/
+      paired: True
+      readsfile1: SRR518969_1.fastq
+      readsfile2: SRR518969_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518969
+    - name: DGRP-732_134
+      path: FASTQ/RNAseq/DGRP-732_134/
+      paired: True
+      readsfile1: SRR518970_1.fastq
+      readsfile2: SRR518970_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518970
+    - name: DGRP-732_135
+      path: FASTQ/RNAseq/DGRP-732_135/
+      paired: True
+      readsfile1: SRR518971_1.fastq
+      readsfile2: SRR518971_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518971
+    - name: DGRP-732_136
+      path: FASTQ/RNAseq/DGRP-732_136/
+      paired: True
+      readsfile1: SRR518972_1.fastq
+      readsfile2: SRR518972_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518972
+    - name: DGRP-774_137
+      path: FASTQ/RNAseq/DGRP-774_137/
+      paired: True
+      readsfile1: SRR518981_1.fastq
+      readsfile2: SRR518981_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518981
+    - name: DGRP-774_138
+      path: FASTQ/RNAseq/DGRP-774_138/
+      paired: True
+      readsfile1: SRR518982_1.fastq
+      readsfile2: SRR518982_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518982
+    - name: DGRP-774_139
+      path: FASTQ/RNAseq/DGRP-774_139/
+      paired: True
+      readsfile1: SRR518983_1.fastq
+      readsfile2: SRR518983_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518983
+    - name: DGRP-774_140
+      path: FASTQ/RNAseq/DGRP-774_140/
+      paired: True
+      readsfile1: SRR518984_1.fastq
+      readsfile2: SRR518984_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518984
+    - name: DGRP-774_141
+      path: FASTQ/RNAseq/DGRP-774_141/
+      paired: True
+      readsfile1: SRR518985_1.fastq
+      readsfile2: SRR518985_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518985
+    - name: DGRP-774_142
+      path: FASTQ/RNAseq/DGRP-774_142/
+      paired: True
+      readsfile1: SRR518986_1.fastq
+      readsfile2: SRR518986_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR518986
+    - name: DGRP-100_143
+      path: FASTQ/RNAseq/DGRP-100_143/
+      paired: True
+      readsfile1: SRR833244_1.fastq
+      readsfile2: SRR833244_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR833244
+    - name: DGRP-310_144
+      path: FASTQ/RNAseq/DGRP-310_144/
+      paired: True
+      readsfile1: SRR834505_1.fastq
+      readsfile2: SRR834505_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834505
+    - name: DGRP-321_145
+      path: FASTQ/RNAseq/DGRP-321_145/
+      paired: True
+      readsfile1: SRR834511_1.fastq
+      readsfile2: SRR834511_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834511
+    - name: DGRP-32_146
+      path: FASTQ/RNAseq/DGRP-32_146/
+      paired: True
+      readsfile1: SRR834512_1.fastq
+      readsfile2: SRR834512_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834512
+    - name: DGRP-350_147
+      path: FASTQ/RNAseq/DGRP-350_147/
+      paired: True
+      readsfile1: SRR834515_1.fastq
+      readsfile2: SRR834515_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834515
+    - name: DGRP-352_148
+      path: FASTQ/RNAseq/DGRP-352_148/
+      paired: True
+      readsfile1: SRR834516_1.fastq
+      readsfile2: SRR834516_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834516
+    - name: DGRP-354_149
+      path: FASTQ/RNAseq/DGRP-354_149/
+      paired: True
+      readsfile1: SRR834517_1.fastq
+      readsfile2: SRR834517_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834517
+    - name: DGRP-189_150
+      path: FASTQ/RNAseq/DGRP-189_150/
+      paired: True
+      readsfile1: SRR834523_1.fastq
+      readsfile2: SRR834523_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834523
+    - name: DGRP-195_151
+      path: FASTQ/RNAseq/DGRP-195_151/
+      paired: True
+      readsfile1: SRR834524_1.fastq
+      readsfile2: SRR834524_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834524
+    - name: DGRP-223_152
+      path: FASTQ/RNAseq/DGRP-223_152/
+      paired: True
+      readsfile1: SRR834527_1.fastq
+      readsfile2: SRR834527_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834527
+    - name: DGRP-235_153
+      path: FASTQ/RNAseq/DGRP-235_153/
+      paired: True
+      readsfile1: SRR834531_1.fastq
+      readsfile2: SRR834531_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834531
+    - name: DGRP-101_154
+      path: FASTQ/RNAseq/DGRP-101_154/
+      paired: True
+      readsfile1: SRR834536_1.fastq
+      readsfile2: SRR834536_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834536
+    - name: DGRP-356_155
+      path: FASTQ/RNAseq/DGRP-356_155/
+      paired: True
+      readsfile1: SRR834537_1.fastq
+      readsfile2: SRR834537_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834537
+    - name: DGRP-105_156
+      path: FASTQ/RNAseq/DGRP-105_156/
+      paired: True
+      readsfile1: SRR834538_1.fastq
+      readsfile2: SRR834538_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834538
+    - name: DGRP-129_157
+      path: FASTQ/RNAseq/DGRP-129_157/
+      paired: True
+      readsfile1: SRR834540_1.fastq
+      readsfile2: SRR834540_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834540
+    - name: DGRP-161_158
+      path: FASTQ/RNAseq/DGRP-161_158/
+      paired: True
+      readsfile1: SRR834548_1.fastq
+      readsfile2: SRR834548_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834548
+    - name: DGRP-158_159
+      path: FASTQ/RNAseq/DGRP-158_159/
+      paired: True
+      readsfile1: SRR834549_1.fastq
+      readsfile2: SRR834549_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR834549
+    - name: DGRP-149_160
+      path: FASTQ/RNAseq/DGRP-149_160/
+      paired: True
+      readsfile1: SRR834550_1.fastq
+      readsfile2: SRR834550_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834550
+    - name: DGRP-382_161
+      path: FASTQ/RNAseq/DGRP-382_161/
+      paired: True
+      readsfile1: SRR834552_1.fastq
+      readsfile2: SRR834552_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR834552
+    - name: DGRP-406_162
+      path: FASTQ/RNAseq/DGRP-406_162/
+      paired: True
+      readsfile1: SRR835024_1.fastq
+      readsfile2: SRR835024_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835024
+    - name: DGRP-40_163
+      path: FASTQ/RNAseq/DGRP-40_163/
+      paired: True
+      readsfile1: SRR835025_1.fastq
+      readsfile2: SRR835025_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835025
+    - name: DGRP-426_164
+      path: FASTQ/RNAseq/DGRP-426_164/
+      paired: True
+      readsfile1: SRR835026_1.fastq
+      readsfile2: SRR835026_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835026
+    - name: DGRP-492_165
+      path: FASTQ/RNAseq/DGRP-492_165/
+      paired: True
+      readsfile1: SRR835036_1.fastq
+      readsfile2: SRR835036_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835036
+    - name: DGRP-49_166
+      path: FASTQ/RNAseq/DGRP-49_166/
+      paired: True
+      readsfile1: SRR835037_1.fastq
+      readsfile2: SRR835037_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835037
+    - name: DGRP-508_167
+      path: FASTQ/RNAseq/DGRP-508_167/
+      paired: True
+      readsfile1: SRR835040_1.fastq
+      readsfile2: SRR835040_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835040
+    - name: DGRP-513_168
+      path: FASTQ/RNAseq/DGRP-513_168/
+      paired: True
+      readsfile1: SRR835042_1.fastq
+      readsfile2: SRR835042_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835042
+    - name: DGRP-528_169
+      path: FASTQ/RNAseq/DGRP-528_169/
+      paired: True
+      readsfile1: SRR835043_1.fastq
+      readsfile2: SRR835043_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835043
+    - name: DGRP-535_170
+      path: FASTQ/RNAseq/DGRP-535_170/
+      paired: True
+      readsfile1: SRR835046_1.fastq
+      readsfile2: SRR835046_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835046
+    - name: DGRP-551_171
+      path: FASTQ/RNAseq/DGRP-551_171/
+      paired: True
+      readsfile1: SRR835047_1.fastq
+      readsfile2: SRR835047_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835047
+    - name: DGRP-559_172
+      path: FASTQ/RNAseq/DGRP-559_172/
+      paired: True
+      readsfile1: SRR835048_1.fastq
+      readsfile2: SRR835048_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835048
+    - name: DGRP-812_173
+      path: FASTQ/RNAseq/DGRP-812_173/
+      paired: True
+      readsfile1: SRR835052_1.fastq
+      readsfile2: SRR835052_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835052
+    - name: DGRP-818_174
+      path: FASTQ/RNAseq/DGRP-818_174/
+      paired: True
+      readsfile1: SRR835053_1.fastq
+      readsfile2: SRR835053_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835053
+    - name: DGRP-822_175
+      path: FASTQ/RNAseq/DGRP-822_175/
+      paired: True
+      readsfile1: SRR835055_1.fastq
+      readsfile2: SRR835055_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835055
+    - name: DGRP-843_176
+      path: FASTQ/RNAseq/DGRP-843_176/
+      paired: True
+      readsfile1: SRR835059_1.fastq
+      readsfile2: SRR835059_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835059
+    - name: DGRP-849_177
+      path: FASTQ/RNAseq/DGRP-849_177/
+      paired: True
+      readsfile1: SRR835060_1.fastq
+      readsfile2: SRR835060_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835060
+    - name: DGRP-850_178
+      path: FASTQ/RNAseq/DGRP-850_178/
+      paired: True
+      readsfile1: SRR835061_1.fastq
+      readsfile2: SRR835061_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835061
+    - name: DGRP-857_179
+      path: FASTQ/RNAseq/DGRP-857_179/
+      paired: True
+      readsfile1: SRR835063_1.fastq
+      readsfile2: SRR835063_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835063
+    - name: DGRP-85_180
+      path: FASTQ/RNAseq/DGRP-85_180/
+      paired: True
+      readsfile1: SRR835064_1.fastq
+      readsfile2: SRR835064_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835064
+    - name: DGRP-894_181
+      path: FASTQ/RNAseq/DGRP-894_181/
+      paired: True
+      readsfile1: SRR835073_1.fastq
+      readsfile2: SRR835073_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835073
+    - name: DGRP-913_182
+      path: FASTQ/RNAseq/DGRP-913_182/
+      paired: True
+      readsfile1: SRR835077_1.fastq
+      readsfile2: SRR835077_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835077
+    - name: DGRP-91_183
+      path: FASTQ/RNAseq/DGRP-91_183/
+      paired: True
+      readsfile1: SRR835078_1.fastq
+      readsfile2: SRR835078_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835078
+    - name: DGRP-642_184
+      path: FASTQ/RNAseq/DGRP-642_184/
+      paired: True
+      readsfile1: SRR835082_1.fastq
+      readsfile2: SRR835082_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835082
+    - name: DGRP-634_185
+      path: FASTQ/RNAseq/DGRP-634_185/
+      paired: True
+      readsfile1: SRR835086_1.fastq
+      readsfile2: SRR835086_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835086
+    - name: DGRP-783_186
+      path: FASTQ/RNAseq/DGRP-783_186/
+      paired: True
+      readsfile1: SRR835090_1.fastq
+      readsfile2: SRR835090_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835090
+    - name: DGRP-787_187
+      path: FASTQ/RNAseq/DGRP-787_187/
+      paired: True
+      readsfile1: SRR835091_1.fastq
+      readsfile2: SRR835091_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR835091
+    - name: DGRP-804_188
+      path: FASTQ/RNAseq/DGRP-804_188/
+      paired: True
+      readsfile1: SRR835094_1.fastq
+      readsfile2: SRR835094_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835094
+    - name: DGRP-596_189
+      path: FASTQ/RNAseq/DGRP-596_189/
+      paired: True
+      readsfile1: SRR835096_1.fastq
+      readsfile2: SRR835096_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835096
+    - name: DGRP-303_190
+      path: FASTQ/RNAseq/DGRP-303_190/
+      paired: True
+      readsfile1: SRR835228_1.fastq
+      readsfile2: SRR835228_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835228
+    - name: DGRP-324_191
+      path: FASTQ/RNAseq/DGRP-324_191/
+      paired: True
+      readsfile1: SRR835256_1.fastq
+      readsfile2: SRR835256_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835256
+    - name: DGRP-774_192
+      path: FASTQ/RNAseq/DGRP-774_192/
+      paired: True
+      readsfile1: SRR835338_1.fastq
+      readsfile2: SRR835338_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835338
+    - name: DGRP-801_193
+      path: FASTQ/RNAseq/DGRP-801_193/
+      paired: True
+      readsfile1: SRR835341_1.fastq
+      readsfile2: SRR835341_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835341
+    - name: DGRP-802_194
+      path: FASTQ/RNAseq/DGRP-802_194/
+      paired: True
+      readsfile1: SRR835343_1.fastq
+      readsfile2: SRR835343_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835343
+    - name: DGRP-808_195
+      path: FASTQ/RNAseq/DGRP-808_195/
+      paired: True
+      readsfile1: SRR835345_1.fastq
+      readsfile2: SRR835345_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835345
+    - name: DGRP-584_196
+      path: FASTQ/RNAseq/DGRP-584_196/
+      paired: True
+      readsfile1: SRR835942_1.fastq
+      readsfile2: SRR835942_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR835942
+    - name: DGRP-138_197
+      path: FASTQ/RNAseq/DGRP-138_197/
+      paired: True
+      readsfile1: SRR932121_1.fastq
+      readsfile2: SRR932121_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR932121
+    - name: DGRP-153_198
+      path: FASTQ/RNAseq/DGRP-153_198/
+      paired: True
+      readsfile1: SRR933562_1.fastq
+      readsfile2: SRR933562_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933562
+    - name: DGRP-181_199
+      path: FASTQ/RNAseq/DGRP-181_199/
+      paired: True
+      readsfile1: SRR933563_1.fastq
+      readsfile2: SRR933563_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933563
+    - name: DGRP-208_200
+      path: FASTQ/RNAseq/DGRP-208_200/
+      paired: True
+      readsfile1: SRR933564_1.fastq
+      readsfile2: SRR933564_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933564
+    - name: DGRP-237_201
+      path: FASTQ/RNAseq/DGRP-237_201/
+      paired: True
+      readsfile1: SRR933565_1.fastq
+      readsfile2: SRR933565_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933565
+    - name: DGRP-26_202
+      path: FASTQ/RNAseq/DGRP-26_202/
+      paired: True
+      readsfile1: SRR933566_1.fastq
+      readsfile2: SRR933566_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933566
+    - name: DGRP-28_203
+      path: FASTQ/RNAseq/DGRP-28_203/
+      paired: True
+      readsfile1: SRR933567_1.fastq
+      readsfile2: SRR933567_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933567
+    - name: DGRP-325_204
+      path: FASTQ/RNAseq/DGRP-325_204/
+      paired: True
+      readsfile1: SRR933568_1.fastq
+      readsfile2: SRR933568_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933568
+    - name: DGRP-332_205
+      path: FASTQ/RNAseq/DGRP-332_205/
+      paired: True
+      readsfile1: SRR933569_1.fastq
+      readsfile2: SRR933569_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933569
+    - name: DGRP-336_206
+      path: FASTQ/RNAseq/DGRP-336_206/
+      paired: True
+      readsfile1: SRR933570_1.fastq
+      readsfile2: SRR933570_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933570
+    - name: DGRP-357_207
+      path: FASTQ/RNAseq/DGRP-357_207/
+      paired: True
+      readsfile1: SRR933571_1.fastq
+      readsfile2: SRR933571_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none]
+      SRA: SRR933571
+    - name: DGRP-375_208
+      path: FASTQ/RNAseq/DGRP-375_208/
+      paired: True
+      readsfile1: SRR933572_1.fastq
+      readsfile2: SRR933572_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933572
+    - name: DGRP-381_209
+      path: FASTQ/RNAseq/DGRP-381_209/
+      paired: True
+      readsfile1: SRR933573_1.fastq
+      readsfile2: SRR933573_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933573
+    - name: DGRP-386_210
+      path: FASTQ/RNAseq/DGRP-386_210/
+      paired: True
+      readsfile1: SRR933574_1.fastq
+      readsfile2: SRR933574_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933574
+    - name: DGRP-399_211
+      path: FASTQ/RNAseq/DGRP-399_211/
+      paired: True
+      readsfile1: SRR933575_1.fastq
+      readsfile2: SRR933575_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933575
+    - name: DGRP-41_212
+      path: FASTQ/RNAseq/DGRP-41_212/
+      paired: True
+      readsfile1: SRR933576_1.fastq
+      readsfile2: SRR933576_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933576
+    - name: DGRP-427_213
+      path: FASTQ/RNAseq/DGRP-427_213/
+      paired: True
+      readsfile1: SRR933577_1.fastq
+      readsfile2: SRR933577_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933577
+    - name: DGRP-486_214
+      path: FASTQ/RNAseq/DGRP-486_214/
+      paired: True
+      readsfile1: SRR933578_1.fastq
+      readsfile2: SRR933578_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933578
+    - name: DGRP-517_215
+      path: FASTQ/RNAseq/DGRP-517_215/
+      paired: True
+      readsfile1: SRR933579_1.fastq
+      readsfile2: SRR933579_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933579
+    - name: DGRP-555_216
+      path: FASTQ/RNAseq/DGRP-555_216/
+      paired: True
+      readsfile1: SRR933580_1.fastq
+      readsfile2: SRR933580_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933580
+    - name: DGRP-57_217
+      path: FASTQ/RNAseq/DGRP-57_217/
+      paired: True
+      readsfile1: SRR933581_1.fastq
+      readsfile2: SRR933581_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933581
+    - name: DGRP-639_218
+      path: FASTQ/RNAseq/DGRP-639_218/
+      paired: True
+      readsfile1: SRR933582_1.fastq
+      readsfile2: SRR933582_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933582
+    - name: DGRP-69_219
+      path: FASTQ/RNAseq/DGRP-69_219/
+      paired: True
+      readsfile1: SRR933583_1.fastq
+      readsfile2: SRR933583_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933583
+    - name: DGRP-705_220
+      path: FASTQ/RNAseq/DGRP-705_220/
+      paired: True
+      readsfile1: SRR933585_1.fastq
+      readsfile2: SRR933585_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933585
+    - name: DGRP-707_221
+      path: FASTQ/RNAseq/DGRP-707_221/
+      paired: True
+      readsfile1: SRR933586_1.fastq
+      readsfile2: SRR933586_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933586
+    - name: DGRP-712_222
+      path: FASTQ/RNAseq/DGRP-712_222/
+      paired: True
+      readsfile1: SRR933587_1.fastq
+      readsfile2: SRR933587_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933587
+    - name: DGRP-714_223
+      path: FASTQ/RNAseq/DGRP-714_223/
+      paired: True
+      readsfile1: SRR933588_1.fastq
+      readsfile2: SRR933588_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933588
+    - name: DGRP-727_224
+      path: FASTQ/RNAseq/DGRP-727_224/
+      paired: True
+      readsfile1: SRR933589_1.fastq
+      readsfile2: SRR933589_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933589
+    - name: DGRP-730_225
+      path: FASTQ/RNAseq/DGRP-730_225/
+      paired: True
+      readsfile1: SRR933590_1.fastq
+      readsfile2: SRR933590_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933590
+    - name: DGRP-732_226
+      path: FASTQ/RNAseq/DGRP-732_226/
+      paired: True
+      readsfile1: SRR933591_1.fastq
+      readsfile2: SRR933591_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933591
+    - name: DGRP-737_227
+      path: FASTQ/RNAseq/DGRP-737_227/
+      paired: True
+      readsfile1: SRR933592_1.fastq
+      readsfile2: SRR933592_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933592
+    - name: DGRP-738_228
+      path: FASTQ/RNAseq/DGRP-738_228/
+      paired: True
+      readsfile1: SRR933593_1.fastq
+      readsfile2: SRR933593_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933593
+    - name: DGRP-757_229
+      path: FASTQ/RNAseq/DGRP-757_229/
+      paired: True
+      readsfile1: SRR933594_1.fastq
+      readsfile2: SRR933594_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933594
+    - name: DGRP-765_230
+      path: FASTQ/RNAseq/DGRP-765_230/
+      paired: True
+      readsfile1: SRR933595_1.fastq
+      readsfile2: SRR933595_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933595
+    - name: DGRP-786_231
+      path: FASTQ/RNAseq/DGRP-786_231/
+      paired: True
+      readsfile1: SRR933596_1.fastq
+      readsfile2: SRR933596_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933596
+    - name: DGRP-799_232
+      path: FASTQ/RNAseq/DGRP-799_232/
+      paired: True
+      readsfile1: SRR933597_1.fastq
+      readsfile2: SRR933597_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933597
+    - name: DGRP-820_233
+      path: FASTQ/RNAseq/DGRP-820_233/
+      paired: True
+      readsfile1: SRR933598_1.fastq
+      readsfile2: SRR933598_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933598
+    - name: DGRP-837_234
+      path: FASTQ/RNAseq/DGRP-837_234/
+      paired: True
+      readsfile1: SRR933599_1.fastq
+      readsfile2: SRR933599_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933599
+    - name: DGRP-859_235
+      path: FASTQ/RNAseq/DGRP-859_235/
+      paired: True
+      readsfile1: SRR933600_1.fastq
+      readsfile2: SRR933600_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933600
+    - name: DGRP-897_236
+      path: FASTQ/RNAseq/DGRP-897_236/
+      paired: True
+      readsfile1: SRR933601_1.fastq
+      readsfile2: SRR933601_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR933601
+    - name: DGRP-362_237
+      path: FASTQ/RNAseq/DGRP-362_237/
+      paired: True
+      readsfile1: SRR846985_1.fastq
+      readsfile2: SRR846985_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR846985
+    - name: DGRP-900_238
+      path: FASTQ/RNAseq/DGRP-900_238/
+      paired: True
+      readsfile1: SRR846989_1.fastq
+      readsfile2: SRR846989_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR846989
+    - name: DGRP-176_239
+      path: FASTQ/RNAseq/DGRP-176_239/
+      paired: True
+      readsfile1: SRR048925_1.fastq
+      readsfile2: SRR048925_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR048925
+    - name: DGRP-176_240
+      path: FASTQ/RNAseq/DGRP-176_240/
+      paired: True
+      readsfile1: SRR048926_1.fastq
+      readsfile2: SRR048926_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR048926
+    - name: DGRP-272_241
+      path: FASTQ/RNAseq/DGRP-272_241/
+      paired: True
+      readsfile1: SRR049811_1.fastq
+      readsfile2: SRR049811_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR049811
+    - name: DGRP-358_242
+      path: FASTQ/RNAseq/DGRP-358_242/
+      paired: True
+      readsfile1: SRR029943_1.fastq
+      readsfile2: SRR029943_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR029943
+    - name: DGRP-208_243
+      path: FASTQ/RNAseq/DGRP-208_243/
+      paired: True
+      readsfile1: SRR034239_1.fastq
+      readsfile2: SRR034239_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034239
+    - name: DGRP-208_244
+      path: FASTQ/RNAseq/DGRP-208_244/
+      paired: True
+      readsfile1: SRR034240_1.fastq
+      readsfile2: SRR034240_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034240
+    - name: DGRP-208_245
+      path: FASTQ/RNAseq/DGRP-208_245/
+      paired: True
+      readsfile1: SRR034241_1.fastq
+      readsfile2: SRR034241_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034241
+    - name: DGRP-208_246
+      path: FASTQ/RNAseq/DGRP-208_246/
+      paired: True
+      readsfile1: SRR034242_1.fastq
+      readsfile2: SRR034242_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034242
+    - name: DGRP-208_247
+      path: FASTQ/RNAseq/DGRP-208_247/
+      paired: True
+      readsfile1: SRR034243_1.fastq
+      readsfile2: SRR034243_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034243
+    - name: DGRP-304_248
+      path: FASTQ/RNAseq/DGRP-304_248/
+      paired: True
+      readsfile1: SRR034244_1.fastq
+      readsfile2: SRR034244_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034244
+    - name: DGRP-304_249
+      path: FASTQ/RNAseq/DGRP-304_249/
+      paired: True
+      readsfile1: SRR034245_1.fastq
+      readsfile2: SRR034245_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034245
+    - name: DGRP-304_250
+      path: FASTQ/RNAseq/DGRP-304_250/
+      paired: True
+      readsfile1: SRR034246_1.fastq
+      readsfile2: SRR034246_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034246
+    - name: DGRP-304_251
+      path: FASTQ/RNAseq/DGRP-304_251/
+      paired: True
+      readsfile1: SRR034247_1.fastq
+      readsfile2: SRR034247_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034247
+    - name: DGRP-304_252
+      path: FASTQ/RNAseq/DGRP-304_252/
+      paired: True
+      readsfile1: SRR034248_1.fastq
+      readsfile2: SRR034248_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034248
+    - name: DGRP-306_253
+      path: FASTQ/RNAseq/DGRP-306_253/
+      paired: True
+      readsfile1: SRR034249_1.fastq
+      readsfile2: SRR034249_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034249
+    - name: DGRP-306_254
+      path: FASTQ/RNAseq/DGRP-306_254/
+      paired: True
+      readsfile1: SRR034250_1.fastq
+      readsfile2: SRR034250_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034250
+    - name: DGRP-306_255
+      path: FASTQ/RNAseq/DGRP-306_255/
+      paired: True
+      readsfile1: SRR034251_1.fastq
+      readsfile2: SRR034251_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034251
+    - name: DGRP-306_256
+      path: FASTQ/RNAseq/DGRP-306_256/
+      paired: True
+      readsfile1: SRR034252_1.fastq
+      readsfile2: SRR034252_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034252
+    - name: DGRP-313_257
+      path: FASTQ/RNAseq/DGRP-313_257/
+      paired: True
+      readsfile1: SRR034253_1.fastq
+      readsfile2: SRR034253_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034253
+    - name: DGRP-313_258
+      path: FASTQ/RNAseq/DGRP-313_258/
+      paired: True
+      readsfile1: SRR034254_1.fastq
+      readsfile2: SRR034254_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034254
+    - name: DGRP-313_259
+      path: FASTQ/RNAseq/DGRP-313_259/
+      paired: True
+      readsfile1: SRR034255_1.fastq
+      readsfile2: SRR034255_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034255
+    - name: DGRP-313_260
+      path: FASTQ/RNAseq/DGRP-313_260/
+      paired: True
+      readsfile1: SRR034256_1.fastq
+      readsfile2: SRR034256_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034256
+    - name: DGRP-315_261
+      path: FASTQ/RNAseq/DGRP-315_261/
+      paired: True
+      readsfile1: SRR034259_1.fastq
+      readsfile2: SRR034259_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034259
+    - name: DGRP-315_262
+      path: FASTQ/RNAseq/DGRP-315_262/
+      paired: True
+      readsfile1: SRR034260_1.fastq
+      readsfile2: SRR034260_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034260
+    - name: DGRP-315_263
+      path: FASTQ/RNAseq/DGRP-315_263/
+      paired: True
+      readsfile1: SRR034261_1.fastq
+      readsfile2: SRR034261_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034261
+    - name: DGRP-315_264
+      path: FASTQ/RNAseq/DGRP-315_264/
+      paired: True
+      readsfile1: SRR034262_1.fastq
+      readsfile2: SRR034262_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034262
+    - name: DGRP-315_265
+      path: FASTQ/RNAseq/DGRP-315_265/
+      paired: True
+      readsfile1: SRR034263_1.fastq
+      readsfile2: SRR034263_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034263
+    - name: DGRP-307_266
+      path: FASTQ/RNAseq/DGRP-307_266/
+      paired: True
+      readsfile1: SRR034264_1.fastq
+      readsfile2: SRR034264_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034264
+    - name: DGRP-307_267
+      path: FASTQ/RNAseq/DGRP-307_267/
+      paired: True
+      readsfile1: SRR034265_1.fastq
+      readsfile2: SRR034265_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034265
+    - name: DGRP-307_268
+      path: FASTQ/RNAseq/DGRP-307_268/
+      paired: True
+      readsfile1: SRR034266_1.fastq
+      readsfile2: SRR034266_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034266
+    - name: DGRP-307_269
+      path: FASTQ/RNAseq/DGRP-307_269/
+      paired: True
+      readsfile1: SRR034267_1.fastq
+      readsfile2: SRR034267_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034267
+    - name: DGRP-307_270
+      path: FASTQ/RNAseq/DGRP-307_270/
+      paired: True
+      readsfile1: SRR034268_1.fastq
+      readsfile2: SRR034268_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034268
+    - name: DGRP-357_271
+      path: FASTQ/RNAseq/DGRP-357_271/
+      paired: True
+      readsfile1: SRR034269_1.fastq
+      readsfile2: SRR034269_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034269
+    - name: DGRP-357_272
+      path: FASTQ/RNAseq/DGRP-357_272/
+      paired: True
+      readsfile1: SRR034270_1.fastq
+      readsfile2: SRR034270_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034270
+    - name: DGRP-357_273
+      path: FASTQ/RNAseq/DGRP-357_273/
+      paired: True
+      readsfile1: SRR034271_1.fastq
+      readsfile2: SRR034271_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034271
+    - name: DGRP-357_274
+      path: FASTQ/RNAseq/DGRP-357_274/
+      paired: True
+      readsfile1: SRR034272_1.fastq
+      readsfile2: SRR034272_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034272
+    - name: DGRP-357_275
+      path: FASTQ/RNAseq/DGRP-357_275/
+      paired: True
+      readsfile1: SRR034273_1.fastq
+      readsfile2: SRR034273_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034273
+    - name: DGRP-358_276
+      path: FASTQ/RNAseq/DGRP-358_276/
+      paired: True
+      readsfile1: SRR034274_1.fastq
+      readsfile2: SRR034274_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034274
+    - name: DGRP-358_277
+      path: FASTQ/RNAseq/DGRP-358_277/
+      paired: True
+      readsfile1: SRR034275_1.fastq
+      readsfile2: SRR034275_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034275
+    - name: DGRP-358_278
+      path: FASTQ/RNAseq/DGRP-358_278/
+      paired: True
+      readsfile1: SRR034276_1.fastq
+      readsfile2: SRR034276_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034276
+    - name: DGRP-358_279
+      path: FASTQ/RNAseq/DGRP-358_279/
+      paired: True
+      readsfile1: SRR034277_1.fastq
+      readsfile2: SRR034277_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034277
+    - name: DGRP-358_280
+      path: FASTQ/RNAseq/DGRP-358_280/
+      paired: True
+      readsfile1: SRR034278_1.fastq
+      readsfile2: SRR034278_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034278
+    - name: DGRP-365_281
+      path: FASTQ/RNAseq/DGRP-365_281/
+      paired: True
+      readsfile1: SRR034279_1.fastq
+      readsfile2: SRR034279_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034279
+    - name: DGRP-365_282
+      path: FASTQ/RNAseq/DGRP-365_282/
+      paired: True
+      readsfile1: SRR034280_1.fastq
+      readsfile2: SRR034280_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034280
+    - name: DGRP-365_283
+      path: FASTQ/RNAseq/DGRP-365_283/
+      paired: True
+      readsfile1: SRR034281_1.fastq
+      readsfile2: SRR034281_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034281
+    - name: DGRP-365_284
+      path: FASTQ/RNAseq/DGRP-365_284/
+      paired: True
+      readsfile1: SRR034282_1.fastq
+      readsfile2: SRR034282_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034282
+    - name: DGRP-365_285
+      path: FASTQ/RNAseq/DGRP-365_285/
+      paired: True
+      readsfile1: SRR034283_1.fastq
+      readsfile2: SRR034283_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034283
+    - name: DGRP-375_286
+      path: FASTQ/RNAseq/DGRP-375_286/
+      paired: True
+      readsfile1: SRR034284_1.fastq
+      readsfile2: SRR034284_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034284
+    - name: DGRP-375_287
+      path: FASTQ/RNAseq/DGRP-375_287/
+      paired: True
+      readsfile1: SRR034285_1.fastq
+      readsfile2: SRR034285_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034285
+    - name: DGRP-375_288
+      path: FASTQ/RNAseq/DGRP-375_288/
+      paired: True
+      readsfile1: SRR034286_1.fastq
+      readsfile2: SRR034286_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034286
+    - name: DGRP-375_289
+      path: FASTQ/RNAseq/DGRP-375_289/
+      paired: True
+      readsfile1: SRR034287_1.fastq
+      readsfile2: SRR034287_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034287
+    - name: DGRP-375_290
+      path: FASTQ/RNAseq/DGRP-375_290/
+      paired: True
+      readsfile1: SRR034288_1.fastq
+      readsfile2: SRR034288_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034288
+    - name: DGRP-379_291
+      path: FASTQ/RNAseq/DGRP-379_291/
+      paired: True
+      readsfile1: SRR034289_1.fastq
+      readsfile2: SRR034289_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034289
+    - name: DGRP-379_292
+      path: FASTQ/RNAseq/DGRP-379_292/
+      paired: True
+      readsfile1: SRR034290_1.fastq
+      readsfile2: SRR034290_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034290
+    - name: DGRP-379_293
+      path: FASTQ/RNAseq/DGRP-379_293/
+      paired: True
+      readsfile1: SRR034291_1.fastq
+      readsfile2: SRR034291_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034291
+    - name: DGRP-379_294
+      path: FASTQ/RNAseq/DGRP-379_294/
+      paired: True
+      readsfile1: SRR034292_1.fastq
+      readsfile2: SRR034292_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034292
+    - name: DGRP-379_295
+      path: FASTQ/RNAseq/DGRP-379_295/
+      paired: True
+      readsfile1: SRR034293_1.fastq
+      readsfile2: SRR034293_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034293
+    - name: DGRP-380_296
+      path: FASTQ/RNAseq/DGRP-380_296/
+      paired: True
+      readsfile1: SRR034294_1.fastq
+      readsfile2: SRR034294_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034294
+    - name: DGRP-380_297
+      path: FASTQ/RNAseq/DGRP-380_297/
+      paired: True
+      readsfile1: SRR034295_1.fastq
+      readsfile2: SRR034295_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034295
+    - name: DGRP-380_298
+      path: FASTQ/RNAseq/DGRP-380_298/
+      paired: True
+      readsfile1: SRR034296_1.fastq
+      readsfile2: SRR034296_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034296
+    - name: DGRP-380_299
+      path: FASTQ/RNAseq/DGRP-380_299/
+      paired: True
+      readsfile1: SRR034297_1.fastq
+      readsfile2: SRR034297_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034297
+    - name: DGRP-380_300
+      path: FASTQ/RNAseq/DGRP-380_300/
+      paired: True
+      readsfile1: SRR034298_1.fastq
+      readsfile2: SRR034298_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034298
+    - name: DGRP-391_301
+      path: FASTQ/RNAseq/DGRP-391_301/
+      paired: True
+      readsfile1: SRR034299_1.fastq
+      readsfile2: SRR034299_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034299
+    - name: DGRP-391_302
+      path: FASTQ/RNAseq/DGRP-391_302/
+      paired: True
+      readsfile1: SRR034300_1.fastq
+      readsfile2: SRR034300_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034300
+    - name: DGRP-391_303
+      path: FASTQ/RNAseq/DGRP-391_303/
+      paired: True
+      readsfile1: SRR034301_1.fastq
+      readsfile2: SRR034301_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034301
+    - name: DGRP-391_304
+      path: FASTQ/RNAseq/DGRP-391_304/
+      paired: True
+      readsfile1: SRR034302_1.fastq
+      readsfile2: SRR034302_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034302
+    - name: DGRP-391_305
+      path: FASTQ/RNAseq/DGRP-391_305/
+      paired: True
+      readsfile1: SRR034303_1.fastq
+      readsfile2: SRR034303_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034303
+    - name: DGRP-399_306
+      path: FASTQ/RNAseq/DGRP-399_306/
+      paired: True
+      readsfile1: SRR034304_1.fastq
+      readsfile2: SRR034304_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034304
+    - name: DGRP-399_307
+      path: FASTQ/RNAseq/DGRP-399_307/
+      paired: True
+      readsfile1: SRR034305_1.fastq
+      readsfile2: SRR034305_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034305
+    - name: DGRP-399_308
+      path: FASTQ/RNAseq/DGRP-399_308/
+      paired: True
+      readsfile1: SRR034306_1.fastq
+      readsfile2: SRR034306_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034306
+    - name: DGRP-399_309
+      path: FASTQ/RNAseq/DGRP-399_309/
+      paired: True
+      readsfile1: SRR034307_1.fastq
+      readsfile2: SRR034307_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034307
+    - name: DGRP-399_310
+      path: FASTQ/RNAseq/DGRP-399_310/
+      paired: True
+      readsfile1: SRR034308_1.fastq
+      readsfile2: SRR034308_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034308
+    - name: DGRP-324_311
+      path: FASTQ/RNAseq/DGRP-324_311/
+      paired: True
+      readsfile1: SRR034413_1.fastq
+      readsfile2: SRR034413_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034413
+    - name: DGRP-324_312
+      path: FASTQ/RNAseq/DGRP-324_312/
+      paired: True
+      readsfile1: SRR034414_1.fastq
+      readsfile2: SRR034414_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034414
+    - name: DGRP-324_313
+      path: FASTQ/RNAseq/DGRP-324_313/
+      paired: True
+      readsfile1: SRR034415_1.fastq
+      readsfile2: SRR034415_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034415
+    - name: DGRP-324_314
+      path: FASTQ/RNAseq/DGRP-324_314/
+      paired: True
+      readsfile1: SRR034416_1.fastq
+      readsfile2: SRR034416_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034416
+    - name: DGRP-324_315
+      path: FASTQ/RNAseq/DGRP-324_315/
+      paired: True
+      readsfile1: SRR034417_1.fastq
+      readsfile2: SRR034417_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034417
+    - name: DGRP-427_316
+      path: FASTQ/RNAseq/DGRP-427_316/
+      paired: True
+      readsfile1: SRR034495_1.fastq
+      readsfile2: SRR034495_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034495
+    - name: DGRP-427_317
+      path: FASTQ/RNAseq/DGRP-427_317/
+      paired: True
+      readsfile1: SRR034496_1.fastq
+      readsfile2: SRR034496_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034496
+    - name: DGRP-427_318
+      path: FASTQ/RNAseq/DGRP-427_318/
+      paired: True
+      readsfile1: SRR034497_1.fastq
+      readsfile2: SRR034497_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034497
+    - name: DGRP-427_319
+      path: FASTQ/RNAseq/DGRP-427_319/
+      paired: True
+      readsfile1: SRR034498_1.fastq
+      readsfile2: SRR034498_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034498
+    - name: DGRP-427_320
+      path: FASTQ/RNAseq/DGRP-427_320/
+      paired: True
+      readsfile1: SRR034499_1.fastq
+      readsfile2: SRR034499_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034499
+    - name: DGRP-437_321
+      path: FASTQ/RNAseq/DGRP-437_321/
+      paired: True
+      readsfile1: SRR034500_1.fastq
+      readsfile2: SRR034500_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034500
+    - name: DGRP-437_322
+      path: FASTQ/RNAseq/DGRP-437_322/
+      paired: True
+      readsfile1: SRR034501_1.fastq
+      readsfile2: SRR034501_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034501
+    - name: DGRP-437_323
+      path: FASTQ/RNAseq/DGRP-437_323/
+      paired: True
+      readsfile1: SRR034502_1.fastq
+      readsfile2: SRR034502_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034502
+    - name: DGRP-437_324
+      path: FASTQ/RNAseq/DGRP-437_324/
+      paired: True
+      readsfile1: SRR034503_1.fastq
+      readsfile2: SRR034503_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034503
+    - name: DGRP-486_325
+      path: FASTQ/RNAseq/DGRP-486_325/
+      paired: True
+      readsfile1: SRR034504_1.fastq
+      readsfile2: SRR034504_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034504
+    - name: DGRP-486_326
+      path: FASTQ/RNAseq/DGRP-486_326/
+      paired: True
+      readsfile1: SRR034505_1.fastq
+      readsfile2: SRR034505_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034505
+    - name: DGRP-486_327
+      path: FASTQ/RNAseq/DGRP-486_327/
+      paired: True
+      readsfile1: SRR034506_1.fastq
+      readsfile2: SRR034506_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034506
+    - name: DGRP-486_328
+      path: FASTQ/RNAseq/DGRP-486_328/
+      paired: True
+      readsfile1: SRR034507_1.fastq
+      readsfile2: SRR034507_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034507
+    - name: DGRP-486_329
+      path: FASTQ/RNAseq/DGRP-486_329/
+      paired: True
+      readsfile1: SRR034508_1.fastq
+      readsfile2: SRR034508_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034508
+    - name: DGRP-555_330
+      path: FASTQ/RNAseq/DGRP-555_330/
+      paired: True
+      readsfile1: SRR034536_1.fastq
+      readsfile2: SRR034536_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034536
+    - name: DGRP-555_331
+      path: FASTQ/RNAseq/DGRP-555_331/
+      paired: True
+      readsfile1: SRR034537_1.fastq
+      readsfile2: SRR034537_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034537
+    - name: DGRP-555_332
+      path: FASTQ/RNAseq/DGRP-555_332/
+      paired: True
+      readsfile1: SRR034538_1.fastq
+      readsfile2: SRR034538_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034538
+    - name: DGRP-555_333
+      path: FASTQ/RNAseq/DGRP-555_333/
+      paired: True
+      readsfile1: SRR034539_1.fastq
+      readsfile2: SRR034539_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034539
+    - name: DGRP-555_334
+      path: FASTQ/RNAseq/DGRP-555_334/
+      paired: True
+      readsfile1: SRR034540_1.fastq
+      readsfile2: SRR034540_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034540
+    - name: DGRP-705_335
+      path: FASTQ/RNAseq/DGRP-705_335/
+      paired: True
+      readsfile1: SRR034662_1.fastq
+      readsfile2: SRR034662_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034662
+    - name: DGRP-705_336
+      path: FASTQ/RNAseq/DGRP-705_336/
+      paired: True
+      readsfile1: SRR034663_1.fastq
+      readsfile2: SRR034663_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034663
+    - name: DGRP-705_337
+      path: FASTQ/RNAseq/DGRP-705_337/
+      paired: True
+      readsfile1: SRR034664_1.fastq
+      readsfile2: SRR034664_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034664
+    - name: DGRP-705_338
+      path: FASTQ/RNAseq/DGRP-705_338/
+      paired: True
+      readsfile1: SRR034665_1.fastq
+      readsfile2: SRR034665_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034665
+    - name: DGRP-705_339
+      path: FASTQ/RNAseq/DGRP-705_339/
+      paired: True
+      readsfile1: SRR034666_1.fastq
+      readsfile2: SRR034666_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034666
+    - name: DGRP-705_340
+      path: FASTQ/RNAseq/DGRP-705_340/
+      paired: True
+      readsfile1: SRR034667_1.fastq
+      readsfile2: SRR034667_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034667
+    - name: DGRP-707_341
+      path: FASTQ/RNAseq/DGRP-707_341/
+      paired: True
+      readsfile1: SRR034668_1.fastq
+      readsfile2: SRR034668_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034668
+    - name: DGRP-707_342
+      path: FASTQ/RNAseq/DGRP-707_342/
+      paired: True
+      readsfile1: SRR034669_1.fastq
+      readsfile2: SRR034669_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034669
+    - name: DGRP-707_343
+      path: FASTQ/RNAseq/DGRP-707_343/
+      paired: True
+      readsfile1: SRR034670_1.fastq
+      readsfile2: SRR034670_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034670
+    - name: DGRP-707_344
+      path: FASTQ/RNAseq/DGRP-707_344/
+      paired: True
+      readsfile1: SRR034671_1.fastq
+      readsfile2: SRR034671_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034671
+    - name: DGRP-707_345
+      path: FASTQ/RNAseq/DGRP-707_345/
+      paired: True
+      readsfile1: SRR034672_1.fastq
+      readsfile2: SRR034672_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034672
+    - name: DGRP-514_346
+      path: FASTQ/RNAseq/DGRP-514_346/
+      paired: True
+      readsfile1: SRR034673_1.fastq
+      readsfile2: SRR034673_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034673
+    - name: DGRP-514_347
+      path: FASTQ/RNAseq/DGRP-514_347/
+      paired: True
+      readsfile1: SRR034674_1.fastq
+      readsfile2: SRR034674_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034674
+    - name: DGRP-514_348
+      path: FASTQ/RNAseq/DGRP-514_348/
+      paired: True
+      readsfile1: SRR034675_1.fastq
+      readsfile2: SRR034675_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034675
+    - name: DGRP-514_349
+      path: FASTQ/RNAseq/DGRP-514_349/
+      paired: True
+      readsfile1: SRR034676_1.fastq
+      readsfile2: SRR034676_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034676
+    - name: DGRP-514_350
+      path: FASTQ/RNAseq/DGRP-514_350/
+      paired: True
+      readsfile1: SRR034677_1.fastq
+      readsfile2: SRR034677_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034677
+    - name: DGRP-514_351
+      path: FASTQ/RNAseq/DGRP-514_351/
+      paired: True
+      readsfile1: SRR034678_1.fastq
+      readsfile2: SRR034678_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034678
+    - name: DGRP-514_352
+      path: FASTQ/RNAseq/DGRP-514_352/
+      paired: True
+      readsfile1: SRR034679_1.fastq
+      readsfile2: SRR034679_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034679
+    - name: DGRP-712_353
+      path: FASTQ/RNAseq/DGRP-712_353/
+      paired: True
+      readsfile1: SRR034680_1.fastq
+      readsfile2: SRR034680_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034680
+    - name: DGRP-712_354
+      path: FASTQ/RNAseq/DGRP-712_354/
+      paired: True
+      readsfile1: SRR034681_1.fastq
+      readsfile2: SRR034681_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034681
+    - name: DGRP-712_355
+      path: FASTQ/RNAseq/DGRP-712_355/
+      paired: True
+      readsfile1: SRR034682_1.fastq
+      readsfile2: SRR034682_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034682
+    - name: DGRP-712_356
+      path: FASTQ/RNAseq/DGRP-712_356/
+      paired: True
+      readsfile1: SRR034683_1.fastq
+      readsfile2: SRR034683_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034683
+    - name: DGRP-712_357
+      path: FASTQ/RNAseq/DGRP-712_357/
+      paired: True
+      readsfile1: SRR034684_1.fastq
+      readsfile2: SRR034684_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034684
+    - name: DGRP-730_358
+      path: FASTQ/RNAseq/DGRP-730_358/
+      paired: True
+      readsfile1: SRR034686_1.fastq
+      readsfile2: SRR034686_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034686
+    - name: DGRP-730_359
+      path: FASTQ/RNAseq/DGRP-730_359/
+      paired: True
+      readsfile1: SRR034687_1.fastq
+      readsfile2: SRR034687_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034687
+    - name: DGRP-730_360
+      path: FASTQ/RNAseq/DGRP-730_360/
+      paired: True
+      readsfile1: SRR034688_1.fastq
+      readsfile2: SRR034688_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034688
+    - name: DGRP-730_361
+      path: FASTQ/RNAseq/DGRP-730_361/
+      paired: True
+      readsfile1: SRR034689_1.fastq
+      readsfile2: SRR034689_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034689
+    - name: DGRP-714_362
+      path: FASTQ/RNAseq/DGRP-714_362/
+      paired: True
+      readsfile1: SRR034744_1.fastq
+      readsfile2: SRR034744_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034744
+    - name: DGRP-714_363
+      path: FASTQ/RNAseq/DGRP-714_363/
+      paired: True
+      readsfile1: SRR034745_1.fastq
+      readsfile2: SRR034745_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034745
+    - name: DGRP-714_364
+      path: FASTQ/RNAseq/DGRP-714_364/
+      paired: True
+      readsfile1: SRR034746_1.fastq
+      readsfile2: SRR034746_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034746
+    - name: DGRP-714_365
+      path: FASTQ/RNAseq/DGRP-714_365/
+      paired: True
+      readsfile1: SRR034747_1.fastq
+      readsfile2: SRR034747_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034747
+    - name: DGRP-714_366
+      path: FASTQ/RNAseq/DGRP-714_366/
+      paired: True
+      readsfile1: SRR034748_1.fastq
+      readsfile2: SRR034748_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034748
+    - name: DGRP-714_367
+      path: FASTQ/RNAseq/DGRP-714_367/
+      paired: True
+      readsfile1: SRR034749_1.fastq
+      readsfile2: SRR034749_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034749
+    - name: DGRP-774_368
+      path: FASTQ/RNAseq/DGRP-774_368/
+      paired: True
+      readsfile1: SRR034750_1.fastq
+      readsfile2: SRR034750_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034750
+    - name: DGRP-774_369
+      path: FASTQ/RNAseq/DGRP-774_369/
+      paired: True
+      readsfile1: SRR034751_1.fastq
+      readsfile2: SRR034751_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034751
+    - name: DGRP-774_370
+      path: FASTQ/RNAseq/DGRP-774_370/
+      paired: True
+      readsfile1: SRR034752_1.fastq
+      readsfile2: SRR034752_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034752
+    - name: DGRP-774_371
+      path: FASTQ/RNAseq/DGRP-774_371/
+      paired: True
+      readsfile1: SRR034753_1.fastq
+      readsfile2: SRR034753_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034753
+    - name: DGRP-765_372
+      path: FASTQ/RNAseq/DGRP-765_372/
+      paired: True
+      readsfile1: SRR034754_1.fastq
+      readsfile2: SRR034754_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034754
+    - name: DGRP-765_373
+      path: FASTQ/RNAseq/DGRP-765_373/
+      paired: True
+      readsfile1: SRR034755_1.fastq
+      readsfile2: SRR034755_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034755
+    - name: DGRP-765_374
+      path: FASTQ/RNAseq/DGRP-765_374/
+      paired: True
+      readsfile1: SRR034756_1.fastq
+      readsfile2: SRR034756_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034756
+    - name: DGRP-765_375
+      path: FASTQ/RNAseq/DGRP-765_375/
+      paired: True
+      readsfile1: SRR034757_1.fastq
+      readsfile2: SRR034757_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034757
+    - name: DGRP-786_376
+      path: FASTQ/RNAseq/DGRP-786_376/
+      paired: True
+      readsfile1: SRR034766_1.fastq
+      readsfile2: SRR034766_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034766
+    - name: DGRP-786_377
+      path: FASTQ/RNAseq/DGRP-786_377/
+      paired: True
+      readsfile1: SRR034767_1.fastq
+      readsfile2: SRR034767_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034767
+    - name: DGRP-786_378
+      path: FASTQ/RNAseq/DGRP-786_378/
+      paired: True
+      readsfile1: SRR034768_1.fastq
+      readsfile2: SRR034768_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034768
+    - name: DGRP-786_379
+      path: FASTQ/RNAseq/DGRP-786_379/
+      paired: True
+      readsfile1: SRR034769_1.fastq
+      readsfile2: SRR034769_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034769
+    - name: DGRP-786_380
+      path: FASTQ/RNAseq/DGRP-786_380/
+      paired: True
+      readsfile1: SRR034770_1.fastq
+      readsfile2: SRR034770_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034770
+    - name: DGRP-799_381
+      path: FASTQ/RNAseq/DGRP-799_381/
+      paired: True
+      readsfile1: SRR034771_1.fastq
+      readsfile2: SRR034771_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034771
+    - name: DGRP-799_382
+      path: FASTQ/RNAseq/DGRP-799_382/
+      paired: True
+      readsfile1: SRR034772_1.fastq
+      readsfile2: SRR034772_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034772
+    - name: DGRP-799_383
+      path: FASTQ/RNAseq/DGRP-799_383/
+      paired: True
+      readsfile1: SRR034773_1.fastq
+      readsfile2: SRR034773_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034773
+    - name: DGRP-799_384
+      path: FASTQ/RNAseq/DGRP-799_384/
+      paired: True
+      readsfile1: SRR034774_1.fastq
+      readsfile2: SRR034774_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034774
+    - name: DGRP-820_385
+      path: FASTQ/RNAseq/DGRP-820_385/
+      paired: True
+      readsfile1: SRR034775_1.fastq
+      readsfile2: SRR034775_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034775
+    - name: DGRP-820_386
+      path: FASTQ/RNAseq/DGRP-820_386/
+      paired: True
+      readsfile1: SRR034776_1.fastq
+      readsfile2: SRR034776_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034776
+    - name: DGRP-820_387
+      path: FASTQ/RNAseq/DGRP-820_387/
+      paired: True
+      readsfile1: SRR034777_1.fastq
+      readsfile2: SRR034777_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034777
+    - name: DGRP-820_388
+      path: FASTQ/RNAseq/DGRP-820_388/
+      paired: True
+      readsfile1: SRR034778_1.fastq
+      readsfile2: SRR034778_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034778
+    - name: DGRP-859_389
+      path: FASTQ/RNAseq/DGRP-859_389/
+      paired: True
+      readsfile1: SRR034802_1.fastq
+      readsfile2: SRR034802_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034802
+    - name: DGRP-859_390
+      path: FASTQ/RNAseq/DGRP-859_390/
+      paired: True
+      readsfile1: SRR034803_1.fastq
+      readsfile2: SRR034803_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034803
+    - name: DGRP-859_391
+      path: FASTQ/RNAseq/DGRP-859_391/
+      paired: True
+      readsfile1: SRR034804_1.fastq
+      readsfile2: SRR034804_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034804
+    - name: DGRP-859_392
+      path: FASTQ/RNAseq/DGRP-859_392/
+      paired: True
+      readsfile1: SRR034805_1.fastq
+      readsfile2: SRR034805_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034805
+    - name: DGRP-859_393
+      path: FASTQ/RNAseq/DGRP-859_393/
+      paired: True
+      readsfile1: SRR034806_1.fastq
+      readsfile2: SRR034806_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034806
+    - name: DGRP-517_394
+      path: FASTQ/RNAseq/DGRP-517_394/
+      paired: True
+      readsfile1: SRR034841_1.fastq
+      readsfile2: SRR034841_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034841
+    - name: DGRP-517_395
+      path: FASTQ/RNAseq/DGRP-517_395/
+      paired: True
+      readsfile1: SRR034842_1.fastq
+      readsfile2: SRR034842_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034842
+    - name: DGRP-517_396
+      path: FASTQ/RNAseq/DGRP-517_396/
+      paired: True
+      readsfile1: SRR034843_1.fastq
+      readsfile2: SRR034843_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034843
+    - name: DGRP-517_397
+      path: FASTQ/RNAseq/DGRP-517_397/
+      paired: True
+      readsfile1: SRR034844_1.fastq
+      readsfile2: SRR034844_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034844
+    - name: DGRP-517_398
+      path: FASTQ/RNAseq/DGRP-517_398/
+      paired: True
+      readsfile1: SRR034845_1.fastq
+      readsfile2: SRR034845_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR034845
+    - name: DGRP-306_399
+      path: FASTQ/RNAseq/DGRP-306_399/
+      paired: True
+      readsfile1: SRR035057_1.fastq
+      readsfile2: SRR035057_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035057
+    - name: DGRP-306_400
+      path: FASTQ/RNAseq/DGRP-306_400/
+      paired: True
+      readsfile1: SRR035058_1.fastq
+      readsfile2: SRR035058_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035058
+    - name: DGRP-306_401
+      path: FASTQ/RNAseq/DGRP-306_401/
+      paired: True
+      readsfile1: SRR035059_1.fastq
+      readsfile2: SRR035059_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035059
+    - name: DGRP-306_402
+      path: FASTQ/RNAseq/DGRP-306_402/
+      paired: True
+      readsfile1: SRR035060_1.fastq
+      readsfile2: SRR035060_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035060
+    - name: DGRP-306_403
+      path: FASTQ/RNAseq/DGRP-306_403/
+      paired: True
+      readsfile1: SRR035061_1.fastq
+      readsfile2: SRR035061_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035061
+    - name: DGRP-306_404
+      path: FASTQ/RNAseq/DGRP-306_404/
+      paired: True
+      readsfile1: SRR035062_1.fastq
+      readsfile2: SRR035062_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035062
+    - name: DGRP-306_405
+      path: FASTQ/RNAseq/DGRP-306_405/
+      paired: True
+      readsfile1: SRR035063_1.fastq
+      readsfile2: SRR035063_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035063
+    - name: DGRP-306_406
+      path: FASTQ/RNAseq/DGRP-306_406/
+      paired: True
+      readsfile1: SRR035064_1.fastq
+      readsfile2: SRR035064_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035064
+    - name: DGRP-306_407
+      path: FASTQ/RNAseq/DGRP-306_407/
+      paired: True
+      readsfile1: SRR035065_1.fastq
+      readsfile2: SRR035065_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035065
+    - name: DGRP-306_408
+      path: FASTQ/RNAseq/DGRP-306_408/
+      paired: True
+      readsfile1: SRR035066_1.fastq
+      readsfile2: SRR035066_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035066
+    - name: DGRP-306_409
+      path: FASTQ/RNAseq/DGRP-306_409/
+      paired: True
+      readsfile1: SRR035067_1.fastq
+      readsfile2: SRR035067_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035067
+    - name: DGRP-306_410
+      path: FASTQ/RNAseq/DGRP-306_410/
+      paired: True
+      readsfile1: SRR035068_1.fastq
+      readsfile2: SRR035068_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035068
+    - name: DGRP-306_411
+      path: FASTQ/RNAseq/DGRP-306_411/
+      paired: True
+      readsfile1: SRR035069_1.fastq
+      readsfile2: SRR035069_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035069
+    - name: DGRP-306_412
+      path: FASTQ/RNAseq/DGRP-306_412/
+      paired: True
+      readsfile1: SRR035070_1.fastq
+      readsfile2: SRR035070_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035070
+    - name: DGRP-306_413
+      path: FASTQ/RNAseq/DGRP-306_413/
+      paired: True
+      readsfile1: SRR035071_1.fastq
+      readsfile2: SRR035071_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035071
+    - name: DGRP-306_414
+      path: FASTQ/RNAseq/DGRP-306_414/
+      paired: True
+      readsfile1: SRR035072_1.fastq
+      readsfile2: SRR035072_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035072
+    - name: DGRP-306_415
+      path: FASTQ/RNAseq/DGRP-306_415/
+      paired: True
+      readsfile1: SRR035073_1.fastq
+      readsfile2: SRR035073_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035073
+    - name: DGRP-306_416
+      path: FASTQ/RNAseq/DGRP-306_416/
+      paired: True
+      readsfile1: SRR035074_1.fastq
+      readsfile2: SRR035074_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035074
+    - name: DGRP-306_417
+      path: FASTQ/RNAseq/DGRP-306_417/
+      paired: True
+      readsfile1: SRR035075_1.fastq
+      readsfile2: SRR035075_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035075
+    - name: DGRP-306_418
+      path: FASTQ/RNAseq/DGRP-306_418/
+      paired: True
+      readsfile1: SRR035076_1.fastq
+      readsfile2: SRR035076_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035076
+    - name: DGRP-306_419
+      path: FASTQ/RNAseq/DGRP-306_419/
+      paired: True
+      readsfile1: SRR035077_1.fastq
+      readsfile2: SRR035077_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035077
+    - name: DGRP-852_420
+      path: FASTQ/RNAseq/DGRP-852_420/
+      paired: True
+      readsfile1: SRR035128_1.fastq
+      readsfile2: SRR035128_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035128
+    - name: DGRP-852_421
+      path: FASTQ/RNAseq/DGRP-852_421/
+      paired: True
+      readsfile1: SRR035129_1.fastq
+      readsfile2: SRR035129_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035129
+    - name: DGRP-852_422
+      path: FASTQ/RNAseq/DGRP-852_422/
+      paired: True
+      readsfile1: SRR035130_1.fastq
+      readsfile2: SRR035130_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035130
+    - name: DGRP-852_423
+      path: FASTQ/RNAseq/DGRP-852_423/
+      paired: True
+      readsfile1: SRR035131_1.fastq
+      readsfile2: SRR035131_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035131
+    - name: DGRP-852_424
+      path: FASTQ/RNAseq/DGRP-852_424/
+      paired: True
+      readsfile1: SRR035132_1.fastq
+      readsfile2: SRR035132_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035132
+    - name: DGRP-852_425
+      path: FASTQ/RNAseq/DGRP-852_425/
+      paired: True
+      readsfile1: SRR035133_1.fastq
+      readsfile2: SRR035133_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035133
+    - name: DGRP-852_426
+      path: FASTQ/RNAseq/DGRP-852_426/
+      paired: True
+      readsfile1: SRR035134_1.fastq
+      readsfile2: SRR035134_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035134
+    - name: DGRP-852_427
+      path: FASTQ/RNAseq/DGRP-852_427/
+      paired: True
+      readsfile1: SRR035135_1.fastq
+      readsfile2: SRR035135_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035135
+    - name: DGRP-852_428
+      path: FASTQ/RNAseq/DGRP-852_428/
+      paired: True
+      readsfile1: SRR035136_1.fastq
+      readsfile2: SRR035136_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035136
+    - name: DGRP-852_429
+      path: FASTQ/RNAseq/DGRP-852_429/
+      paired: True
+      readsfile1: SRR035137_1.fastq
+      readsfile2: SRR035137_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035137
+    - name: DGRP-852_430
+      path: FASTQ/RNAseq/DGRP-852_430/
+      paired: True
+      readsfile1: SRR035138_1.fastq
+      readsfile2: SRR035138_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035138
+    - name: DGRP-852_431
+      path: FASTQ/RNAseq/DGRP-852_431/
+      paired: True
+      readsfile1: SRR035139_1.fastq
+      readsfile2: SRR035139_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035139
+    - name: DGRP-852_432
+      path: FASTQ/RNAseq/DGRP-852_432/
+      paired: True
+      readsfile1: SRR035140_1.fastq
+      readsfile2: SRR035140_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035140
+    - name: DGRP-852_433
+      path: FASTQ/RNAseq/DGRP-852_433/
+      paired: True
+      readsfile1: SRR035141_1.fastq
+      readsfile2: SRR035141_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035141
+    - name: DGRP-852_434
+      path: FASTQ/RNAseq/DGRP-852_434/
+      paired: True
+      readsfile1: SRR035142_1.fastq
+      readsfile2: SRR035142_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035142
+    - name: DGRP-852_435
+      path: FASTQ/RNAseq/DGRP-852_435/
+      paired: True
+      readsfile1: SRR035143_1.fastq
+      readsfile2: SRR035143_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035143
+    - name: DGRP-852_436
+      path: FASTQ/RNAseq/DGRP-852_436/
+      paired: True
+      readsfile1: SRR035144_1.fastq
+      readsfile2: SRR035144_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035144
+    - name: DGRP-852_437
+      path: FASTQ/RNAseq/DGRP-852_437/
+      paired: True
+      readsfile1: SRR035145_1.fastq
+      readsfile2: SRR035145_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035145
+    - name: DGRP-639_438
+      path: FASTQ/RNAseq/DGRP-639_438/
+      paired: True
+      readsfile1: SRR035232_1.fastq
+      readsfile2: SRR035232_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035232
+    - name: DGRP-639_439
+      path: FASTQ/RNAseq/DGRP-639_439/
+      paired: True
+      readsfile1: SRR035233_1.fastq
+      readsfile2: SRR035233_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035233
+    - name: DGRP-639_440
+      path: FASTQ/RNAseq/DGRP-639_440/
+      paired: True
+      readsfile1: SRR035234_1.fastq
+      readsfile2: SRR035234_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035234
+    - name: DGRP-639_441
+      path: FASTQ/RNAseq/DGRP-639_441/
+      paired: True
+      readsfile1: SRR035235_1.fastq
+      readsfile2: SRR035235_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035235
+    - name: DGRP-639_442
+      path: FASTQ/RNAseq/DGRP-639_442/
+      paired: True
+      readsfile1: SRR035236_1.fastq
+      readsfile2: SRR035236_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR035236
+    - name: DGRP-398_443
+      path: FASTQ/RNAseq/DGRP-398_443/
+      paired: True
+      readsfile1: SRR051592_1.fastq
+      readsfile2: SRR051592_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR051592
+    - name: DGRP-398_444
+      path: FASTQ/RNAseq/DGRP-398_444/
+      paired: True
+      readsfile1: SRR051593_1.fastq
+      readsfile2: SRR051593_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR051593
+    - name: DGRP-378_445
+      path: FASTQ/RNAseq/DGRP-378_445/
+      paired: True
+      readsfile1: SRR051594_1.fastq
+      readsfile2: SRR051594_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR051594
+    - name: DGRP-554_446
+      path: FASTQ/RNAseq/DGRP-554_446/
+      paired: True
+      readsfile1: SRR051896_1.fastq
+      readsfile2: SRR051896_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR051896
+    - name: DGRP-591_447
+      path: FASTQ/RNAseq/DGRP-591_447/
+      paired: True
+      readsfile1: SRR051905_1.fastq
+      readsfile2: SRR051905_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR051905
+    - name: DGRP-393_448
+      path: FASTQ/RNAseq/DGRP-393_448/
+      paired: True
+      readsfile1: SRR060062_1.fastq
+      readsfile2: SRR060062_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,phylo]
+      SRA: SRR060062
+    - name: DGRP-391_449
+      path: FASTQ/RNAseq/DGRP-391_449/
+      paired: True
+      readsfile1: SRR060098_1.fastq
+      readsfile2: SRR060098_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR060098
+    - name: DGRP-391_450
+      path: FASTQ/RNAseq/DGRP-391_450/
+      paired: True
+      readsfile1: SRR018292_1.fastq
+      readsfile2: SRR018292_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018292
+    - name: DGRP-391_451
+      path: FASTQ/RNAseq/DGRP-391_451/
+      paired: True
+      readsfile1: SRR018293_1.fastq
+      readsfile2: SRR018293_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018293
+    - name: DGRP-391_452
+      path: FASTQ/RNAseq/DGRP-391_452/
+      paired: True
+      readsfile1: SRR018294_1.fastq
+      readsfile2: SRR018294_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018294
+    - name: DGRP-514_453
+      path: FASTQ/RNAseq/DGRP-514_453/
+      paired: True
+      readsfile1: SRR018305_1.fastq
+      readsfile2: SRR018305_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018305
+    - name: DGRP-514_454
+      path: FASTQ/RNAseq/DGRP-514_454/
+      paired: True
+      readsfile1: SRR018306_1.fastq
+      readsfile2: SRR018306_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018306
+    - name: DGRP-313_455
+      path: FASTQ/RNAseq/DGRP-313_455/
+      paired: True
+      readsfile1: SRR018517_1.fastq
+      readsfile2: SRR018517_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018517
+    - name: DGRP-313_456
+      path: FASTQ/RNAseq/DGRP-313_456/
+      paired: True
+      readsfile1: SRR018518_1.fastq
+      readsfile2: SRR018518_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018518
+    - name: DGRP-313_457
+      path: FASTQ/RNAseq/DGRP-313_457/
+      paired: True
+      readsfile1: SRR018519_1.fastq
+      readsfile2: SRR018519_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018519
+    - name: DGRP-335_458
+      path: FASTQ/RNAseq/DGRP-335_458/
+      paired: True
+      readsfile1: SRR018521_1.fastq
+      readsfile2: SRR018521_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018521
+    - name: DGRP-335_459
+      path: FASTQ/RNAseq/DGRP-335_459/
+      paired: True
+      readsfile1: SRR018522_1.fastq
+      readsfile2: SRR018522_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018522
+    - name: DGRP-335_460
+      path: FASTQ/RNAseq/DGRP-335_460/
+      paired: True
+      readsfile1: SRR018523_1.fastq
+      readsfile2: SRR018523_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018523
+    - name: DGRP-358_461
+      path: FASTQ/RNAseq/DGRP-358_461/
+      paired: True
+      readsfile1: SRR018574_1.fastq
+      readsfile2: SRR018574_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018574
+    - name: DGRP-358_462
+      path: FASTQ/RNAseq/DGRP-358_462/
+      paired: True
+      readsfile1: SRR018575_1.fastq
+      readsfile2: SRR018575_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018575
+    - name: DGRP-365_463
+      path: FASTQ/RNAseq/DGRP-365_463/
+      paired: True
+      readsfile1: SRR018579_1.fastq
+      readsfile2: SRR018579_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018579
+    - name: DGRP-365_464
+      path: FASTQ/RNAseq/DGRP-365_464/
+      paired: True
+      readsfile1: SRR018580_1.fastq
+      readsfile2: SRR018580_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018580
+    - name: DGRP-365_465
+      path: FASTQ/RNAseq/DGRP-365_465/
+      paired: True
+      readsfile1: SRR018581_1.fastq
+      readsfile2: SRR018581_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018581
+    - name: DGRP-379_466
+      path: FASTQ/RNAseq/DGRP-379_466/
+      paired: True
+      readsfile1: SRR018582_1.fastq
+      readsfile2: SRR018582_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018582
+    - name: DGRP-379_467
+      path: FASTQ/RNAseq/DGRP-379_467/
+      paired: True
+      readsfile1: SRR018583_1.fastq
+      readsfile2: SRR018583_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018583
+    - name: DGRP-379_468
+      path: FASTQ/RNAseq/DGRP-379_468/
+      paired: True
+      readsfile1: SRR018584_1.fastq
+      readsfile2: SRR018584_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018584
+    - name: DGRP-380_469
+      path: FASTQ/RNAseq/DGRP-380_469/
+      paired: True
+      readsfile1: SRR018591_1.fastq
+      readsfile2: SRR018591_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018591
+    - name: DGRP-380_470
+      path: FASTQ/RNAseq/DGRP-380_470/
+      paired: True
+      readsfile1: SRR018592_1.fastq
+      readsfile2: SRR018592_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018592
+    - name: DGRP-380_471
+      path: FASTQ/RNAseq/DGRP-380_471/
+      paired: True
+      readsfile1: SRR018593_1.fastq
+      readsfile2: SRR018593_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018593
+    - name: DGRP-380_472
+      path: FASTQ/RNAseq/DGRP-380_472/
+      paired: True
+      readsfile1: SRR018594_1.fastq
+      readsfile2: SRR018594_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018594
+    - name: DGRP-380_473
+      path: FASTQ/RNAseq/DGRP-380_473/
+      paired: True
+      readsfile1: SRR018595_1.fastq
+      readsfile2: SRR018595_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018595
+    - name: DGRP-380_474
+      path: FASTQ/RNAseq/DGRP-380_474/
+      paired: True
+      readsfile1: SRR018596_1.fastq
+      readsfile2: SRR018596_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018596
+    - name: DGRP-380_475
+      path: FASTQ/RNAseq/DGRP-380_475/
+      paired: True
+      readsfile1: SRR018597_1.fastq
+      readsfile2: SRR018597_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018597
+    - name: DGRP-852_476
+      path: FASTQ/RNAseq/DGRP-852_476/
+      paired: True
+      readsfile1: SRR018598_1.fastq
+      readsfile2: SRR018598_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018598
+    - name: DGRP-852_477
+      path: FASTQ/RNAseq/DGRP-852_477/
+      paired: True
+      readsfile1: SRR018599_1.fastq
+      readsfile2: SRR018599_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018599
+    - name: DGRP-852_478
+      path: FASTQ/RNAseq/DGRP-852_478/
+      paired: True
+      readsfile1: SRR018600_1.fastq
+      readsfile2: SRR018600_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018600
+    - name: DGRP-852_479
+      path: FASTQ/RNAseq/DGRP-852_479/
+      paired: True
+      readsfile1: SRR018601_1.fastq
+      readsfile2: SRR018601_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018601
+    - name: DGRP-852_480
+      path: FASTQ/RNAseq/DGRP-852_480/
+      paired: True
+      readsfile1: SRR018602_1.fastq
+      readsfile2: SRR018602_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018602
+    - name: DGRP-852_481
+      path: FASTQ/RNAseq/DGRP-852_481/
+      paired: True
+      readsfile1: SRR018603_1.fastq
+      readsfile2: SRR018603_2.fastq
+      genotype: [DGRP,]
+      subgroups: [none,]
+      SRA: SRR018603
+
+
+
+
+reference_genomes:
+    - name: dm6main
+      species: drosophila melanogaster
+      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa
+      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main.fa.fai
+      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_bowtie/dm6.main
+      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dm6.main_split/
+      source: UCSC Genome Browser
+
+annotations:
+    - name: dm6_genes
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.bed
+      gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.gtf
+      derived: False
+    - name: dm6_repeats
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dm6.repeatMasker.main.bed
+      derived: False
+    - name: fru_exons
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_ex.gtf
+      derived: False
+    - name: fru_junct
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_exonJunctions.gtf
+      derived: False
+    - name: fru_intron
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru_introns.gtf
+      derived: False
+    - name: fru_isoid
+      bed_path: utils/annotations/fru_ex.bed
+      gtf_path: utils/annotations/fru.isoids.gtf
+      derived: False
+    - name: ionotropic
+      bed_path: utils/annotations/ionotropic.bed
+      base: dm6_genes
+      derived: True
+    - name: nervSysDev
+      bed_path: utils/annotations/nervSysDev.bed
+      base: dm6_genes
+      derived: True
+    - name: histoneMod
+      bed_path: utils/annotations/histoneMod.bed
+      base: dm6_genes
+      derived: True
+    - name: mating
+      bed_path: utils/annotations/mating.bed
+      base: dm6_genes
+      derived: True
+    - name: synapseSig
+      bed_path: utils/annotations/synapseSig.bed
+      base: dm6_genes
+      derived: True
+    - name: brysonsList
+      bed_path: utils/annotations/brysonsList.bed
+      base: dm6_genes
+      derived: True
+
+
+gene_queries:
+    - name: ionotropic
+      list_path: utils/geneLists/ionotropic_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionotropic.bed
+    - name: nervSysDev
+      list_path: utils/geneLists/nervSysDev_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/nervSysDev.bed
+    - name: histoneMod
+      list_path: utils/geneLists/histoneMod_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/histoneMod.bed
+    - name: mating
+      list_path: utils/geneLists/mating_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/mating.bed
+    - name: synapseSig
+      list_path: utils/geneLists/synapseSig_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/synapseSig.bed
+    - name: brysonsList
+      list_path: utils/geneLists/bryson_FBgn.clean.txt 
+      base: dm6_genes
+      bed_path: utils/annotations/brysonsList.bed
+    - name: brysonPriority
+      list_path: utils/geneLists/brysonRush_FBgn.clean.txt 
+      base: dm6_genes
+      bed_path: utils/annotations/brysonPriority.bed
+    - name: ionChannel
+      list_path: utils/geneLists/ionChannel_FBgn.clean.txt
+      base: dm6_genes
+      bed_path: utils/annotations/ionChannel.bed
+
+
+
+contrasts:
+    - name: wildTypeHousing
+      design: ~ housing
+      filt: wtHousing
+      vars: [rep, housing]
+      ref: ["1", "group" ]
+    - name: grpWtVs47b
+      design: ~ genotype
+      filt: grpWtVs47b
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    - name: grpWtVs67d
+      design: ~ genotype
+      filt: grpWtVs67d
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    - name: grpWtVsFru
+      design: ~ genotype
+      filt: grpWtVsFru
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+    # - name: grpWtVsMut
+    #   design: ~ genotype
+    #   filt: grpWtVsMut
+    #   vars: [rep, genotype]
+    #   ref: ["1", "wt"]
+    - name: hausWtVsMut
+      design: ~ genotype + housing
+      filt: hausWtVsMut
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+    - name: hausWtVsMut_noFru
+      design: ~ genotype + housing
+      filt: hausWtVsMut_noFru
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+
+    - name: hausWtVsMut_smolFru
+      design: ~ genotype + housing
+      filt: hausWtVsMut_smolFru
+      vars: ["rep", "genotype", "housing"]
+      ref: ["1", "wt", "group" ]
+    - name: grpWtVsFru_smolFru
+      design: ~ genotype
+      filt: grpWtVsFru_smolFru
+      vars: [rep, genotype]
+      ref: ["1", "wt"]
+
+xcontrasts:
+    - name: dex_wtHousing
+      design: ~ sample + exon + condition:exon
+      filt: wtHousing
+      vars: [housing]
+      ref: ["group" ]
+    - name: dex_grpWtVs67d
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs67d
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVs47b
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVs47b
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru
+      vars: [genotype]
+      ref: ["wt" ]
+    - name: dex_grpWtVsFru_smolFru
+      design: ~ sample + exon + condition:exon
+      filt: grpWtVsFru_smolFru
+      vars: [genotype]
+      ref: ["wt" ]
+
