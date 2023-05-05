@@ -2,6 +2,8 @@
 
 Software used to analyze data for: 
 
+Deanhardt, B., Duan, Q., Du, C., Soeder, C., Morlote, A., Garg, D., Saha, A., Jones, C. D., &#38; Volkan, P. C. (2023). Social experience and pheromone receptor activity reprogram gene expression in sensory neurons. <i>G3 Genes|Genomes|Genetics</i>, <i>00</i>(March), 2006–2021. https://doi.org/10.1093/g3journal/jkad072
+
 Social experience and pheromone receptor activity reprogram behavioral switch and neuromodulatory gene expression in sensory neurons
 Bryson Deanhardt, Qichen Duan, Chengcheng Du, Charles Soeder, Alec Morlote, Deeya Garg, Corbin D. Jones, Pelin Cayirlioglu Volkan
 bioRxiv 2021.06.18.449021; doi: https://doi.org/10.1101/2021.06.18.449021
@@ -13,7 +15,7 @@ bioRxiv 2021.06.18.449021; doi: https://doi.org/10.1101/2021.06.18.449021
   version 1: https://www.biorxiv.org/content/10.1101/2021.06.18.449021v1 
   version 2: https://www.biorxiv.org/content/10.1101/2021.06.18.449021v2
 
-
+Analysis downstream of this workflow was performed by Quichen Duan.
 
 ## Dependencies
 
@@ -90,7 +92,17 @@ nohup time snakemake --restart-times 6 --latency-wait 60 --jobs 24 -p --cluster 
 
 ```
 
+### Deanhardt et al. 2023
 
+In order to respond to reviewer comments, the population genetics of the experimental flies were compared to those of published DGRP lines sequenced in Huang et al. (2014). Calling the variants in parallel required some platform-dependent tweaks which will need to be modified; unless these population genetics are of specific interest it is probably best to use the 2021 workflow. However, the 5 May 2023 results summary can be rebuilt with the updated workflow:
+
+```bash
+
+snakemake --restart-times 6 --latency-wait 60 --jobs 24 -p --cluster "sbatch --time={params.runtime} -n {params.cores} --mem={params.runmem_gb}G "  --snakefile Snakefile.Deanhardt2023 &
+
+```
+
+In particular, scripts/freebayes-parallel requires a hard path to the GNU parallel utility and to the vcfstreamsort utility from vcflib.
 
 ## Code of Note
 
